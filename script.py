@@ -3,6 +3,7 @@ from binance import ThreadedWebsocketManager
 import pandas as pd
 from BinanceKeys import api_key, secret_key
 import time
+from time import sleep
 from datetime import datetime, timedelta
 client = Client(api_key, secret_key, tld='com')
 
@@ -88,11 +89,30 @@ df = get_history(symbol = "DOGEUSDT", interval = "1h", start = str(baghdad_time_
 def stream_data(msg):
     print(msg)
 
+def stream_candles(msg):
+    ''' define how to process incoming WebSocket messages '''
+    # extract the required items from msg
+    event_time = pd.to_datetime(msg["E"], unit = "ms")
+    start_time = pd.to_datetime(msg["k"]["t"], unit = "ms")
+    first   = float(msg["k"]["o"])
+    high    = float(msg["k"]["h"])
+    low     = float(msg["k"]["l"])
+    close   = float(msg["k"]["c"])
+    volume  = float(msg["k"]["v"])
+    complete=       msg["k"]["x"]
+    
+    # print out
+    print("Time: {} | Price: {}".format(event_time, close))
+    
+    # feed df (add new bar / update latest bar)
+    df.loc[start_time] = [first, high, low, close, volume, complete]
+
 
 # pr(baghdad_time) # current price for one symbol
 # pr(baghdad_time_last_night) # current price for one symbol
 # pr(df) # current price for one symbol
-
+{'e': '24hrMiniTicker', 'E': 1738579230921, 's': 'DOGEUSDT', 'c': 
+'0.25808000', 'o': '0.29872000', 'h': '0.30165000', 'l': '0.20178000', 'v': '7391014564.00000000', 'q': '1870145086.53592000'}
 twm = ThreadedWebsocketManager()
 {
     'e': '24hrMiniTicker', 
@@ -106,14 +126,47 @@ twm = ThreadedWebsocketManager()
     'q': '523393611.91487000'
 }
 
-while True:
-    twm.start()
-    twm.start_symbol_miniticker_socket(callback = stream_data, symbol = "DOGEUSDT")
-    time.sleep(15)
-    twm.stop()
+{
+    'e': 'kline', 
+    'E': 1738579434020, 
+    's': 'BTCUSDT', 
+    'k': {
+        't': 1738579380000, 
+        'T': 1738579439999, 
+        's': 'BTCUSDT', 
+        'i': '1m', 
+        'f': 4511674996, 
+        'L': 4511679783, 
+        'o': '95239.15000000', 
+        'c': '95284.32000000', 
+        'h': '95339.31000000', 
+        'l': '95239.15000000', 
+        'v': '29.69850000', 
+        'n': 4788, 
+        'x': False, 
+        'q': '2830608.39831130', 
+        'V': '4.05544000', 
+        'Q': '386475.11794980', 
+        'B': '0'
+    }
+}
 
+# df = pd.DataFrame(columns = ["Open", "High", "Low", "Close", "Volume", "Complete"])
 
+# stop = True
 
+# if stop is True:
+#     twm.start()
+#     # twm.start_symbol_miniticker_socket(callback = stream_data, symbol = "DOGEUSDT")
+#     twm.start_kline_socket(callback = stream_candles, symbol = "BTCUSDT", interval = "1m")
+#     sleep(20)
+#     stop = False
+# else:
+#     twm.stop()
+
+order = client.create_test_order(symbol = "DOGEUSDT", side = "BUY", type = "MARKET", quantity = 10)
+
+pr(f'order: {order}')
 
 {
     'code': 200, 'msg': '', 
