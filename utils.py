@@ -23,8 +23,12 @@ def get_history(client, symbol, interval, start, end = None):
 
 
 def stream_data(msg):
+    ''' define how to process incoming WebSocket messages '''
     print(msg)
-
+    time = pd.to_datetime(msg["E"], unit = "ms")
+    price = msg["c"]
+    
+    print("Time: {} | Price: {}".format(time, price))
 
 def stream_candles(df, msg):
     ''' define how to process incoming WebSocket messages '''
