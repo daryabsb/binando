@@ -34,6 +34,7 @@ regex==2024.11.6
 requests==2.32.3
 six==1.17.0
 soupsieve==2.6
+ta==0.11.0
 typing_extensions==4.12.2
 tzdata==2025.1
 tzlocal==5.2
