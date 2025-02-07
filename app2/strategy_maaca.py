@@ -2,12 +2,15 @@ from binance.client import Client
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
+# from BinanceKeys import test_api_key, test_secret_key
 
-API_KEY = "your_api_key"
-API_SECRET = "your_api_secret"
+
+API_KEY = 'test_api_key'
+API_SECRET = 'test_secret_key'
 client = Client(API_KEY, API_SECRET)
 
-SYMBOL = "BTCUSDT"
+# SYMBOL = "BTCUSDT"
+SYMBOL = "DOGEUSDT"
 GRID_SIZE = 5  # Number of buy levels
 BUY_PERCENT = 1 / 100  # Buy every 1% drop
 SELL_PERCENT = 1.5 / 100  # Sell 1.5% above buy price
