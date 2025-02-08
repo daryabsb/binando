@@ -2,10 +2,10 @@ from binance.client import Client
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
-# from BinanceKeys import test_api_key, test_secret_key
+from BinanceKeys import test_api_key, test_secret_key
 
-API_KEY = 'test_api_key'
-API_SECRET = 'test_secret_key'
+API_KEY = test_api_key
+API_SECRET = test_secret_key
 # client = Client(API_KEY, API_SECRET)
 client = Client(API_KEY, API_SECRET, tld='com', testnet=True)
 
@@ -149,7 +149,8 @@ def is_near_level(price, level, tolerance):
 
 def is_trending(symbol, interval="1h", threshold=25, lookback="2 days ago UTC"):
     try:
-        klines = client.get_historical_klines(symbol, interval, lookback)  # Fetch 2 days of data
+        klines = client.get_historical_klines(
+            symbol, interval, lookback)  # Fetch 2 days of data
         df = pd.DataFrame(klines, columns=[
             'timestamp', 'open', 'high', 'low', 'close', 'volume',
             'close_time', 'qav', 'num_trades', 'taker_base_vol', 'taker_quote_vol', 'ignore'
@@ -157,7 +158,8 @@ def is_trending(symbol, interval="1h", threshold=25, lookback="2 days ago UTC"):
         df['close'] = df['close'].astype(float)
         df['high'] = df['high'].astype(float)
         df['low'] = df['low'].astype(float)
-        adx = ta.trend.ADXIndicator(df['high'], df['low'], df['close'], window=14).adx()
+        adx = ta.trend.ADXIndicator(
+            df['high'], df['low'], df['close'], window=14).adx()
         if len(adx) == 0:
             return False
         return adx.iloc[-1] > threshold

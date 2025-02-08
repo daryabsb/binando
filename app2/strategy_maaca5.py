@@ -2,11 +2,11 @@ from binance.client import Client
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
-# from BinanceKeys import test_api_key, test_secret_key
+from BinanceKeys import test_api_key, test_secret_key
 
 
-API_KEY = 'test_api_key'
-API_SECRET = 'test_secret_key'
+API_KEY = test_api_key
+API_SECRET = test_secret_key
 # client = Client(API_KEY, API_SECRET)
 client = Client(API_KEY, API_SECRET, tld='com', testnet=True)
 
@@ -47,6 +47,7 @@ DURATION_MINUTES = 5
 # -------------------------------
 # HELPER FUNCTIONS
 # -------------------------------
+
 
 def get_weekly_support_resistance(symbol):
     """
@@ -189,11 +190,13 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
                 rsi, macd, macd_signal = get_technical_indicators(symbol)
                 if rsi is None:
                     continue
-                print(f"{symbol} >> RSI: {rsi:.2f} | MACD: {macd:.8f} | Signal: {macd_signal:.8f}")
+                print(
+                    f"{symbol} >> RSI: {rsi:.2f} | MACD: {macd:.8f} | Signal: {macd_signal:.8f}")
 
                 # BUY LOGIC
                 for i, level in enumerate(grid_info["grid_levels"]):
-                    already_bought = any(pos.get("grid_index") == i for pos in open_positions[symbol])
+                    already_bought = any(
+                        pos.get("grid_index") == i for pos in open_positions[symbol])
                     if already_bought:
                         continue
                     if current_price <= level + grid_info["tolerance"]:
@@ -201,7 +204,8 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
                             quantity = TRADE_USDT_AMOUNT / current_price
                             order = place_order(symbol, 'BUY', quantity)
                             if order:
-                                target_sell = grid_info["grid_levels"][i + 1] if i + 1 < len(grid_info["grid_levels"]) else grid_info["resistance"]
+                                target_sell = grid_info["grid_levels"][i + 1] if i + 1 < len(
+                                    grid_info["grid_levels"]) else grid_info["resistance"]
                                 open_positions[symbol].append({
                                     "grid_index": i,
                                     "buy_price": current_price,
@@ -213,9 +217,11 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
                 for pos in open_positions[symbol][:]:
                     if current_price >= pos["target_sell"] - grid_info["tolerance"]:
                         if rsi > RSI_SELL_THRESHOLD and (not MACD_CONFIRMATION or macd < macd_signal):
-                            order = place_order(symbol, 'SELL', pos["quantity"])
+                            order = place_order(
+                                symbol, 'SELL', pos["quantity"])
                             if order:
-                                profit = (current_price - pos["buy_price"]) * pos["quantity"]
+                                profit = (current_price -
+                                          pos["buy_price"]) * pos["quantity"]
                                 closed_trades.append({
                                     "symbol": symbol,
                                     "buy_price": pos["buy_price"],
@@ -232,7 +238,8 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
     total_profit = sum(trade["profit"] for trade in closed_trades)
     print("\n=== Trading session completed ===")
     print(f"Total closed trades: {len(closed_trades)}")
-    print(f"Total profit over {duration_minutes} minutes: {total_profit:.8f} USDT")
+    print(
+        f"Total profit over {duration_minutes} minutes: {total_profit:.8f} USDT")
     return total_profit, closed_trades
 
 

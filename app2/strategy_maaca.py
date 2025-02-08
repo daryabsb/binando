@@ -2,11 +2,11 @@ from binance.client import Client
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
-# from BinanceKeys import test_api_key, test_secret_key
+from BinanceKeys import test_api_key, test_secret_key
 
 
-API_KEY = 'test_api_key'
-API_SECRET = 'test_secret_key'
+API_KEY = test_api_key
+API_SECRET = test_secret_key
 client = Client(API_KEY, API_SECRET)
 
 # SYMBOL = "BTCUSDT"
