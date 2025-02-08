@@ -34,7 +34,7 @@ SYMBOLS = [
 # Grid & technical parameters
 GRID_LEVELS = 5              # Number of grid levels between support and resistance
 TOLERANCE_FACTOR = 0.1       # Tolerance as a fraction of the grid spacing
-TRADE_USDT_AMOUNT = 10.0     # USDT to spend per trade
+TRADE_USDT_AMOUNT = 100.0     # USDT to spend per trade
 
 # Technical indicator thresholds
 RSI_BUY_THRESHOLD = 30       # Only buy when RSI is below 30 (oversold)
@@ -42,7 +42,7 @@ RSI_SELL_THRESHOLD = 70      # Only sell when RSI is above 70 (overbought)
 MACD_CONFIRMATION = True     # Enforce MACD condition
 
 # Run duration in minutes (set to 30 minutes)
-DURATION_MINUTES = 5
+DURATION_MINUTES = 960
 
 # -------------------------------
 # HELPER FUNCTIONS
