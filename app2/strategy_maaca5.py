@@ -3,7 +3,7 @@ import pandas as pd
 import time
 import ta  # Technical Analysis Library
 from BinanceKeys import test_api_key, test_secret_key
-
+from symbols import SYMBOLS
 
 API_KEY = test_api_key
 API_SECRET = test_secret_key
@@ -22,22 +22,6 @@ client.timestamp_offset = time_offset
 # GLOBAL PARAMETERS & SETTINGS
 # -------------------------------
 
-# List of symbols to trade
-SYMBOLS = [
-    "DOGEUSDT",
-    "SHIBUSDT",
-    "PEPEUSDT",
-    "XRPUSDT",
-    "ETHUSDT",
-    "SOLUSDT",
-    "BNBUSDT",
-    "TRUMPUSDT",
-    "BTCUSDT",
-    "ENSUSDT",
-    "MANTAUSDT",
-    "TURBOUSDT",
-    "ETCUSDT",
-]
 
 # Grid & technical parameters
 GRID_LEVELS = 5              # Number of grid levels between support and resistance
@@ -149,6 +133,43 @@ def place_order(symbol, side, quantity):
         return None
 
 
+def get_usdt_balance():
+    """
+    Fetch the current USDT balance from the Binance Testnet account.
+    """
+    try:
+        account_info = client.get_account(recvWindow=5000)
+        for asset in account_info['balances']:
+            if asset['asset'] == 'USDT':
+                return float(asset['free'])
+        return 0.0
+    except Exception as e:
+        print(f"Error fetching USDT balance: {e}")
+        return 0.0
+
+
+def monitor_profits(interval_minutes=5):
+    """
+    Monitor and print the current USDT balance and profits every 5 minutes.
+    """
+    print("Starting profit monitor...")
+    initial_balance = get_usdt_balance()
+    print(f"Initial USDT Balance: {initial_balance:.8f}")
+
+    while True:
+        try:
+            current_balance = get_usdt_balance()
+            profit = current_balance - initial_balance
+            print(f"\n=== Profit Report ===")
+            print(f"Current USDT Balance: {current_balance:.8f}")
+            print(f"Profit/Loss: {profit:.8f} USDT")
+            print("=====================")
+        except Exception as e:
+            print(f"Error generating profit report: {e}")
+
+        time.sleep(interval_minutes * 60)  # Wait for the specified interval
+
+
 # -------------------------------
 # TRADING BOT MAIN FUNCTION
 # -------------------------------
@@ -240,6 +261,7 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
                                 open_positions[symbol].remove(pos)
             except Exception as e:
                 print(f"Error processing {symbol}: {e}")
+        
         time.sleep(15)  # Wait before the next check
 
     # Calculate and print total profit
@@ -250,61 +272,7 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
         f"Total profit over {duration_minutes} minutes: {total_profit:.8f} USDT")
     return total_profit, closed_trades
 
-def get_server_time():
-    """
-    Fetch the current server time from Binance.
-    """
-    try:
-        server_time = client.get_server_time()
-        return server_time['serverTime']
-    except Exception as e:
-        print(f"Error fetching server time: {e}")
-        return None
-
-
-def get_usdt_balance():
-    """
-    Fetch the current USDT balance from the Binance Testnet account.
-    """
-    try:
-        # Fetch server time and use it as the timestamp
-        timestamp = get_server_time()
-        if timestamp is None:
-            return 0.0
-
-        account_info = client.get_account(recvWindow=5000)
-        for asset in account_info['balances']:
-            if asset['asset'] == 'USDT':
-                return float(asset['free'])
-        return 0.0
-    except Exception as e:
-        print(f"Error fetching USDT balance: {e}")
-        return 0.0
-
-
-def monitor_profits(interval_minutes=5):
-    """
-    Monitor and print the current USDT balance and profits every 5 minutes.
-    """
-    print("Starting profit monitor...")
-    initial_balance = get_usdt_balance()
-    print(f"Initial USDT Balance: {initial_balance:.8f}")
-
-    while True:
-        try:
-            current_balance = get_usdt_balance()
-            profit = current_balance - initial_balance
-            print(f"\n=== Profit Report ===")
-            print(f"Current USDT Balance: {current_balance:.8f}")
-            print(f"Profit/Loss: {profit:.8f} USDT")
-            print("=====================")
-        except Exception as e:
-            print(f"Error generating profit report: {e}")
-
-        time.sleep(interval_minutes * 60)  # Wait for the specified interval
-
-
 
 if __name__ == "__main__":
-    monitor_profits()
-    # run_trading_bot(duration_minutes=DURATION_MINUTES)
+    # monitor_profits()
+    run_trading_bot(duration_minutes=DURATION_MINUTES)
