@@ -34,7 +34,7 @@ RSI_SELL_THRESHOLD = 70      # Only sell when RSI is above 70 (overbought)
 MACD_CONFIRMATION = True     # Enforce MACD condition
 
 # Run duration in minutes (set to 30 minutes)
-DURATION_MINUTES = 960
+DURATION_MINUTES = 1200
 
 # -------------------------------
 # HELPER FUNCTIONS
@@ -261,7 +261,7 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
                                 open_positions[symbol].remove(pos)
             except Exception as e:
                 print(f"Error processing {symbol}: {e}")
-        
+
         time.sleep(15)  # Wait before the next check
 
     # Calculate and print total profit
