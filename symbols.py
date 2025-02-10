@@ -1,6 +1,7 @@
 
 # List of symbols to trade
 SYMBOLS = [
+    "BTCUSDT",
     "DOGEUSDT",
     "SHIBUSDT",
     "PEPEUSDT",
@@ -15,6 +16,4 @@ SYMBOLS = [
     "TURBOUSDT",
     "ETCUSDT",
     "SUIUSDT",
-    "BTCUSDT",
-    "TSTUSDT"
 ]
