@@ -32,7 +32,7 @@ MACD_CONFIRMATION = True     # Require MACD > Signal for buy and vice versa for 
 TRADE_USDT_AMOUNT = 10.0      # USDT allocated per trade
 TOLERANCE_FACTOR = 0.1       # Fraction of grid spacing used as tolerance
 
-DURATION_MINUTES = 60        # Bot run duration in minutes for this test
+DURATION_MINUTES = 600       # Bot run duration in minutes for this test
 MAX_EXPOSURE_PER_SYMBOL = 100  # Maximum USDT to commit per symbol
 GRID_LEVELS_COUNT = 5        # Number of grid levels
 GRID_RECALC_INTERVAL = 30 * 60  # Recalculate grid every 30 minutes
