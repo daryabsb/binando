@@ -16,4 +16,5 @@ SYMBOLS = [
     "ETCUSDT",
     "SUIUSDT",
     "BTCUSDT",
+    "TSTUSDT"
 ]
