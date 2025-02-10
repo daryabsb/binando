@@ -1,4 +1,4 @@
-
+import math
 import pandas as pd
 
 
@@ -47,3 +47,27 @@ def stream_candles(df, msg):
     
     # feed df (add new bar / update latest bar)
     df.loc[start_time] = [first, high, low, close, volume, complete]
+
+
+def format_quantity(client, symbol, quantity):
+    """
+    Adjusts the quantity to the allowed precision based on the symbol's LOT_SIZE filter.
+    """
+    try:
+        info = client.get_symbol_info(symbol)
+        if info is None:
+            return quantity  # fallback if no info is available
+        for f in info['filters']:
+            if f['filterType'] == 'LOT_SIZE':
+                step_size = float(f['stepSize'])
+                # Determine the number of decimals allowed from the step size.
+                # For example, a step size of 0.001 allows 3 decimals.
+                decimals = int(round(-math.log10(step_size), 0))
+                formatted_quantity = round(quantity, decimals)
+                # Alternatively, you could use string formatting to be extra sure:
+                # formatted_quantity = float(f"{{:.{decimals}f}}".format(quantity))
+                return formatted_quantity
+        return quantity
+    except Exception as e:
+        print(f"Error formatting quantity for {symbol}: {e}")
+        return quantity

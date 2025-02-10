@@ -5,6 +5,8 @@ import ta  # Technical Analysis Library
 from BinanceKeys import test_api_key, test_secret_key
 from symbols import SYMBOLS
 
+from utils import format_quantity
+
 API_KEY = test_api_key
 API_SECRET = test_secret_key
 # client = Client(API_KEY, API_SECRET)
@@ -28,7 +30,7 @@ client.timestamp_offset = time_offset
 RSI_BUY_THRESHOLD = 40.0     # Lower threshold to trigger buys
 RSI_SELL_THRESHOLD = 60.0    # Upper threshold to trigger sells
 MACD_CONFIRMATION = True     # Require MACD condition?
-TRADE_USDT_AMOUNT = 10.0      # USDT amount used per trade (adjust as desired)
+TRADE_USDT_AMOUNT = 100.0      # USDT amount used per trade (adjust as desired)
 TOLERANCE_FACTOR = 0.1       # Fraction of grid spacing used as tolerance
 
 
@@ -57,14 +59,15 @@ def place_order(symbol, side, quantity):
     Binance API calls when you are live.)
     """
     try:
-        print(f"Placing {side} order for {symbol} for quantity {quantity:.6f}")
+        formatted_quantity = format_quantity(client, symbol, quantity)
+        print(f"Placing {side} order for {symbol} for quantity {formatted_quantity:.6f}")
         # Uncomment below for live trading:
-        # if side == 'BUY':
-        #     order = client.order_market_buy(symbol=symbol, quantity=quantity)
-        # else:
-        #     order = client.order_market_sell(symbol=symbol, quantity=quantity)
-        # return order
-        return True  # Simulate a successful order
+        if side == 'BUY':
+            order = client.order_market_buy(symbol=symbol, quantity=formatted_quantity)
+        else:
+            order = client.order_market_sell(symbol=symbol, quantity=formatted_quantity)
+        return order
+        # return True  # Simulate a successful order
     except Exception as e:
         print(f"Error placing order for {symbol}: {e}")
         return None
@@ -309,3 +312,4 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
 if __name__ == "__main__":
     # monitor_profits()
     run_trading_bot(duration_minutes=DURATION_MINUTES)
+
