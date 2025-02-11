@@ -23,15 +23,15 @@ SIDE_SELL = "SELL"
 # List of meme coin symbols to trade
 meme_coins = [
     "DOGEUSDT",
-    "SHIBUSDT",
     "PEPEUSDT",
-    "XRPUSDT",
+    "TFUELUSDT",
     "TRUMPUSDT",
+    "SHIBUSDT",
+    "XRPUSDT",
     "ENSUSDT",
     "MANTAUSDT",
     "TURBOUSDT",
     "SUIUSDT",
-    "TFUELUSDT",
     "LTCUSDT",
     "1000CHZUSDT",
     "BNXUSDT",

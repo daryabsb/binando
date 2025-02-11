@@ -4,7 +4,7 @@ import time
 from binance.enums import *
 
 from _utils.coins import (
-    get_balance, get_percentage_options, get_history_options,
+    get_balance, get_usdt_balance, get_coin_balance, get_percentage_options, get_history_options,
     get_step_size_and_min_qty, get_previous_hour_price, calculate_quantity,
     get_price,
 )
@@ -43,49 +43,49 @@ def execute_strategy():
     print("⏳ Trading bot started...")
     client = get_client()
 
-    usdt_balance = get_balance(client)
-    trade_amount = usdt_balance * TRADE_ALLOCATION_PERCENTAGE
-    # Get available balance before selling
+    usdt_balance = get_usdt_balance(client)
 
-    print('trade_amount = ', trade_amount)
-    print('MINIMUM_TRADE_AMOUNT = ', MINIMUM_TRADE_AMOUNT)
+    # Ensure a fixed trade amount of 20 USDT (if balance allows)
+    # Use 20 or the highest available amount
+    trade_amount = min(20, usdt_balance)
+    print(f"🔹 Adjusted trade amount: {trade_amount} USDT")
 
     if trade_amount < MINIMUM_TRADE_AMOUNT:
         print("⚠️ Not enough USDT allocated for trading.")
         return
 
     for symbol in meme_coins:
-        coin_balance = get_balance(client, symbol)
-
+        coin_balance = get_coin_balance(
+            client, symbol)  # Fix missing coins issue
         current_price = get_price(client, symbol)
         previous_price = get_previous_hour_price(
             client, symbol, INTERVAL_PRIZE)
 
         price_change = (current_price - previous_price) / previous_price
 
-        if should_trade(symbol, current_price, "BUY", PRICE_CHANGE_THRESHOLD):  # Downtrend → BUY
+        if should_trade(symbol, current_price, "BUY", PRICE_CHANGE_THRESHOLD):
             print(f"📉 {symbol} is DOWN {price_change:.2%}. Buying...")
             quantity = calculate_quantity(client, symbol, trade_amount)
 
-            print(f"📉 {symbol} is UP {price_change:.2%}. from {current_price}...")
-            # place_order(symbol, SIDE_BUY, quantity)
-
-        elif should_trade(symbol, current_price, "SELL", PRICE_CHANGE_THRESHOLD):  # Uptrend → SELL
-            if coin_balance == 0:
+            if quantity:
                 print(
-                    f"❌ Insufficient balance for {symbol}. Skipping sell order.")
+                    f"✅ Buying {symbol} at {current_price}... Quantity: {quantity}")
+                # place_order(symbol, SIDE_BUY, quantity)
+
+        elif should_trade(symbol, current_price, "SELL", PRICE_CHANGE_THRESHOLD):
+            if coin_balance == Decimal("0.0"):
+                print(f"❌ No {symbol} balance to sell. Skipping.")
                 continue
 
             print(f"📈 {symbol} is UP {price_change:.2%}. Selling...")
-            quantity = calculate_quantity(
-                symbol, trade_amount, MAX_TRADE_PERCENTAGE)
-            if quantity is None or Decimal(quantity) > coin_balance:
-                continue
+            quantity = calculate_quantity(client, symbol, trade_amount)
 
-            print(f"📉 {symbol} is DOWN {price_change:.2%}. from {current_price}...")
-
-            # place_order(symbol, SIDE_SELL, quantity)
-
+            if quantity and quantity <= coin_balance:
+                print(
+                    f"✅ Selling {symbol} at {current_price}... Quantity: {quantity}")
+                # place_order(symbol, SIDE_SELL, quantity)
+            else:
+                print(f"⚠️ Not enough {symbol} balance to sell. Skipping.")
         else:
             print(f"🔍 {symbol}: No trade (change: {price_change:.2%})")
 

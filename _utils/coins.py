@@ -1,8 +1,11 @@
 from decimal import Decimal
+from binance.client import Client
 
 
-def get_balance(client, symbol="USDT"):
+def get_balance(client: Client, symbol="USDT"):
     """Retrieve the available USDT balance."""
+    if not client:
+        return 0.0
     if symbol == "USDT":
         balance = client.get_asset_balance(asset="USDT")
     else:
@@ -18,10 +21,14 @@ def get_usdt_balance(client):
 
 
 def get_coin_balance(client, symbol):
-    """Retrieve the available balance for a specific coin."""
+    """Retrieve the available balance for a specific coin, return 0 if not owned."""
     asset = symbol.replace("USDT", "")  # Extract asset name
-    balance = client.get_asset_balance(asset=asset)
-    return Decimal(balance["free"])
+    balance_info = client.get_asset_balance(asset=asset)
+
+    if balance_info is None:
+        return Decimal('0.0')  # If user has no balance, return 0 safely
+
+    return Decimal(balance_info["free"])
 
 
 def get_percentage_options(key):
@@ -90,12 +97,13 @@ def calculate_quantity(client, symbol, amount, MAX_TRADE_PERCENTAGE=0.1):
         print(f"⚠️ Error fetching step size or minQty for {symbol}.")
         return None
 
-    available_balance = get_balance(symbol)
+    available_balance = get_balance(client, symbol)
     max_trade_amount = available_balance * MAX_TRADE_PERCENTAGE  # Limit trade size
 
     # Limit by max % balance
     raw_quantity = min(Decimal(amount) / price, max_trade_amount)
-    quantity = (raw_quantity // step_size) * step_size  # Adjust to step size
+    quantity = (Decimal(raw_quantity) // step_size) * \
+        step_size  # Adjust to step size
 
     if quantity < min_qty:
         print(f"⚠️ {symbol} Order too small ({quantity} < {min_qty}), skipping.")
