@@ -5,52 +5,19 @@ from binance.enums import *
 
 from _utils.coins import (
     get_balance, get_percentage_options, get_history_options,
-    get_step_size_and_min_qty, get_previous_hour_price
-    )
+    get_step_size_and_min_qty, get_previous_hour_price, calculate_quantity,
+    get_price,
+)
 from _utils.const import (
-    meme_coins, TRADE_ALLOCATION_PERCENTAGE, MAX_TRADE_PERCENTAGE, 
+    meme_coins, TRADE_ALLOCATION_PERCENTAGE, MAX_TRADE_PERCENTAGE,
     PRICE_CHANGE_THRESHOLD, MINIMUM_TRADE_AMOUNT, LAST_TRADE,
     SIDE_BUY, SIDE_SELL, INTERVAL_PRIZE
 )
 
 from _utils.trade import should_trade
 
-client = get_client()
 
-
-
-def get_price(symbol):
-    """Get the current price of a symbol."""
-    ticker = client.get_symbol_ticker(symbol=symbol)
-    return float(ticker["price"])
-
-
-
-
-def calculate_quantity(symbol, amount):
-    """Calculate the correct quantity based on Binance precision rules."""
-    price = Decimal(get_price(symbol))
-    step_size, min_qty = get_step_size_and_min_qty(client, symbol)
-
-    if not step_size or not min_qty:
-        print(f"⚠️ Error fetching step size or minQty for {symbol}.")
-        return None
-
-    available_balance = get_balance(symbol)
-    max_trade_amount = available_balance * MAX_TRADE_PERCENTAGE  # Limit trade size
-
-    # Limit by max % balance
-    raw_quantity = min(Decimal(amount) / price, max_trade_amount)
-    quantity = (raw_quantity // step_size) * step_size  # Adjust to step size
-
-    if quantity < min_qty:
-        print(f"⚠️ {symbol} Order too small ({quantity} < {min_qty}), skipping.")
-        return None
-
-    return str(quantity)  # Convert to string to avoid precision issues
-
-
-def place_order(symbol, side, quantity):
+def place_order(client, symbol, side, quantity):
     """Place a market order (buy/sell) with balance validation."""
     if not quantity:
         return  # Skip order if quantity is None
@@ -73,26 +40,35 @@ def place_order(symbol, side, quantity):
 
 def execute_strategy():
     """Monitor and execute the trading strategy while preventing duplicate trades."""
-    usdt_balance = get_balance()
+    print("⏳ Trading bot started...")
+    client = get_client()
+
+    usdt_balance = get_balance(client)
     trade_amount = usdt_balance * TRADE_ALLOCATION_PERCENTAGE
     # Get available balance before selling
+
+    print('trade_amount = ', trade_amount)
+    print('MINIMUM_TRADE_AMOUNT = ', MINIMUM_TRADE_AMOUNT)
 
     if trade_amount < MINIMUM_TRADE_AMOUNT:
         print("⚠️ Not enough USDT allocated for trading.")
         return
 
     for symbol in meme_coins:
-        coin_balance = get_balance(symbol)
+        coin_balance = get_balance(client, symbol)
 
-        current_price = get_price(symbol)
-        previous_price = get_previous_hour_price(symbol, INTERVAL_PRIZE)
+        current_price = get_price(client, symbol)
+        previous_price = get_previous_hour_price(
+            client, symbol, INTERVAL_PRIZE)
 
         price_change = (current_price - previous_price) / previous_price
 
         if should_trade(symbol, current_price, "BUY", PRICE_CHANGE_THRESHOLD):  # Downtrend → BUY
             print(f"📉 {symbol} is DOWN {price_change:.2%}. Buying...")
-            quantity = calculate_quantity(symbol, trade_amount)
-            place_order(symbol, SIDE_BUY, quantity)
+            quantity = calculate_quantity(client, symbol, trade_amount)
+
+            print(f"📉 {symbol} is UP {price_change:.2%}. from {current_price}...")
+            # place_order(symbol, SIDE_BUY, quantity)
 
         elif should_trade(symbol, current_price, "SELL", PRICE_CHANGE_THRESHOLD):  # Uptrend → SELL
             if coin_balance == 0:
@@ -101,7 +77,8 @@ def execute_strategy():
                 continue
 
             print(f"📈 {symbol} is UP {price_change:.2%}. Selling...")
-            quantity = calculate_quantity(symbol, trade_amount)
+            quantity = calculate_quantity(
+                symbol, trade_amount, MAX_TRADE_PERCENTAGE)
             if quantity is None or Decimal(quantity) > coin_balance:
                 continue
 

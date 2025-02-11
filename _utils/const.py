@@ -1,11 +1,11 @@
 
 from decimal import Decimal
-from symbols import get_percentage_options
+from _utils.coins import get_percentage_options
 
-INTERVAL_PRIZE:str = "1_day" 
+INTERVAL_PRIZE: str = "1_day"
 # Trade settings
 TRADE_ALLOCATION_PERCENTAGE = 0.10  # 10% of total USDT balance
-MINIMUM_TRADE_AMOUNT = 5  # Minimum order amount in USDT to cover fees
+MINIMUM_TRADE_AMOUNT = 3  # Minimum order amount in USDT to cover fees
 
 
 MAX_TRADE_PERCENTAGE = Decimal(0.25)  # Max 25% of coin balance per trade
