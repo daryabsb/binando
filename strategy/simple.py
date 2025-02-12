@@ -38,6 +38,8 @@ def place_order(client, symbol, side, quantity):
         print(f"❌ Error placing {side} order for {symbol}: {str(e)}")
 
 
+from decimal import Decimal
+
 def execute_strategy():
     """Monitor and execute the trading strategy while preventing duplicate trades."""
     print("⏳ Trading bot started...")
@@ -46,8 +48,8 @@ def execute_strategy():
     usdt_balance = get_usdt_balance(client)
 
     # Ensure a fixed trade amount of 20 USDT (if balance allows)
-    # Use 20 or the highest available amount
-    trade_amount = min(20, usdt_balance)
+    trade_amount = min(5, usdt_balance)
+
     print(f"🔹 Adjusted trade amount: {trade_amount} USDT")
 
     if trade_amount < MINIMUM_TRADE_AMOUNT:
@@ -55,43 +57,43 @@ def execute_strategy():
         return
 
     for symbol in meme_coins:
-        coin_balance = get_coin_balance(
-            client, symbol)  # Fix missing coins issue
+        coin_balance = get_coin_balance(client, symbol)  # Fix missing coins issue
         current_price = get_price(client, symbol)
-        previous_price = get_previous_hour_price(
-            client, symbol, INTERVAL_PRIZE)
+        previous_price = get_previous_hour_price(client, symbol, INTERVAL_PRIZE)
 
         price_change = (current_price - previous_price) / previous_price
 
-        if should_trade(symbol, current_price, "BUY", PRICE_CHANGE_THRESHOLD):
-            print(f"📉 {symbol} is DOWN {price_change:.2%}. Buying...")
-            quantity = calculate_quantity(client, symbol, trade_amount)
+        if should_trade(client, symbol, current_price, "BUY", PRICE_CHANGE_THRESHOLD):
+            if trade_amount > 1:
+                print(f"📉 {symbol} is DOWN {price_change:.2%}. Buying...")
 
-            if quantity:
-                print(
-                    f"✅ Buying {symbol} at {current_price}... Quantity: {quantity}")
-                # place_order(symbol, SIDE_BUY, quantity)
+                # Use trade_amount for BUY orders (ignoring balance)
+                quantity = calculate_quantity(client, symbol, trade_amount, "BUY")
 
-        elif should_trade(symbol, current_price, "SELL", PRICE_CHANGE_THRESHOLD):
-            if coin_balance == Decimal("0.0"):
+                if quantity:
+                    print(f"✅ Buying {symbol} at {current_price}... Quantity: {quantity}")
+                    place_order(client, symbol, SIDE_BUY, quantity)
+
+        elif should_trade(client, symbol, current_price, "SELL", PRICE_CHANGE_THRESHOLD):
+            if coin_balance is None or coin_balance == Decimal("0.0"):
                 print(f"❌ No {symbol} balance to sell. Skipping.")
                 continue
 
             print(f"📈 {symbol} is UP {price_change:.2%}. Selling...")
-            quantity = calculate_quantity(client, symbol, trade_amount)
 
-            if quantity and quantity <= coin_balance:
-                print(
-                    f"✅ Selling {symbol} at {current_price}... Quantity: {quantity}")
-                # place_order(symbol, SIDE_SELL, quantity)
+            # Use available balance for SELL orders
+            quantity = calculate_quantity(client, symbol, trade_amount, "SELL")
+
+            if quantity and Decimal(quantity) <= coin_balance:
+                print(f"✅ Selling {symbol} at {current_price}... Quantity: {quantity}")
+                place_order(client, symbol, SIDE_SELL, quantity)
             else:
                 print(f"⚠️ Not enough {symbol} balance to sell. Skipping.")
         else:
             print(f"🔍 {symbol}: No trade (change: {price_change:.2%})")
 
-
 # Run the strategy every hour
 while True:
     execute_strategy()
     print("⏳ Waiting 1 hour before checking again...")
-    time.sleep(3600)
+    time.sleep(60)

@@ -88,7 +88,7 @@ def get_price(client, symbol):
     return float(ticker["price"])
 
 
-def calculate_quantity(client, symbol, amount, MAX_TRADE_PERCENTAGE=0.1):
+def calculate_quantity(client, symbol, amount, side, MAX_TRADE_PERCENTAGE=0.1):
     """Calculate the correct quantity based on Binance precision rules."""
     price = Decimal(get_price(client, symbol))
     step_size, min_qty = get_step_size_and_min_qty(client, symbol)
@@ -97,16 +97,25 @@ def calculate_quantity(client, symbol, amount, MAX_TRADE_PERCENTAGE=0.1):
         print(f"⚠️ Error fetching step size or minQty for {symbol}.")
         return None
 
-    available_balance = get_balance(client, symbol)
-    max_trade_amount = available_balance * MAX_TRADE_PERCENTAGE  # Limit trade size
+    if side == "BUY":
+        # Directly calculate quantity based on USDT spent
+        raw_quantity = Decimal(amount) / price
+    else:  # SELL
+        available_balance = get_balance(client, symbol)
 
-    # Limit by max % balance
-    raw_quantity = min(Decimal(amount) / price, max_trade_amount)
-    quantity = (Decimal(raw_quantity) // step_size) * \
-        step_size  # Adjust to step size
+        if available_balance is None or available_balance == Decimal("0.0"):
+            print(f"⚠️ No {symbol} balance to sell. Skipping.")
+            return None
+
+        max_trade_amount = available_balance * Decimal(MAX_TRADE_PERCENTAGE)
+        raw_quantity = min(max_trade_amount, available_balance)  # Ensure we don’t oversell
+
+    # Adjust to step size
+    quantity = (Decimal(raw_quantity) // step_size) * step_size
 
     if quantity < min_qty:
         print(f"⚠️ {symbol} Order too small ({quantity} < {min_qty}), skipping.")
         return None
 
-    return str(quantity)  # Convert to string to avoid precision issues
+    return str(quantity)  # Convert to string for Binance API
+
