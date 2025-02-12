@@ -64,15 +64,15 @@ def execute_strategy():
         price_change = (current_price - previous_price) / previous_price
 
         if should_trade(client, symbol, current_price, "BUY", PRICE_CHANGE_THRESHOLD):
-            if trade_amount > 1:
-                print(f"📉 {symbol} is DOWN {price_change:.2%}. Buying...")
+            # if trade_amount > 1:
+            print(f"📉 {symbol} is DOWN {price_change:.2%}. Buying...")
 
-                # Use trade_amount for BUY orders (ignoring balance)
-                quantity = calculate_quantity(client, symbol, trade_amount, "BUY")
+            # Use trade_amount for BUY orders (ignoring balance)
+            quantity = calculate_quantity(client, symbol, trade_amount, "BUY")
 
-                if quantity:
-                    print(f"✅ Buying {symbol} at {current_price}... Quantity: {quantity}")
-                    place_order(client, symbol, SIDE_BUY, quantity)
+            if quantity:
+                print(f"✅ Buying {symbol} at {current_price}... Quantity: {quantity}")
+                place_order(client, symbol, SIDE_BUY, quantity)
 
         elif should_trade(client, symbol, current_price, "SELL", PRICE_CHANGE_THRESHOLD):
             if coin_balance is None or coin_balance == Decimal("0.0"):
@@ -96,4 +96,4 @@ def execute_strategy():
 while True:
     execute_strategy()
     print("⏳ Waiting 1 hour before checking again...")
-    time.sleep(60)
+    time.sleep(15)
