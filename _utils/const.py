@@ -77,6 +77,7 @@ meme_coins = [
     "COOKIEUSDT",
     "HARDUSDT",
     "UNIUSDT",
+    "SYNUSDT",
     
 ]
 
