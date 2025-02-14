@@ -10,9 +10,11 @@ MINIMUM_TRADE_AMOUNT = 3  # Minimum order amount in USDT to cover fees
 
 MAX_TRADE_PERCENTAGE = Decimal(0.25)  # Max 25% of coin balance per trade
 
+
 def get_percentage_options(value: str):
     """Convert percentage string like '5%' into a decimal (e.g., 5% → 0.05)."""
     return float(value.strip('%')) / 100  # Ensure it's correctly converted
+
 
 # PRICE_CHANGE_THRESHOLD = 0.015  # 1.5% threshold for buy/sell
 PRICE_CHANGE_THRESHOLD = get_percentage_options(
@@ -26,6 +28,7 @@ SIDE_SELL = "SELL"
 
 # List of meme coin symbols to trade
 meme_coins = [
+    "1MBABYDOGEUSDT",
     "TSTUSDT",
     "DOGEUSDT",
     "PEPEUSDT",
@@ -54,7 +57,7 @@ meme_coins = [
     "JSTUSDT",
     "HOTUSDT",
     "ARDRUSDT",
-    "XEMUSDT",
+    # "XEMUSDT",
     "SEIUSDT",
     "BTTCUSDT",
     "JTOUSDT",
@@ -67,7 +70,6 @@ meme_coins = [
     "BELUSDT",
     "JUVUSDT",
     "WOOUSDT",
-    "1MBABYDOGEUSDT",
     "BLURUSDT",
     "STRKUSDT",
     "DFUSDT",
@@ -78,7 +80,6 @@ meme_coins = [
     "HARDUSDT",
     "UNIUSDT",
     "SYNUSDT",
-    
 ]
 
 

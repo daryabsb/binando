@@ -129,14 +129,6 @@ def get_weekly_support_resistance(symbol):
         return None, None
 
 
-def zero_lag_ema(data, period=14):
-    """Calculate Zero Lag Exponential Moving Average (ZLMA)"""
-    ema1 = data.ewm(span=period, adjust=False).mean()
-    ema2 = ema1.ewm(span=period, adjust=False).mean()
-    zlma = 2 * ema1 - ema2  # Zero Lag EMA formula
-    return zlma
-
-
 def get_technical_indicators(symbol, interval="15m", lookback="1 day ago UTC"):
     """
     Retrieve recent klines and compute technical indicators:
@@ -144,7 +136,6 @@ def get_technical_indicators(symbol, interval="15m", lookback="1 day ago UTC"):
       - MACD and MACD signal
       - Bollinger Bands (20-period, 2 std dev)
       - SMA50 (50-period Simple Moving Average)
-      - ZLMA (20-period Zero Lag Moving Average)
     """
     try:
         klines = client.get_historical_klines(symbol, interval, lookback)
@@ -153,33 +144,24 @@ def get_technical_indicators(symbol, interval="15m", lookback="1 day ago UTC"):
             'close_time', 'qav', 'num_trades', 'taker_base_vol', 'taker_quote_vol', 'ignore'
         ])
         df['close'] = df['close'].astype(float)
+        df['volume'] = df['volume'].astype(float)
 
-        # RSI (Relative Strength Index)
         rsi = ta.momentum.RSIIndicator(df['close'], window=14).rsi().iloc[-1]
-
-        # MACD (Moving Average Convergence Divergence)
         macd_series = ta.trend.MACD(df['close'])
         macd = macd_series.macd().iloc[-1]
         macd_signal = macd_series.macd_signal().iloc[-1]
 
-        # Bollinger Bands
         bb_indicator = ta.volatility.BollingerBands(
             df['close'], window=20, window_dev=2)
         bb_lower = bb_indicator.bollinger_lband().iloc[-1]
         bb_upper = bb_indicator.bollinger_hband().iloc[-1]
 
-        # SMA (Simple Moving Average)
         sma50 = df['close'].rolling(window=50).mean().iloc[-1]
 
-        # ZLMA (Zero Lag Moving Average) Calculation
-        ema1 = df['close'].ewm(span=20, adjust=False).mean()
-        ema2 = ema1.ewm(span=20, adjust=False).mean()
-        zlma = (2 * ema1 - ema2).iloc[-1]  # Final ZLMA value
-
-        return rsi, macd, macd_signal, bb_lower, bb_upper, sma50, zlma
+        return rsi, macd, macd_signal, bb_lower, bb_upper, sma50
     except Exception as e:
         print(f"Error calculating indicators for {symbol}: {e}")
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None
 
 
 def get_total_exposure(open_positions, symbol):
@@ -264,109 +246,163 @@ last_grid_recalc = {}
 
 
 def run_trading_bot(duration_minutes=DURATION_MINUTES):
+    """
+    Run the trading bot for a fixed duration (in minutes). For each symbol:
+      1. Initialize grid levels.
+      2. In a loop, check the current price and technical indicators.
+      3. If the price is near a grid level and entry signals are met, place a BUY order (only once per grid level).
+      4. For open positions, if the price reaches the target or a stop-loss condition is met, place a SELL order.
+      5. Recalculate grid levels every GRID_RECALC_INTERVAL seconds.
+      6. At the end, report total profit.
+    """
     start_time = time.time()
     end_time = start_time + duration_minutes * 60
 
     # Track open positions and closed trades per symbol
     open_positions = {symbol: [] for symbol in SYMBOLS}
     closed_trades = []
-    symbol_grids = {}
-    last_grid_recalc = {}
 
-    # Initial Grid Calculation
+    # Initialize grid levels for each symbol and record recalculation times
+    symbol_grids = {}
+    now = time.time()
     for symbol in SYMBOLS:
         grid_info = recalc_grid_levels(symbol)
-        if grid_info:
-            symbol_grids[symbol] = grid_info
-            last_grid_recalc[symbol] = time.time()
-            print(
-                f"{symbol} >> Grid initialized: Support {grid_info['support']:.8f}, Resistance {grid_info['resistance']:.8f}")
+        if grid_info is None:
+            continue
+        symbol_grids[symbol] = grid_info
+        last_grid_recalc[symbol] = now
+        print(
+            f"{symbol} >> Support: {grid_info['support']:.8f}, Resistance: {grid_info['resistance']:.8f}")
+        print(f"Grid levels: {grid_info['grid_levels']}\n")
 
-    # Main Trading Loop
+    # Main trading loop
     while time.time() < end_time:
         for symbol in SYMBOLS:
             try:
-                now = time.time()
-
-                # Recalculate grid if needed
-                if now - last_grid_recalc.get(symbol, 0) > GRID_RECALC_INTERVAL:
+                # Recalculate grid levels every GRID_RECALC_INTERVAL seconds
+                if time.time() - last_grid_recalc.get(symbol, 0) > GRID_RECALC_INTERVAL:
                     new_grid = recalc_grid_levels(symbol)
-                    if new_grid:
+                    if new_grid is not None:
                         symbol_grids[symbol] = new_grid
-                        last_grid_recalc[symbol] = now
+                        last_grid_recalc[symbol] = time.time()
                         print(f"{symbol} >> Grid recalculated.")
 
                 if symbol not in symbol_grids:
                     continue
 
-                # Get Current Price
+                grid_info = symbol_grids[symbol]
                 current_price = get_current_price(symbol)
                 if current_price is None:
                     continue
+                print(f"{symbol} >> Current Price: {current_price:.8f}")
 
-                # Get Technical Indicators
-                rsi, macd, macd_signal, bb_lower, bb_upper, sma50, zlma = get_technical_indicators(
+                # Get technical indicators
+                rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = get_technical_indicators(
                     symbol)
                 if rsi is None:
                     continue
+                print(f"{symbol} >> RSI: {rsi:.2f} | MACD: {macd:.8f} | Signal: {macd_signal:.8f} | "
+                      f"BB Lower: {bb_lower:.8f} | BB Upper: {bb_upper:.8f} | SMA50: {sma50:.8f}")
 
-                print(f"{symbol} >> Price: {current_price:.8f} | RSI: {rsi:.2f} | MACD: {macd:.8f} | Signal: {macd_signal:.8f} | "
-                      f"BB Lower: {bb_lower:.8f} | BB Upper: {bb_upper:.8f} | SMA50: {sma50:.8f} | ZLMA: {zlma:.8f}")
-
-                # --------- BUY LOGIC ----------
-                for i, level in enumerate(symbol_grids[symbol]["grid_levels"]):
-                    if any(pos["grid_index"] == i for pos in open_positions[symbol]):
+                # ---------------
+                # BUY LOGIC
+                # ---------------
+                for i, level in enumerate(grid_info["grid_levels"]):
+                    # Prevent repetitive buys on the same grid level
+                    already_bought = any(
+                        pos.get("grid_index") == i for pos in open_positions[symbol])
+                    if already_bought:
                         continue
 
-                    if current_price <= level + symbol_grids[symbol]["tolerance"]:
+                    # Check if price is near the grid level
+                    if current_price <= level + grid_info["tolerance"]:
+                        # Check maximum exposure limit
                         if get_total_exposure(open_positions, symbol) + TRADE_USDT_AMOUNT > MAX_EXPOSURE_PER_SYMBOL:
+                            print(
+                                f"{symbol} >> Maximum exposure reached; skipping buy.")
                             continue
 
-                        buy_signal = (
-                            (rsi < RSI_BUY_THRESHOLD) or
-                            (current_price < bb_lower) or
-                            (current_price < sma50) or
-                            (current_price < zlma)  # ZLMA Buy Confirmation
-                        )
-
+                        # Determine buy signal (if one or more conditions are met)
+                        buy_signal = False
+                        if rsi < RSI_BUY_THRESHOLD:
+                            print(
+                                f"{symbol} >> Buy signal: RSI ({rsi:.2f}) below threshold ({RSI_BUY_THRESHOLD}).")
+                            buy_signal = True
+                        if current_price < bb_lower:
+                            print(
+                                f"{symbol} >> Buy signal: Price ({current_price:.8f}) below Bollinger Lower ({bb_lower:.8f}).")
+                            buy_signal = True
+                        if current_price < sma50:
+                            print(
+                                f"{symbol} >> Buy signal: Price ({current_price:.8f}) below SMA50 ({sma50:.8f}).")
+                            buy_signal = True
+                        # Enforce MACD condition if enabled
                         if MACD_CONFIRMATION and not (macd > macd_signal):
-                            buy_signal = False  # MACD must confirm
+                            print(
+                                f"{symbol} >> MACD condition not met for BUY (MACD: {macd:.8f} <= Signal: {macd_signal:.8f}).")
+                            buy_signal = False
 
                         if buy_signal:
                             quantity = TRADE_USDT_AMOUNT / current_price
                             order = place_order(symbol, 'BUY', quantity)
                             if order:
-                                target_sell = symbol_grids[symbol]["grid_levels"][i + 1] if i + 1 < len(
-                                    symbol_grids[symbol]["grid_levels"]) else symbol_grids[symbol]["resistance"]
-                                open_positions[symbol].append(
-                                    {"grid_index": i, "buy_price": current_price, "quantity": quantity, "target_sell": target_sell})
+                                # Determine target sell level: next grid level or resistance if at the top
+                                target_sell = (grid_info["grid_levels"][i + 1]
+                                               if i + 1 < len(grid_info["grid_levels"])
+                                               else grid_info["resistance"])
+                                open_positions[symbol].append({
+                                    "grid_index": i,
+                                    "buy_price": current_price,
+                                    "quantity": quantity,
+                                    "target_sell": target_sell
+                                })
                                 print(
-                                    f"{symbol} >> BUY executed at {current_price:.8f} for {quantity:.6f}.")
+                                    f"{symbol} >> BUY order executed at {current_price:.8f} for quantity {quantity:.6f}.")
 
-                # --------- SELL LOGIC ----------
+                # ---------------
+                # SELL LOGIC
+                # ---------------
                 for pos in open_positions[symbol][:]:
+                    # Check for stop-loss: if current price falls more than 5% below entry
                     if check_stop_loss(pos, current_price, stop_loss_pct=0.05):
+                        print(
+                            f"{symbol} >> Stop-loss triggered for position bought at {pos['buy_price']:.8f}.")
                         order = place_order(symbol, 'SELL', pos["quantity"])
                         if order:
                             profit = (current_price -
                                       pos["buy_price"]) * pos["quantity"]
-                            closed_trades.append(
-                                {"symbol": symbol, "buy_price": pos["buy_price"], "sell_price": current_price, "quantity": pos["quantity"], "profit": profit})
+                            closed_trades.append({
+                                "symbol": symbol,
+                                "buy_price": pos["buy_price"],
+                                "sell_price": current_price,
+                                "quantity": pos["quantity"],
+                                "profit": profit
+                            })
                             open_positions[symbol].remove(pos)
                             print(
-                                f"{symbol} >> STOP-LOSS SELL at {current_price:.8f}; Profit: {profit:.8f} USDT")
+                                f"{symbol} >> STOP-LOSS SELL executed at {current_price:.8f}; Profit: {profit:.8f} USDT")
                         continue
 
-                    if current_price >= pos["target_sell"] - symbol_grids[symbol]["tolerance"]:
-                        sell_signal = (
-                            (rsi > RSI_SELL_THRESHOLD) or
-                            (current_price > bb_upper) or
-                            (current_price > sma50) or
-                            (current_price > zlma)  # ZLMA Sell Confirmation
-                        )
-
+                    # Regular sell condition: if price is near (or above) the target sell level
+                    if current_price >= pos["target_sell"] - grid_info["tolerance"]:
+                        sell_signal = False
+                        if rsi > RSI_SELL_THRESHOLD:
+                            print(
+                                f"{symbol} >> Sell signal: RSI ({rsi:.2f}) above threshold ({RSI_SELL_THRESHOLD}).")
+                            sell_signal = True
+                        if current_price > bb_upper:
+                            print(
+                                f"{symbol} >> Sell signal: Price ({current_price:.8f}) above Bollinger Upper ({bb_upper:.8f}).")
+                            sell_signal = True
+                        if current_price > sma50:
+                            print(
+                                f"{symbol} >> Sell signal: Price ({current_price:.8f}) above SMA50 ({sma50:.8f}).")
+                            sell_signal = True
+                        # Enforce MACD condition for selling
                         if MACD_CONFIRMATION and not (macd < macd_signal):
-                            sell_signal = False  # MACD must confirm
+                            print(
+                                f"{symbol} >> MACD condition not met for SELL (MACD: {macd:.8f} >= Signal: {macd_signal:.8f}).")
+                            sell_signal = False
 
                         if sell_signal:
                             order = place_order(
@@ -374,20 +410,27 @@ def run_trading_bot(duration_minutes=DURATION_MINUTES):
                             if order:
                                 profit = (current_price -
                                           pos["buy_price"]) * pos["quantity"]
-                                closed_trades.append(
-                                    {"symbol": symbol, "buy_price": pos["buy_price"], "sell_price": current_price, "quantity": pos["quantity"], "profit": profit})
+                                closed_trades.append({
+                                    "symbol": symbol,
+                                    "buy_price": pos["buy_price"],
+                                    "sell_price": current_price,
+                                    "quantity": pos["quantity"],
+                                    "profit": profit
+                                })
                                 open_positions[symbol].remove(pos)
                                 print(
-                                    f"{symbol} >> SELL executed at {current_price:.8f}; Profit: {profit:.8f} USDT")
-
+                                    f"{symbol} >> SELL order executed at {current_price:.8f}; Profit: {profit:.8f} USDT")
             except Exception as e:
                 print(f"Error processing {symbol}: {e}")
+        time.sleep(15)  # Pause between loops
 
-        time.sleep(15)
-
+    # Session complete – summarize results
+    total_profit = sum(trade["profit"] for trade in closed_trades)
+    print("\n=== Trading session completed ===")
+    print(f"Total closed trades: {len(closed_trades)}")
     print(
-        f"Total Profit: {sum(trade['profit'] for trade in closed_trades):.8f} USDT")
-    return closed_trades
+        f"Total profit over {duration_minutes} minutes: {total_profit:.8f} USDT")
+    return total_profit, closed_trades
 
 
 # ================================

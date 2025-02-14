@@ -1,5 +1,9 @@
 import math
+import random
+from decimal import Decimal
 import pandas as pd
+from ta.momentum import ROCIndicator
+from bot.coins import get_price
 
 
 def pr(command1='', command2='', command3='', command4='', command5='', command6='', command7='', command8='', command9='', command10=''):
@@ -73,3 +77,13 @@ def format_quantity(client, symbol, quantity):
     except Exception as e:
         print(f"Error formatting quantity for {symbol}: {e}")
         return quantity
+
+
+def get_current_price(client, symbol):
+    """Fetch the latest price for a symbol from Binance API."""
+    try:
+        ticker = client.get_ticker(symbol=symbol)
+        return Decimal(ticker["lastPrice"])
+    except Exception as e:
+        print(f"⚠️ Error fetching current price for {symbol}: {e}")
+        return Decimal("0.0")
