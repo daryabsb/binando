@@ -94,11 +94,13 @@ def has_recent_trade(client, symbol, min_time_gap=10, price_change_threshold=0.5
             return False  # No trade history, safe to proceed
 
         last_trade = trades[-1]  # Get the most recent trade
-        last_trade_time = datetime.utcfromtimestamp(last_trade["time"] / 1000)
+        last_trade_time = datetime.fromtimestamp(
+            datetime.timezone.utc)(last_trade["time"] / 1000)
         last_trade_price = Decimal(last_trade["price"])
 
         # ✅ Condition 1: Time-based filter (no trades within X minutes)
-        time_since_last_trade = datetime.utcnow() - last_trade_time
+        time_since_last_trade = datetime.now(
+            datetime.timezone.utc) - last_trade_time
         if time_since_last_trade < timedelta(minutes=min_time_gap):
             print(
                 f"⚠️ Skipping {symbol}: Last trade was {time_since_last_trade.seconds // 60} min ago (Min gap: {min_time_gap} min).")

@@ -23,7 +23,6 @@ def load_cached_sorted_symbols():
             with open(CACHE_FILE, "r") as f:
                 data = json.load(f)
                 if time.time() - data["timestamp"] < CACHE_EXPIRATION:
-                    print(f"📚 data: {data}...")
                     return data["sorted_coins"]  # ✅ Use cached data if valid
         except Exception as e:
             print(f"⚠️ Error reading cache: {e}, recalculating...")
