@@ -59,6 +59,9 @@ meme_coins = [
     "ARDRUSDT",
     # "XEMUSDT",
     "SEIUSDT",
+    "BABYSORA2USD",
+    "BENCOUSD",
+    "WAGGUSD",
     "BTTCUSDT",
     "JTOUSDT",
     "DGBUSDT",
@@ -80,6 +83,8 @@ meme_coins = [
     "HARDUSDT",
     "UNIUSDT",
     "SYNUSDT",
+    "OCBOUSD",
+    "OMUSD",
 ]
 
 

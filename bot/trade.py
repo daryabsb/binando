@@ -1,4 +1,3 @@
-import pandas as pd
 from decimal import Decimal
 from ta.momentum import ROCIndicator
 from _utils.const import LAST_TRADE, PRICE_CHANGE_THRESHOLD as threshold
@@ -47,8 +46,9 @@ def should_buy(client, symbol):
 
     price_change = (Decimal(current_price) -
                     Decimal(last_price)) / Decimal(last_price)
-
+   
     price_change_roc = get_roc(client, symbol)
+    
 
     if roc_meets_threshold(price_change_roc):
         print(

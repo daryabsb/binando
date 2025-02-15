@@ -1,0 +1,26 @@
+{
+    "timestamp": 1739617737.4557483,
+    "sorted_coins": [
+        {
+            "symbol": "XRPUSDT",
+            "price": 2.8124,
+            "roc": 0.029278290147855227,
+            "volume": 861128382.4027,
+            "algoalpha_trend": 0.5215604541146635
+        },
+        {
+            "symbol": "LTCUSDT",
+            "price": 131.99,
+            "roc": 0.014917339484813514,
+            "volume": 173057255.21275,
+            "algoalpha_trend": 0.9745208379986776
+        },
+        {
+            "symbol": "JTOUSDT",
+            "price": 3.205,
+            "roc": 0.02037567653613501,
+            "volume": 26590023.016,
+            "algoalpha_trend": 0.9749940794720218
+        }
+    ]
+}

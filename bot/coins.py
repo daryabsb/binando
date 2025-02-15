@@ -1,6 +1,8 @@
+import pandas as pd
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
 from binance.client import Client
-from bot.market import is_bullish_trend, get_algoalpha_trend, get_volume
+
+from bot.market import get_algoalpha_trend, get_volume
 from _utils.const import meme_coins
 from ta.momentum import ROCIndicator
 
@@ -31,32 +33,46 @@ def get_price(client, symbol):
 
 
 def get_sorted_symbols(client):
-    """Sort and filter symbols based on strong trend signals."""
+    """Sort and filter symbols based on strong trend signals, with caching."""
+    from _utils.cache import load_cached_sorted_symbols, save_sorted_symbols
+    from _utils.helpers import is_bullish_trend
+
+    # ✅ Try loading from cache first
+    # cached_symbols = load_cached_sorted_symbols()
+    # if cached_symbols:
+    #     return cached_symbols
+
     trending_coins = []
-
+    skipped_count = 0  # Track skipped coins
     for symbol in meme_coins:
-        current_price = get_price(client, symbol)
-        roc = get_roc(client, symbol)  # Rate of Change (momentum)
-        volume = get_volume(client, symbol)  # Market activity
+        try:
+            current_price = float(get_price(client, symbol))  # Convert Decimal to float
+            roc = float(get_roc(client, symbol))  # Convert Decimal to float
+            volume = float(get_volume(client, symbol))  # Convert Decimal to float
+            
+            # ✅ Filter only bullish coins
+            if not is_bullish_trend(client, symbol):
+                skipped_count += 1
+                print(f"⚠️ Skipping {symbol}: Not bullish.")
+                continue  # Skip if it's not consistently bullish
 
-        # ✅ Filter only bullish coins
-        if not is_bullish_trend(client, symbol):
-            continue  # Skip if it's not consistently bullish
+            algoalpha_trend = float(get_algoalpha_trend(client, symbol))  # Convert Decimal to float
 
-        algoalpha_trend = get_algoalpha_trend(
-            client, symbol)  # Strong trend indicator
-
-        trending_coins.append({
-            "symbol": symbol,
-            "price": current_price,
-            "roc": roc,
-            "volume": volume,
-            "algoalpha_trend": algoalpha_trend,
-        })
+            trending_coins.append({
+                "symbol": symbol,
+                "price": current_price,
+                "roc": roc,
+                "volume": volume,
+                "algoalpha_trend": algoalpha_trend,
+            })
+        except Exception as e:
+            print(f"⚠️ Skipping {symbol}: {e}")  # Log the error and continue
 
     # ✅ Sort by highest volume & momentum
-    sorted_coins = sorted(trending_coins, key=lambda x: (
-        x["volume"], abs(x["roc"]), x["algoalpha_trend"]), reverse=True)
+    sorted_coins = sorted(trending_coins, key=lambda x: (x["volume"], abs(x["roc"]), x["algoalpha_trend"]), reverse=True)
+
+    # ✅ Save sorted list to cache
+    save_sorted_symbols(sorted_coins)
 
     return sorted_coins
 
@@ -101,6 +117,7 @@ def get_previous_hour_price(client, symbol, interval="1h"):
 
 def calculate_quantity(client, symbol, amount, trade_type):
     """Calculate correct quantity based on Binance precision rules and risk management."""
+    from _utils.helpers import get_min_notional, get_step_size_and_min_qty
 
     price = Decimal(get_price(client, symbol))
     step_size, min_qty = get_step_size_and_min_qty(client, symbol)
