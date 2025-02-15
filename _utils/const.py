@@ -85,6 +85,7 @@ meme_coins = [
     "SYNUSDT",
     "OCBOUSD",
     "OMUSD",
+    "FARTCOINUSD",
 ]
 
 

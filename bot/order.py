@@ -4,52 +4,36 @@ from bot.coins import get_price
 
 
 def place_order(client, symbol, side, quantity):
-    """Place a market order (buy/sell) with balance validation."""
-
+    """Place a market order (buy/sell) with balance validation and LOT_SIZE handling."""
     if not quantity or Decimal(quantity) <= 0:
-        print(
-            f"⚠️ Skipping {side} order for {symbol} (Invalid quantity: {quantity})")
+        print(f"⚠️ Skipping {side} order for {symbol} (Invalid quantity: {quantity})")
         return
 
-    base_asset = symbol.replace("USDT", "").rstrip(
-        "0123456789")  # Handle non-standard symbols
-    balance = client.get_asset_balance(asset=base_asset)
+    # Get trading rules (LOT_SIZE)
+    exchange_info = client.get_exchange_info()
+    symbol_info = next((s for s in exchange_info["symbols"] if s["symbol"] == symbol), None)
 
-    if not balance:
-        print(f"⚠️ No balance info for {symbol}. Skipping order.")
+    if not symbol_info:
+        print(f"⚠️ No trading info for {symbol}. Skipping order.")
         return
 
-    available_balance = Decimal(balance["free"])
+    lot_size_filter = next((f for f in symbol_info["filters"] if f["filterType"] == "LOT_SIZE"), None)
 
-    # Ensure sufficient balance for SELL orders
-    if side == "SELL" and available_balance < Decimal(quantity):
-        print(
-            f"❌ Insufficient balance for {symbol} ({available_balance} < {quantity}). Skipping.")
-        return
+    if lot_size_filter:
+        min_qty = Decimal(lot_size_filter["minQty"])  # Minimum tradable quantity
+        step_size = Decimal(lot_size_filter["stepSize"])  # Step size for rounding
 
-    # Fetch minNotional for final check
-    min_notional = get_min_notional(client, symbol)
-    price = Decimal(get_price(client, symbol))  # Get latest price
-    total_value = Decimal(quantity) * price  # Final notional check
+        # Adjust quantity to be a valid multiple of step size
+        adjusted_quantity = (Decimal(quantity) // step_size) * step_size
 
-    if total_value < min_notional:
-        print(
-            f"❌ {symbol} Order rejected ({total_value} < {min_notional}). Adjusting quantity...")
-        adjusted_quantity = (
-            min_notional / price).quantize(Decimal('1e-8'), rounding=ROUND_UP)
-
-        # If adjusted quantity is too large, skip
-        if adjusted_quantity > available_balance:
-            print(
-                f"❌ Adjusted quantity ({adjusted_quantity}) exceeds balance ({available_balance}). Skipping order.")
+        if adjusted_quantity < min_qty:
+            print(f"❌ {symbol} Order rejected (Adjusted quantity {adjusted_quantity} < minQty {min_qty}). Skipping.")
             return
 
-        quantity = adjusted_quantity  # Update quantity
+        quantity = adjusted_quantity  # Update with valid quantity
 
-    # Execute order
     try:
-        order = client.order_market(
-            symbol=symbol, side=side, quantity=str(quantity))
-        print(f"✅ {side.upper()} Order placed for {symbol}: {quantity} at {price}")
+        order = client.order_market(symbol=symbol, side=side, quantity=str(quantity))
+        print(f"✅ {side.upper()} Order placed for {symbol}: {quantity}")
     except Exception as e:
         print(f"❌ Error placing {side} order for {symbol}: {str(e)}")
