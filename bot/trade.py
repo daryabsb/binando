@@ -1,8 +1,9 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 from ta.momentum import ROCIndicator
 from _utils.const import LAST_TRADE, PRICE_CHANGE_THRESHOLD as threshold
 from _utils.helpers import get_min_notional
-from bot.coins import get_coin_balance
+from bot.coins import get_coin_balance, get_price
 from bot.coins import get_roc
 
 
@@ -46,9 +47,8 @@ def should_buy(client, symbol):
 
     price_change = (Decimal(current_price) -
                     Decimal(last_price)) / Decimal(last_price)
-   
+
     price_change_roc = get_roc(client, symbol)
-    
 
     if roc_meets_threshold(price_change_roc):
         print(
@@ -83,3 +83,39 @@ def should_sell(client, symbol):
         f"📈 SKIP-SELL: {symbol} | ROC: {price_change_roc:.2%} | Price: {current_price}")
 
     return False
+
+
+def has_recent_trade(client, symbol, min_time_gap=10, price_change_threshold=0.5):
+    """Check if a recent trade happened for this symbol based on time or price movement."""
+    try:
+        # Fetch last 5 trades for the symbol
+        trades = client.get_my_trades(symbol=symbol, limit=5)
+        if not trades:
+            return False  # No trade history, safe to proceed
+
+        last_trade = trades[-1]  # Get the most recent trade
+        last_trade_time = datetime.utcfromtimestamp(last_trade["time"] / 1000)
+        last_trade_price = Decimal(last_trade["price"])
+
+        # ✅ Condition 1: Time-based filter (no trades within X minutes)
+        time_since_last_trade = datetime.utcnow() - last_trade_time
+        if time_since_last_trade < timedelta(minutes=min_time_gap):
+            print(
+                f"⚠️ Skipping {symbol}: Last trade was {time_since_last_trade.seconds // 60} min ago (Min gap: {min_time_gap} min).")
+            return True
+
+        # ✅ Condition 2: Price-based filter (skip if price hasn’t moved ±X%)
+        current_price = Decimal(get_price(client, symbol))
+        price_change = abs(
+            ((current_price - last_trade_price) / last_trade_price) * 100)
+
+        if price_change < price_change_threshold:
+            print(
+                f"⚠️ Skipping {symbol}: Price change is only {price_change:.2f}% (Min required: {price_change_threshold}%).")
+            return True
+
+        return False  # ✅ Safe to trade
+
+    except Exception as e:
+        print(f"⚠️ Error checking trade history for {symbol}: {e}")
+        return False  # Assume safe to trade if an error occurs

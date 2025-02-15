@@ -7,10 +7,12 @@ def get_volume(client, symbol):
     ticker = client.get_ticker(symbol=symbol)
     return Decimal(ticker["quoteVolume"])  # Convert to Decimal for accuracy
 
+
 def get_algoalpha_trend(client, symbol):
     """Fetch trend strength score from AlgoAlpha indicators."""
     # Placeholder: Replace with actual AlgoAlpha API call
     return Decimal(random.uniform(0, 1))  # Simulated trend score (0-1)
+
 
 def get_volatility(client, symbol):
     """Calculate coin volatility based on price variations in the last 24h."""
@@ -20,6 +22,7 @@ def get_volatility(client, symbol):
     current_price = Decimal(ticker["lastPrice"])
 
     return (high_price - low_price) / current_price  # Volatility percentage
+
 
 def is_market_stable(client):
     from bot.coins import get_roc
@@ -38,6 +41,7 @@ def is_market_stable(client):
 
 active_trades = {}  # Store open trades
 
+
 def calculate_trade_levels(entry_price, trade_type, risk_ratio=1.5, risk_percentage=0.02):
     """
     Calculate stop-loss and take-profit levels based on entry price and trade type.
@@ -50,7 +54,8 @@ def calculate_trade_levels(entry_price, trade_type, risk_ratio=1.5, risk_percent
         - take_profit (Decimal)
     """
     entry_price = Decimal(entry_price)
-    risk_amount = entry_price * Decimal(risk_percentage)  # Define the risk per trade
+    # Define the risk per trade
+    risk_amount = entry_price * Decimal(risk_percentage)
 
     if trade_type.upper() == "BUY":  # Long position
         stop_loss = entry_price - risk_amount
@@ -78,9 +83,14 @@ def calculate_stop_loss_and_take_profit(entry_price):
 
     return stop_loss_price, take_profit_price
 
+
 def execute_trade(client, symbol, trade_type, quantity, entry_price):
     """Execute a trade with stop-loss and take-profit conditions."""
     from bot.order import place_order
+    from bot.trade import has_recent_trade
+
+    if has_recent_trade(client, symbol):
+        return  # Skip trade if conditions are met
 
     stop_loss, take_profit = calculate_trade_levels(entry_price, trade_type)
 
@@ -94,10 +104,12 @@ def execute_trade(client, symbol, trade_type, quantity, entry_price):
         # Track stop-loss & take-profit if order was successful
         track_trade(symbol, entry_price, stop_loss, take_profit)
 
+
 def track_trade(symbol, entry_price, stop_loss, take_profit):
     """Track open trades & dynamically update stop-loss."""
     active_trades[symbol] = {"entry": entry_price,
-                                "stop_loss": stop_loss, "take_profit": take_profit}
+                             "stop_loss": stop_loss, "take_profit": take_profit}
+
 
 def trailing_stop_loss(entry_price, current_price, last_stop_loss):
     """Adjust stop-loss dynamically as price rises to lock in profits."""
@@ -107,6 +119,7 @@ def trailing_stop_loss(entry_price, current_price, last_stop_loss):
         (Decimal("1") - (TRAILING_STOP_PERCENT / Decimal("100")))
 
     return max(new_stop_loss, last_stop_loss)  # Always move stop-loss up
+
 
 def monitor_trades(client):
     """Monitor active trades & adjust stop-loss dynamically."""
@@ -129,16 +142,3 @@ def monitor_trades(client):
             print(f"🎯 Selling {symbol} at {current_price} (Take-Profit Hit)")
             # place_order(client, symbol, SIDE_SELL, get_coin_balance(client, symbol))
             del active_trades[symbol]
-
-
-
-
-
-
-
-
-
-
-
-
-

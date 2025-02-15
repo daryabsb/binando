@@ -65,4 +65,4 @@ start_background_cache_update(get_client(testnet=True))
 while True:
     execute_strategy()
     print("⏳ Waiting 1 hour before checking again...")
-    time.sleep(3)
+    time.sleep(10)
