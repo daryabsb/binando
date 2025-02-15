@@ -31,6 +31,7 @@ def get_price(client, symbol):
     ticker = client.get_symbol_ticker(symbol=symbol)
     return float(ticker["price"])
 
+
 def calculate_trade_levels(df, risk_multiplier=1.5):
     """
     Generates Stop Loss (SL) and Take Profit (TP) based on ATR.
@@ -38,7 +39,8 @@ def calculate_trade_levels(df, risk_multiplier=1.5):
     - TP = 1.5x the risk (ATR) beyond entry.
     """
     df["stop_loss"] = df["close"] - df["atr"]  # SL for long positions
-    df["take_profit"] = df["close"] + (df["atr"] * risk_multiplier)  # 1.5x ATR for TP
+    df["take_profit"] = df["close"] + \
+        (df["atr"] * risk_multiplier)  # 1.5x ATR for TP
 
     # Reverse for short positions
     df["short_stop_loss"] = df["close"] + df["atr"]
@@ -61,17 +63,20 @@ def get_sorted_symbols(client):
     skipped_count = 0  # Track skipped coins
     for symbol in meme_coins:
         try:
-            current_price = float(get_price(client, symbol))  # Convert Decimal to float
+            # Convert Decimal to float
+            current_price = float(get_price(client, symbol))
             roc = float(get_roc(client, symbol))  # Convert Decimal to float
-            volume = float(get_volume(client, symbol))  # Convert Decimal to float
-            
+            # Convert Decimal to float
+            volume = float(get_volume(client, symbol))
+
             # ✅ Filter only bullish coins
             if not is_bullish_trend(client, symbol):
                 skipped_count += 1
                 print(f"⚠️ Skipping {symbol}: Not bullish.")
                 continue  # Skip if it's not consistently bullish
 
-            algoalpha_trend = float(get_algoalpha_trend(client, symbol))  # Convert Decimal to float
+            algoalpha_trend = float(get_algoalpha_trend(
+                client, symbol))  # Convert Decimal to float
 
             trending_coins.append({
                 "symbol": symbol,
@@ -84,7 +89,8 @@ def get_sorted_symbols(client):
             print(f"⚠️ Skipping {symbol}: {e}")  # Log the error and continue
 
     # ✅ Sort by highest volume & momentum
-    sorted_coins = sorted(trending_coins, key=lambda x: (x["volume"], abs(x["roc"]), x["algoalpha_trend"]), reverse=True)
+    sorted_coins = sorted(trending_coins, key=lambda x: (
+        x["volume"], abs(x["roc"]), x["algoalpha_trend"]), reverse=True)
 
     # ✅ Save sorted list to cache
     save_sorted_symbols(sorted_coins)
@@ -107,7 +113,7 @@ def get_balance(client: Client, symbol="USDT"):
 def get_usdt_balance(client):
     """Retrieve the available USDT balance."""
     balance = client.get_asset_balance(asset="USDT")
-    return 200  # float(balance["free"])
+    return 500  # float(balance["free"])
 
 
 def get_coin_balance(client, symbol):
