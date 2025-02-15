@@ -38,6 +38,34 @@ def is_market_stable(client):
 
 active_trades = {}  # Store open trades
 
+def calculate_trade_levels(entry_price, trade_type, risk_ratio=1.5, risk_percentage=0.02):
+    """
+    Calculate stop-loss and take-profit levels based on entry price and trade type.
+
+    - `risk_ratio`: Determines the reward-to-risk ratio (default is 1.5x risk).
+    - `risk_percentage`: Percentage of the entry price to use as the risk (default is 2%).
+
+    Returns:
+        - stop_loss (Decimal)
+        - take_profit (Decimal)
+    """
+    entry_price = Decimal(entry_price)
+    risk_amount = entry_price * Decimal(risk_percentage)  # Define the risk per trade
+
+    if trade_type.upper() == "BUY":  # Long position
+        stop_loss = entry_price - risk_amount
+        take_profit = entry_price + (risk_amount * Decimal(risk_ratio))
+
+    elif trade_type.upper() == "SELL":  # Short position
+        stop_loss = entry_price + risk_amount
+        take_profit = entry_price - (risk_amount * Decimal(risk_ratio))
+
+    else:
+        raise ValueError("Invalid trade_type. Expected 'BUY' or 'SELL'.")
+
+    return stop_loss.quantize(Decimal('1e-8')), take_profit.quantize(Decimal('1e-8'))
+
+
 def calculate_stop_loss_and_take_profit(entry_price):
     """Calculate stop-loss and take-profit prices based on risk management strategy."""
     STOP_LOSS_PERCENT = Decimal("2")  # 2% stop-loss
@@ -52,18 +80,19 @@ def calculate_stop_loss_and_take_profit(entry_price):
 
 def execute_trade(client, symbol, trade_type, quantity, entry_price):
     """Execute a trade with stop-loss and take-profit conditions."""
-    from order import place_order
-    
-    stop_loss, take_profit = calculate_stop_loss_and_take_profit(entry_price)
+    from bot.order import place_order
+
+    stop_loss, take_profit = calculate_trade_levels(entry_price, trade_type)
 
     print(f"🔹 Placing {trade_type} order for {symbol} | Quantity: {quantity}")
     print(f"🚨 Stop-loss: {stop_loss} | 🎯 Take-profit: {take_profit}")
 
     # Place market order
-    # order = place_order(client, symbol, trade_type, quantity)
+    order = place_order(client, symbol, trade_type, quantity)
 
-    # Track stop-loss & take-profit
-    track_trade(symbol, entry_price, stop_loss, take_profit)
+    if order:
+        # Track stop-loss & take-profit if order was successful
+        track_trade(symbol, entry_price, stop_loss, take_profit)
 
 def track_trade(symbol, entry_price, stop_loss, take_profit):
     """Track open trades & dynamically update stop-loss."""

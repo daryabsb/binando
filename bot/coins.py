@@ -31,6 +31,21 @@ def get_price(client, symbol):
     ticker = client.get_symbol_ticker(symbol=symbol)
     return float(ticker["price"])
 
+def calculate_trade_levels(df, risk_multiplier=1.5):
+    """
+    Generates Stop Loss (SL) and Take Profit (TP) based on ATR.
+    - SL = 1 ATR away from entry price.
+    - TP = 1.5x the risk (ATR) beyond entry.
+    """
+    df["stop_loss"] = df["close"] - df["atr"]  # SL for long positions
+    df["take_profit"] = df["close"] + (df["atr"] * risk_multiplier)  # 1.5x ATR for TP
+
+    # Reverse for short positions
+    df["short_stop_loss"] = df["close"] + df["atr"]
+    df["short_take_profit"] = df["close"] - (df["atr"] * risk_multiplier)
+
+    return df[["stop_loss", "take_profit", "short_stop_loss", "short_take_profit"]]
+
 
 def get_sorted_symbols(client):
     """Sort and filter symbols based on strong trend signals, with caching."""
