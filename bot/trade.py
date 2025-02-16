@@ -85,7 +85,7 @@ def should_sell(client, symbol):
     return False
 
 
-def has_recent_trade(client, symbol, min_time_gap=10, price_change_threshold=0.5):
+def has_recent_trade(client, symbol, min_time_gap=60, price_change_threshold=0.5):
     """Check if a recent trade happened for this symbol based on time or price movement."""
     try:
         # Fetch last 5 trades for the symbol
@@ -94,19 +94,21 @@ def has_recent_trade(client, symbol, min_time_gap=10, price_change_threshold=0.5
             return False  # No trade history, safe to proceed
 
         last_trade = trades[-1]  # Get the most recent trade
-        last_trade_time = datetime.fromtimestamp(
-            datetime.timezone.utc)(last_trade["time"] / 1000)
-        last_trade_price = Decimal(last_trade["price"])
+        last_trade_time = datetime.utcfromtimestamp(
+            last_trade["time"] / 1000)  # Convert from milliseconds
 
-        # ✅ Condition 1: Time-based filter (no trades within X minutes)
-        time_since_last_trade = datetime.now(
-            datetime.timezone.utc) - last_trade_time
-        if time_since_last_trade < timedelta(minutes=min_time_gap):
+        # ✅ Ensure correct time calculation
+        time_since_last_trade = abs(
+            # Convert to minutes
+            datetime.utcnow() - last_trade_time).total_seconds() / 60
+        # ✅ Time filter (skip if a trade happened too recently)
+        if time_since_last_trade < min_time_gap:
             print(
-                f"⚠️ Skipping {symbol}: Last trade was {time_since_last_trade.seconds // 60} min ago (Min gap: {min_time_gap} min).")
+                f"⚠️ Skipping {symbol}: Last trade was {time_since_last_trade:.2f} min ago (Min gap: {min_time_gap} min).")
             return True
 
-        # ✅ Condition 2: Price-based filter (skip if price hasn’t moved ±X%)
+        # ✅ Price filter (skip if price change is too small)
+        last_trade_price = Decimal(last_trade["price"])
         current_price = Decimal(get_price(client, symbol))
         price_change = abs(
             ((current_price - last_trade_price) / last_trade_price) * 100)

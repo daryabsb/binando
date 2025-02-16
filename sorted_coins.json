@@ -1,1 +1,61 @@
-{"timestamp": 1739645707.8978074, "sorted_coins": [{"symbol": "BNXUSDT", "price": 1.0108, "roc": -0.06564956079519182, "volume": 132405257.11587, "algoalpha_trend": 0.2632572931649645}, {"symbol": "CAKEUSDT", "price": 2.659, "roc": 0.04934859849980261, "volume": 37747308.42608, "algoalpha_trend": 0.4715642410293348}, {"symbol": "JTOUSDT", "price": 3.209, "roc": 0.003753518923991245, "volume": 27092982.9246, "algoalpha_trend": 0.7292095749616857}, {"symbol": "TFUELUSDT", "price": 0.04988, "roc": -0.01325420375865474, "volume": 8065442.73318, "algoalpha_trend": 0.13413177364924445}, {"symbol": "SCRUSDT", "price": 0.645, "roc": -0.04726735598227478, "volume": 5952535.5362, "algoalpha_trend": 0.5145871193304087}, {"symbol": "SHIBUSDT", "price": 2.619e-05, "roc": 0.5570749108204518, "volume": 579853.34737242, "algoalpha_trend": 0.25910153565922267}]}
+{
+    "timestamp": 1739687440.0052338,
+    "sorted_coins": [
+        {
+            "symbol": "BNXUSDT",
+            "price": 1.0093,
+            "roc": 0.07172457762193167,
+            "volume": 111811636.18596,
+            "algoalpha_trend": 0.7528335219402248
+        },
+        {
+            "symbol": "JUPUSDT",
+            "price": 0.9471,
+            "roc": 0.01153476449855819,
+            "volume": 63976017.30382,
+            "algoalpha_trend": 0.37457666912451126
+        },
+        {
+            "symbol": "COOKIEUSDT",
+            "price": 0.2039,
+            "roc": 0.03292806484295849,
+            "volume": 17445330.34849,
+            "algoalpha_trend": 0.07676595676697329
+        },
+        {
+            "symbol": "1MBABYDOGEUSDT",
+            "price": 0.0017085,
+            "roc": 0.007726790138020555,
+            "volume": 11257759.9209027,
+            "algoalpha_trend": 0.0567139438893014
+        },
+        {
+            "symbol": "TRXUSDT",
+            "price": 0.2394,
+            "roc": 0.027467811158798233,
+            "volume": 10273695.01061,
+            "algoalpha_trend": 0.7674192812317808
+        },
+        {
+            "symbol": "TRXUSDT",
+            "price": 0.2394,
+            "roc": 0.027467811158798233,
+            "volume": 10273695.01061,
+            "algoalpha_trend": 0.18761094328886785
+        },
+        {
+            "symbol": "SCRUSDT",
+            "price": 0.644,
+            "roc": -0.018292682926829285,
+            "volume": 4958159.9303,
+            "algoalpha_trend": 0.08205104428241328
+        },
+        {
+            "symbol": "JSTUSDT",
+            "price": 0.0337,
+            "roc": 0.013533834586466134,
+            "volume": 4850867.604853,
+            "algoalpha_trend": 0.9732336235473364
+        }
+    ]
+}

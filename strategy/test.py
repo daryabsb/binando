@@ -30,6 +30,9 @@ def execute_strategy():
     # ✅ Get the best coins to trade
     sorted_coins = load_cached_sorted_symbols()
     # sorted_coins = get_sorted_symbols(client)
+    if not sorted_coins:
+        print("⚠️ No coins found. Skipping trades...")
+        return
 
     for coin in sorted_coins:
         symbol = coin["symbol"]
