@@ -85,7 +85,7 @@ def should_sell(client, symbol):
     return False
 
 
-def has_recent_trade(client, symbol, min_time_gap=60, price_change_threshold=0.5):
+def has_recent_trade(client, symbol, min_time_gap=180, price_change_threshold=0.5):
     """Check if a recent trade happened for this symbol based on time or price movement."""
     try:
         # Fetch last 5 trades for the symbol
