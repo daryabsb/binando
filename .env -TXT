@@ -1,8 +1,0 @@
-
-
-
-SECRET_KEY = 'django-insecure-$aiujv0b+)%r#)ga_-oek+drl4=fxq(un%!$l2=%&*w#s+%^da'
-
-DJANGO_DEBUG=1
-ALLOWED_HOST=*
-BASE_ENDPOINT=http://127.0.0.1:8000

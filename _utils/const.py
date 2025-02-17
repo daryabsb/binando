@@ -28,8 +28,8 @@ SIDE_SELL = "SELL"
 
 # List of meme coin symbols to trade
 meme_coins = [
+    "BURGERUSDT",
     "1MBABYDOGEUSDT",
-    "TSTUSDT",
     "DOGEUSDT",
     "PEPEUSDT",
     "TFUELUSDT",
