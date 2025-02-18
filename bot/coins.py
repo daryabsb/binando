@@ -70,10 +70,10 @@ def get_sorted_symbols(client):
             volume = float(get_volume(client, symbol))
 
             # ✅ Filter only bullish coins
-            if not is_bullish_trend(client, symbol):
-                skipped_count += 1
-                print(f"⚠️ Skipping {symbol}: Not bullish.")
-                continue  # Skip if it's not consistently bullish
+            # if not is_bullish_trend(client, symbol):
+            #     skipped_count += 1
+            #     print(f"⚠️ Skipping {symbol}: Not bullish.")
+            #     continue  # Skip if it's not consistently bullish
 
             algoalpha_trend = float(get_algoalpha_trend(
                 client, symbol))  # Convert Decimal to float
