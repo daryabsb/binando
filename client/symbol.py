@@ -14,6 +14,7 @@ class Symbol:
         # self.info = self.get_info()
 
     def get_info(self):
+        print(self.symbol)
         return self.symbol #.symbols_info.get(self.symbol, {})
 
     def get_price(self):
@@ -52,8 +53,10 @@ class Symbol:
 
     def get_step_size_and_min_qty(self):
         """Retrieve the step size and minimum quantity for a given symbol."""
-        exchange_info = self.client.get_symbol_info(self.symbol)
 
+        exchange_info = self.client.get_symbol_info(self.symbol['symbol'])
+
+        print('What is this? ', exchange_info['orderTypes']['filters'])
         step_size = min_qty = None
 
         for f in exchange_info["filters"]:
@@ -142,12 +145,11 @@ class Symbol:
 
     def calculate_quantity(self, amount, trade_type):
         """Calculate correct quantity based on Binance precision rules and risk management."""
-        from _utils.helpers import get_min_notional, get_step_size_and_min_qty
         from bot.coins import get_sma
 
-        price = Decimal(self.get_price())
-        step_size, min_qty = get_step_size_and_min_qty()
-        min_notional = get_min_notional()
+        price = self.get_price() 
+        step_size, min_qty = self.get_step_size_and_min_qty()
+        min_notional = self.get_min_notional()
 
         sma = Decimal(self.get_sma(period=20) or price)  # Avoid None
 
@@ -189,3 +191,35 @@ class Symbol:
         return str(quantity)  # Convert to string for Binance API
 
 
+ingo = {'symbol': 'XRPUSDT', 'status': 'TRADING', 'baseAsset': 'XRP', 
+        'baseAssetPrecision': 8, 'quoteAsset': 'USDT', 'quotePrecision': 8, 
+        'quoteAssetPrecision': 8, 'baseCommissionPrecision': 8, 
+        'quoteCommissionPrecision': 8, 
+        'orderTypes': [
+            'LIMIT', 'LIMIT_MAKER', 'MARKET', 'STOP_LOSS', 'STOP_LOSS_LIMIT', 
+            'TAKE_PROFIT', 'TAKE_PROFIT_LIMIT'], 'icebergAllowed': True, 
+            'ocoAllowed': True, 'otoAllowed': True, 'quoteOrderQtyMarketAllowed': True, 
+            'allowTrailingStop': True, 'cancelReplaceAllowed': True, 
+            'isSpotTradingAllowed': True, 'isMarginTradingAllowed': False, 
+            'filters': [
+                {
+                    'filterType': 'PRICE_FILTER', 'minPrice': '0.00010000',
+                    'maxPrice': '10000.00000000', 'tickSize': '0.00010000'
+                }, 
+                {
+                    'filterType': 'LOT_SIZE', 'minQty': '1.00000000', 
+                    'maxQty': '9222449.00000000', 'stepSize': '1.00000000'
+                }, 
+                {
+                    'filterType': 'ICEBERG_PARTS', 'limit': 10
+                }, 
+                {
+                    'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.00000000', 
+                    'maxQty': '2578738.88284518', 'stepSize': '0.00000000'}, 
+            ], 
+        'permissions': [], 
+        'permissionSets': [['SPOT']], 
+        'defaultSelfTradePreventionMode': 'EXPIRE_MAKER', 
+        'allowedSelfTradePreventionModes': 
+            ['NONE', 'EXPIRE_TAKER', 'EXPIRE_MAKER', 'EXPIRE_BOTH']
+    } 

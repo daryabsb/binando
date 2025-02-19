@@ -35,40 +35,41 @@ def execute_strategy():
         print("⚠️ No coins found. Skipping trades...")
         return
 
-    for coin in sorted_coins:
-        symbol: Symbol = Symbol(client, coin)
+    for sym in sorted_coins:
+        coin: Symbol = Symbol(client, sym)
 
-        usdt_balance = symbol.get_balance("USDT")
+        # if False:
 
-        print(f'Check Class symbol: {symbol.price}')
+        usdt_balance = coin.get_balance("USDT")
 
-        # symbol = coin["symbol"]
-        price = coin["price"]
-        roc = coin["roc"]
+        symbol = coin.symbol["symbol"]
+        price = coin.symbol['price']
+        roc = coin.symbol['roc']
 
-        # print(f"🔹 {symbol} | ROC: {roc:.2%} | Price: {price}")
+        print(f"🔹 {symbol} | ROC: {roc:.2%} | Price: {price}")
 
+        
         if should_buy(client, symbol):
-            quantity = calculate_quantity(client, symbol, usdt_balance, "BUY")
+            quantity = coin.calculate_quantity(usdt_balance, "BUY")
             if usdt_balance < 5:
                 print("⚠️ Not enough USDT to trade. Skipping...")
                 return
 
             if quantity:
-                pass
-                # print(
-                #     f"✅ Buying {symbol} | ROC: {roc:.2%} | Price: {price} | Trend: 🔥 Strong Uptrend")
-                # execute_trade(client, symbol, SIDE_BUY, quantity, price)
+                
+                print(
+                    f"✅ Buying {symbol} | ROC: {roc:.2%} | Price: {price} | Trend: 🔥 Strong Uptrend")
+                execute_trade(client, symbol, SIDE_BUY, quantity, price)
                 # place_order(client, symbol, SIDE_BUY, quantity)
 
         elif should_sell(client, symbol):
 
-            quantity = calculate_quantity(client, symbol, usdt_balance, "SELL")
+            quantity = coin.calculate_quantity(usdt_balance, "SELL")
             if quantity:
-                pass
-                # print(
-                #     f"✅ Selling {symbol} | ROC: {roc:.2%} | Price: {price} | Trend: 🔻 Strong Downtrend")
-                # execute_trade(client, symbol, SIDE_SELL, quantity, price)
+                
+                print(
+                    f"✅ Selling {symbol} | ROC: {roc:.2%} | Price: {price} | Trend: 🔻 Strong Downtrend")
+                execute_trade(client, symbol, SIDE_SELL, quantity, price)
                 # place_order(client, symbol, SIDE_SELL, quantity)
 
 
