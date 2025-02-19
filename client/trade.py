@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
 from client.symbol import Symbol
-from client import Client
 from _utils.const import LAST_TRADE, PRICE_CHANGE_THRESHOLD as threshold
 
 class Trade:
     """Handles trade execution and market analysis."""
 
-    def __init__(self, client:Client, symbol:Symbol):
+    def __init__(self, client, symbol:Symbol):
         self.client = client
         self.symbol = Symbol(client, symbol)
 

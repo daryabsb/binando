@@ -1,11 +1,30 @@
 import pandas as pd
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
 from binance.client import Client
-
+import pandas_ta as ta
 from bot.market import get_algoalpha_trend, get_volume
 from _utils.const import meme_coins
 from ta.momentum import ROCIndicator
 
+
+
+def get_sma(client, symbol, period=20):
+    """Fetch historical prices and calculate SMA."""
+    try:
+        klines = client.get_klines(symbol=symbol, interval="15m", limit=period)  # 15-minute candles
+        closes = [float(k[4]) for k in klines]  # Closing prices
+
+        if len(closes) < period:
+            print(f"⚠️ Not enough data for SMA {period}.")
+            return None
+
+        df = pd.DataFrame(closes, columns=["close"])
+        df["sma"] = ta.sma(df["close"], length=period)
+
+        return df["sma"].iloc[-1]  # Latest SMA value
+    except Exception as e:
+        print(f"⚠️ Error calculating SMA for {symbol}: {e}")
+        return None
 
 def get_roc(client, symbol, period=24):
     """Fetch historical prices and calculate the Rate of Change (ROC) indicator."""
@@ -139,10 +158,13 @@ def get_previous_hour_price(client, symbol, interval="1h"):
 def calculate_quantity(client, symbol, amount, trade_type):
     """Calculate correct quantity based on Binance precision rules and risk management."""
     from _utils.helpers import get_min_notional, get_step_size_and_min_qty
+    from bot.coins import get_sma
 
     price = Decimal(get_price(client, symbol))
     step_size, min_qty = get_step_size_and_min_qty(client, symbol)
     min_notional = get_min_notional(client, symbol)
+
+    sma = Decimal(get_sma(client, symbol, period=20) or price)  # Avoid None
 
     # ✅ Ensure valid step size & min qty
     if not step_size or not min_qty:
@@ -158,11 +180,12 @@ def calculate_quantity(client, symbol, amount, trade_type):
 
     # ✅ Buy: Allocate a portion of available USDT
     if trade_type == "BUY":
-        usdt_balance = Decimal(get_usdt_balance(client))
+        # usdt_balance = Decimal(get_usdt_balance(client))
+        usdt_balance = Decimal("10.0") if price < sma else Decimal("5.0")
         trade_usdt = (usdt_balance * USDT_TRADE_PERCENTAGE) * \
             PER_TRADE_PERCENTAGE
         quantity = (trade_usdt / price).quantize(step_size,
-                                                 rounding=ROUND_UP)
+                                                 rounding=ROUND_DOWN)
 
     # ✅ Sell: Trade a portion of the coin balance worth `trade_usdt`
     else:  # trade_type == "SELL"

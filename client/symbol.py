@@ -1,22 +1,24 @@
 import pandas as pd
-from client import Client
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
 from ta.momentum import ROCIndicator
+import pandas_ta
 # client = get_client(testnet=True)
 
 
 class Symbol:
     """Represents a trading pair and provides analysis utilities."""
 
-    def __init__(self, client:Client, symbol="USDT"):
+    def __init__(self, client, symbol="USDT"):
         self.client = client
         self.symbol = symbol
-        self.info = self.client.symbols_info.get(symbol, {})
+        # self.info = self.get_info()
+
+    def get_info(self):
+        return self.symbol #.symbols_info.get(self.symbol, {})
 
     def get_price(self):
         """Fetches latest price for the symbol."""
         return self.client.get_price(self.symbol)
-
 
     def get_min_notional(self):
         """Fetch the minimum notional value required for a trade."""
@@ -34,17 +36,19 @@ class Symbol:
         """Fetches minimum lot size for an order."""
         return Decimal(next((f["stepSize"] for f in self.info["filters"] if f["filterType"] == "LOT_SIZE"), "0"))
 
-    def get_balance(self):
+    def get_balance(self, symbol=None):
         """Retrieve the available USDT balance."""
+        if not symbol:
+            symbol = self.symbol
+
         if not self.client:
             return 0.0
-        if self.symbol == "USDT":
+        if symbol == "USDT":
             balance = self.client.get_asset_balance(asset="USDT")
         else:
-            asset = self.symbol.replace("USDT", "")  # Extract asset name
+            asset = symbol.replace("USDT", "")  # Extract asset name
             balance = self.client.get_asset_balance(asset=asset)
         return float(balance["free"])
-
 
     def get_step_size_and_min_qty(self):
         """Retrieve the step size and minimum quantity for a given symbol."""
@@ -59,6 +63,23 @@ class Symbol:
 
         return step_size, min_qty
 
+    def get_sma(self, period=20):
+        """Fetch historical prices and calculate SMA."""
+        try:
+            klines = self.client.get_klines(symbol=self.symbol, interval="15m", limit=period)  # 15-minute candles
+            closes = [float(k[4]) for k in klines]  # Closing prices
+
+            if len(closes) < period:
+                print(f"⚠️ Not enough data for SMA {period}.")
+                return None
+
+            df = pd.DataFrame(closes, columns=["close"])
+            df["sma"] = pandas_ta.sma(df["close"], length=period)
+
+            return df["sma"].iloc[-1]  # Latest SMA value
+        except Exception as e:
+            print(f"⚠️ Error calculating SMA for {self.symbol}: {e}")
+            return None
 
     def get_roc(self, period=24):
         """Fetch historical prices and calculate the Rate of Change (ROC) indicator."""
@@ -119,12 +140,16 @@ class Symbol:
 
         return bullish_trend
 
-    def calculate_quantity(self, trade_type):
+    def calculate_quantity(self, amount, trade_type):
         """Calculate correct quantity based on Binance precision rules and risk management."""
+        from _utils.helpers import get_min_notional, get_step_size_and_min_qty
+        from bot.coins import get_sma
 
-        price = Decimal(self.get_price(self.client, self.symbol))
-        step_size, min_qty = self.get_step_size_and_min_qty(self.client, self.symbol)
-        min_notional = self.get_min_notional(self.client, self.symbol)
+        price = Decimal(self.get_price())
+        step_size, min_qty = get_step_size_and_min_qty()
+        min_notional = get_min_notional()
+
+        sma = Decimal(self.get_sma(period=20) or price)  # Avoid None
 
         # ✅ Ensure valid step size & min qty
         if not step_size or not min_qty:
@@ -140,15 +165,16 @@ class Symbol:
 
         # ✅ Buy: Allocate a portion of available USDT
         if trade_type == "BUY":
-            usdt_balance = Decimal(self.get_balance(self.client))
+            # usdt_balance = Decimal(get_usdt_balance(client))
+            usdt_balance = Decimal("10.0") if price < sma else Decimal("5.0")
             trade_usdt = (usdt_balance * USDT_TRADE_PERCENTAGE) * \
                 PER_TRADE_PERCENTAGE
             quantity = (trade_usdt / price).quantize(step_size,
-                                                    rounding=ROUND_UP)
+                                                    rounding=ROUND_DOWN)
 
         # ✅ Sell: Trade a portion of the coin balance worth `trade_usdt`
         else:  # trade_type == "SELL"
-            available_balance = Decimal(self.get_balance(self.client, self.symbol) or 0)
+            available_balance = Decimal(self.get_balance() or 0)
             trade_usdt = (available_balance * price *
                         USDT_TRADE_PERCENTAGE) * PER_TRADE_PERCENTAGE
             quantity = (trade_usdt / price).quantize(step_size,
