@@ -6,27 +6,27 @@ from _utils.helpers import get_min_notional
 from bot.coins import get_coin_balance, get_price
 from bot.coins import get_roc
 
+
 def get_current_price(client, symbol):
     """Fetch the latest price for a symbol from Binance API and return as float."""
     try:
         ticker = client.get_ticker(symbol=symbol)
         raw_price = ticker["lastPrice"]  # Get price as string
-        
+
         # Convert from scientific notation to standard float
         price = float(raw_price)
-        
+
         # Ensure the price is valid (greater than zero)
         if price <= 0:
-            print(f"⚠️ Received invalid price for {symbol}: {raw_price}. Possible API issue.")
+            print(
+                f"⚠️ Received invalid price for {symbol}: {raw_price}. Possible API issue.")
             return 1e-8  # Smallest nonzero price to avoid division errors
-        
+
         print(f'🔹 {symbol} Price: {price}')
         return price  # Return float instead of Decimal
     except Exception as e:
         print(f"⚠️ Error fetching current price for {symbol}: {e}")
         return 1e-8  # Return small valid number instead of None
-
-
 
 
 def is_valid_trade(client, symbol, price, quantity):
@@ -53,6 +53,7 @@ def should_buy(client, symbol):
     """Check if we should place a BUY trade based on ROC."""
     from bot.coins import get_sma
     current_price = get_current_price(client, symbol)
+
     sma = get_sma(client, symbol, period=20)
 
     if sma is None:
@@ -60,25 +61,25 @@ def should_buy(client, symbol):
 
     # Default to current if not tracked
     last_price = LAST_TRADE.get(symbol, None)
+
     if last_price is None or last_price == Decimal("0.0"):
         last_price = current_price  # Initialize tracking to avoid division errors
-    print(f'🔹 check {symbol} price: {current_price} vs {last_price}')
-    price_change = (Decimal(current_price) -
-                    Decimal(last_price)) / Decimal(last_price)
+    else:
+        price_change = (Decimal(current_price) -
+                        Decimal(last_price)) / Decimal(last_price)
+        print('Price changed since last trde: ', price_change)
 
-    price_change_roc = get_roc(client, symbol)
+    # price_change_roc = get_roc(client, symbol)
 
-    # if roc_meets_threshold(price_change_roc):
-    #     print(
-    #         f"✅ Buying {symbol} based on ROC drop of {price_change_roc:.2%}.")
-    #     LAST_TRADE[symbol] = current_price
-    #     return True
-    if current_price < sma * 0.995:  # Buy if price is 0.5% below SMA
-        print(f"📈 BUY SIGNAL for {symbol} at {current_price} (below SMA {sma})")
+    print(f'🔹 check {symbol} sma: {current_price} vs {sma}')
+
+    if current_price < sma:  # * 0.995:  # Buy if price is 0.5% below SMA
+        print(
+            f"📈 BUY SIGNAL for {symbol} at {current_price} (below SMA {sma})")
         return True
 
     print(
-        f"📈 SKIP-BUY: {symbol} | ROC: {price_change_roc:.2%} | Price: {current_price}")
+        f"📈 SKIP-BUY: {symbol} | SMA: {sma:.2%} | Price: {current_price}")
 
     return False
 
@@ -99,6 +100,7 @@ def should_sell(client, symbol):
 
     current_price = get_current_price(client, symbol)
     last_price = LAST_TRADE.get(symbol, current_price)
+
     price_change = (current_price - last_price) / last_price
 
     price_change_roc = get_roc(client, symbol)
@@ -108,8 +110,9 @@ def should_sell(client, symbol):
     #     LAST_TRADE[symbol] = current_price
     #     return True
 
-    if current_price > sma * 1.005:  # Sell if price is 0.5% above SMA
-        print(f"📉 SELL SIGNAL for {symbol} at {current_price} (above SMA {sma})")
+    if current_price > sma:  # * 1.005:  # Sell if price is 0.5% above SMA
+        print(
+            f"📉 SELL SIGNAL for {symbol} at {current_price} (above SMA {sma})")
         return True
     print(
         f"📈 SKIP-SELL: {symbol} | ROC: {price_change_roc:.2%} | Price: {current_price}")
@@ -117,7 +120,7 @@ def should_sell(client, symbol):
     return False
 
 
-def has_recent_trade(client, symbol, min_time_gap=180, price_change_threshold=0.5):
+def has_recent_trade(client, symbol, min_time_gap=5, price_change_threshold=0.5):
     """Check if a recent trade happened for this symbol based on time or price movement."""
     try:
         # Fetch last 5 trades for the symbol
