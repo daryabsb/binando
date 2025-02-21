@@ -56,20 +56,21 @@ def get_step_size_and_min_qty(client, symbol):
         if f["filterType"] == "LOT_SIZE":
             step_size = Decimal(f["stepSize"])
             min_qty = Decimal(f["minQty"])
-
     return step_size, min_qty
 
 
 def is_bullish_trend(client, symbol, pullback=False):
     """Check if a coin is in a strong uptrend or pullback using Zero Lag Trend Signals."""
-    timeframes = ["5m", "15m", "1h", "4h", "1d"] if not pullback else ["15m", "1h", "4h", "1d"]
-    
-    current_price = Decimal(get_price(client, symbol))  # Assume get_price returns a string or float
-    
+    timeframes = ["5m", "15m", "1h", "4h",
+                  "1d"] if not pullback else ["15m", "1h", "4h", "1d"]
+
+    # Assume get_price returns a string or float
+    current_price = Decimal(get_price(client, symbol))
+
     trends = []
     for tf in timeframes:
         zlma, atr, volatil = get_zlma(client, symbol, tf)
-        
+
         if zlma is not None and volatil is not None:
             if current_price > zlma + volatil:
                 trends.append(True)
@@ -80,15 +81,16 @@ def is_bullish_trend(client, symbol, pullback=False):
         else:
             print(f"Invalid ZLMA or Volatility for {symbol}")
             trends.append(None)
-    
+
     # Return True if all trends are bullish, False if all are bearish, else None
     if all(trend is True for trend in trends):
         return True
     elif all(trend is False for trend in trends):
         return False
     else:
-        
+
         return None  # Mixed or insufficient data
+
 
 def get_klines_data(client, symbol, interval, limit):
     klines = client.get_klines(symbol=symbol, interval=interval, limit=limit)
@@ -97,14 +99,17 @@ def get_klines_data(client, symbol, interval, limit):
             # Example for close price, but you might want to check all relevant fields
             close_price = Decimal(kline[4])
         except ValueError:
-            print(f"NaN or invalid value detected at index {i} for {symbol} on {interval}")
+            print(
+                f"NaN or invalid value detected at index {i} for {symbol} on {interval}")
     return klines
 
 # Use this function to fetch data
+
+
 def get_zlma(client, symbol, interval, length=70, mult=Decimal("1.7")):
     klines = get_klines_data(client, symbol, interval, length * 4)
     # klines = client.get_klines(symbol=symbol, interval=interval, limit=length * 4)  # Increased limit for lookback
-    
+
     # Extract OHLCV data
     src = [Decimal(k[4]) for k in klines]  # Close price for ZLMA calculation
     highs = [Decimal(k[2]) for k in klines]
@@ -114,11 +119,11 @@ def get_zlma(client, symbol, interval, length=70, mult=Decimal("1.7")):
     # ATR Calculation
     atr_values = []
     for i in range(1, len(closes)):
-        tr = max(highs[i] - lows[i], 
-                abs(highs[i] - closes[i - 1]), 
-                abs(lows[i] - closes[i - 1]))
+        tr = max(highs[i] - lows[i],
+                 abs(highs[i] - closes[i - 1]),
+                 abs(lows[i] - closes[i - 1]))
         atr_values.append(tr)
-    
+
     # Use the last 'length' periods for ATR, ensure enough data
     if len(atr_values) >= length:
         atr = sum(atr_values[-length:]) / Decimal(length)
@@ -134,7 +139,8 @@ def get_zlma(client, symbol, interval, length=70, mult=Decimal("1.7")):
 
     # ZLMA Calculation
     min_length = 20  # or whatever minimum you decide
-    length = min(max(len(src) // 4, min_length), 70)  # Adjust length based on data available
+    # Adjust length based on data available
+    length = min(max(len(src) // 4, min_length), 70)
     lag = math.floor((length - 1) / 2)
 
     print(f'src:{len(src)} || lag: {lag}')
@@ -144,11 +150,12 @@ def get_zlma(client, symbol, interval, length=70, mult=Decimal("1.7")):
         for i in range(lag, len(src)):
             diff = src[i] + (src[i] - src[i - lag])  # Zero-lag adjustment
             zlma_values.append(diff)
-        
+
         if len(zlma_values) >= length:
             zlma = sum(zlma_values[-length:]) / Decimal(length)
         else:
-            zlma = sum(zlma_values) / Decimal(len(zlma_values)) if zlma_values else Decimal("0")
+            zlma = sum(zlma_values) / Decimal(len(zlma_values)
+                                              ) if zlma_values else Decimal("0")
     else:
         zlma = Decimal("0")
 

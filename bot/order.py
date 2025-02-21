@@ -27,14 +27,16 @@ def place_order(client, symbol, side, quantity):
 
     price = Decimal(get_price(client, symbol))  # Get latest market price
     total_value = Decimal(quantity) * price  # Calculate trade value
-    print(f'price: {price} | total_value: {total_value}')
+    # print(f'price: {price} | total_value: {total_value}')
     # ✅ Ensure quantity meets LOT_SIZE requirements
     if lot_size_filter:
         min_qty = Decimal(lot_size_filter["minQty"])
         step_size = Decimal(lot_size_filter["stepSize"])
 
-        # Adjust quantity to a valid multiple of step_size
+    #     # Adjust quantity to a valid multiple of step_size
         adjusted_quantity = (Decimal(quantity) // step_size) * step_size
+        print(
+            f"❌ {symbol} adjusted_quantity ({adjusted_quantity}) | min_qty: ({min_qty})")
 
         if adjusted_quantity < min_qty:
             print(
@@ -45,34 +47,37 @@ def place_order(client, symbol, side, quantity):
 
     # ✅ Ensure total value meets minNotional
     # if notional_filter:
-    min_notional = Decimal(get_min_notional(client, symbol))
+    # min_notional = Decimal(get_min_notional(client, symbol))
 
-    if total_value < min_notional:
-        print(
-            f"❌ {symbol} Order rejected (Total value {total_value} < minNotional {min_notional}). Adjusting quantity...")
+    # if total_value < min_notional:
+    #     print(
+    #         f"❌ {symbol} Order rejected (Total value {total_value} < minNotional {min_notional}). Adjusting quantity...")
 
-        # Calculate the minimum required quantity
-        adjusted_quantity = (
-            min_notional / price).quantize(step_size, rounding=ROUND_UP)
+    #     # Calculate the minimum required quantity
+    #     adjusted_quantity = (
+    #         min_notional / price).quantize(step_size, rounding=ROUND_UP)
 
-        # Recheck adjusted quantity
-        adjusted_total_value = adjusted_quantity * price
+    #     # Recheck adjusted quantity
+    #     adjusted_total_value = adjusted_quantity * price
 
-        print(
-            f"🔹 Adjusted Quantity: {adjusted_quantity} | Adjusted Total Value: {adjusted_total_value}")
+    #     print(
+    #         f"🔹 Adjusted Quantity: {adjusted_quantity} | Adjusted Total Value: {adjusted_total_value}")
 
-        if adjusted_quantity < min_qty:
-            print(
-                f"❌ Adjusted quantity ({adjusted_quantity}) is below minQty ({min_qty}). Skipping order.")
-            return
+    #     if adjusted_quantity < min_qty:
+    #         print(
+    #             f"❌ Adjusted quantity ({adjusted_quantity}) is below minQty ({min_qty}). Skipping order.")
+    #         return
 
-        quantity = adjusted_quantity  # Update quantity
+    #     quantity = adjusted_quantity  # Update quantity
 
-    print(
-        f"✅ Final Order Details: {side.upper()} {symbol} | Quantity: {quantity} | Price: {price} | Total: {quantity * price}")
+    # print(
+    #     f"✅ Final Order Details: {side.upper()} {symbol} | Quantity: {quantity} | Price: {price} | Total: {quantity * price}")
 
     # 🔹 Try executing the order
     try:
+
+        print(
+            f'🔹 CHECK ORDER MENU: SYMBOL: {symbol} | SIDE: {side} | quantity: {str(quantity)}')
         order = client.order_market(
             symbol=symbol, side=side, quantity=str(quantity))
         print(f"✅ {side.upper()} Order placed for {symbol}: {quantity}")

@@ -1,9 +1,9 @@
 import time
-from client import get_client
+from client.client import get_client
 from binance.enums import *
 from bot.market import is_market_stable, execute_trade
 from server import start_background_cache_update
-
+import pandas as pd
 
 from bot.coins import get_sorted_symbols, get_usdt_balance, calculate_quantity
 
@@ -14,10 +14,15 @@ from bot.order import place_order
 def execute_strategy():
     """Enhanced trading strategy with risk management & fine-tuned filtering."""
     from _utils.cache import load_cached_sorted_symbols
+    from _utils.helpers import get_min_notional
+    from bot.coins import get_sma
 
     print("⏳ Trading bot started...")
-
-    client = get_client(testnet=True)
+    try:
+        client = get_client(testnet=True)
+    except ConnectionError as e:
+        print(f'❌ Connection is unstable: {e}')
+        return
 
     # ✅ Check if market is stable
     if not is_market_stable(client):
@@ -39,13 +44,11 @@ def execute_strategy():
         price = coin["price"]
         roc = coin["roc"]
 
-        print(f"🔹 {symbol} | ROC: {roc:.2%} | Price: {price}")
+        # print(f"🔹 {symbol} | ROC: {roc:.2%} | Price: {price}")
 
-        if should_buy(client, symbol):
+        #
+        if should_buy(client, symbol) and usdt_balance >= get_min_notional(client, symbol):
             quantity = calculate_quantity(client, symbol, usdt_balance, "BUY")
-            if usdt_balance < 5:
-                print("⚠️ Not enough USDT to trade. Skipping...")
-                return
 
             if quantity:
                 print(

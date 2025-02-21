@@ -5,7 +5,7 @@ from BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
 
 class Client(BinanceClient):
     """Handles Binance API requests with automatic time synchronization and exchange info loading."""
-    
+
     def __init__(self, api_key, api_secret, testnet=True):
         super().__init__(api_key, api_secret, tld='com', testnet=testnet)
 
@@ -29,7 +29,8 @@ class Client(BinanceClient):
         """Loads exchange filters for all symbols to validate orders."""
         try:
             self.exchange_info = self.get_exchange_info()
-            self.symbols_info = {s["symbol"]: s for s in self.exchange_info["symbols"]}
+            self.symbols_info = {s["symbol"]
+                : s for s in self.exchange_info["symbols"]}
         except Exception as e:
             print(f"⚠️ Error loading exchange info: {e}")
             self.symbols_info = {}
