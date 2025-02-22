@@ -1,9 +1,23 @@
-from decimal import Decimal, ROUND_UP
+from decimal import Decimal, ROUND_UP, ROUND_DOWN
 from _utils.helpers import get_min_notional
 from bot.coins import get_price
 
-
 def place_order(client, symbol, side, quantity):
+    quantity = Decimal(quantity)
+    # step_size = Decimal('0.1')  # Fetch from lot_size_filter
+    # steps = (quantity / step_size).quantize(Decimal('1.'), rounding=ROUND_DOWN)
+    # adjusted_quantity = steps * step_size
+    # if adjusted_quantity != quantity:
+    #     print(f"⚠️ Quantity adjusted from {quantity} to {adjusted_quantity}")
+    #     quantity = adjusted_quantity
+    
+    try:
+        order = client.order_market(symbol=symbol, side=side, quantity=str(quantity))
+    except Exception as e:
+        print(f"❌ Error placing {side} order: {e}")       
+
+
+def place_order_old(client, symbol, side, quantity):
     """Place a market order (buy/sell) with balance validation, LOT_SIZE, and MIN_NOTIONAL handling."""
     from _utils.helpers import get_min_notional
     if not quantity or Decimal(quantity) <= 0:

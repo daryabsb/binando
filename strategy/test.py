@@ -50,6 +50,8 @@ def execute_strategy():
         if should_buy(client, symbol) and usdt_balance >= get_min_notional(client, symbol):
             quantity = calculate_quantity(client, symbol, usdt_balance, "BUY")
 
+            print(f'{symbol} | checking the code | quantity: {quantity}')
+
             if quantity:
                 print(
                     f"✅ Buying {symbol} | ROC: {roc:.2%} | Price: {price} | Trend: 🔥 Strong Uptrend")
@@ -64,6 +66,7 @@ def execute_strategy():
                     f"✅ Selling {symbol} | ROC: {roc:.2%} | Price: {price} | Trend: 🔻 Strong Downtrend")
                 execute_trade(client, symbol, SIDE_SELL, quantity, price)
                 # place_order(client, symbol, SIDE_SELL, quantity)
+
 
 
 start_background_cache_update(get_client(testnet=True))

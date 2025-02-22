@@ -47,16 +47,11 @@ def get_history_options(key):
 
 
 def get_step_size_and_min_qty(client, symbol):
-    """Retrieve the step size and minimum quantity for a given symbol."""
-    exchange_info = client.get_symbol_info(symbol)
-
-    step_size = min_qty = None
-
-    for f in exchange_info["filters"]:
-        if f["filterType"] == "LOT_SIZE":
-            step_size = Decimal(f["stepSize"])
-            min_qty = Decimal(f["minQty"])
-    return step_size, min_qty
+    symbol_info = client.get_symbol_info(symbol)
+    lot_size_filter = next((f for f in symbol_info["filters"] if f["filterType"] == "LOT_SIZE"), None)
+    if lot_size_filter:
+        return Decimal(lot_size_filter["stepSize"]), Decimal(lot_size_filter["minQty"])
+    raise ValueError(f"No LOT_SIZE filter for {symbol}")
 
 
 def is_bullish_trend(client, symbol, pullback=False):

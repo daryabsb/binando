@@ -157,14 +157,16 @@ def get_previous_hour_price(client, symbol, interval="1h"):
     return float(klines[0][4])  # Closing price of the previous hour
 
 
-def calculate_quantity(client, symbol, amount, trade_type):
+def calculate_quantity3(client, symbol, amount, trade_type):
     """Calculate correct quantity based on Binance precision rules and risk management."""
     from _utils.helpers import get_min_notional, get_step_size_and_min_qty
+    from bot.coins import get_sma
 
     price = Decimal(get_price(client, symbol))
     step_size, min_qty = get_step_size_and_min_qty(client, symbol)
     min_notional = get_min_notional(client, symbol)
 
+    sma = Decimal(get_sma(client, symbol, period=20) or price)  # Avoid None
 
     # ✅ Ensure valid step size & min qty
     if not step_size or not min_qty:
@@ -180,13 +182,13 @@ def calculate_quantity(client, symbol, amount, trade_type):
 
     trade_usdt = (amount * USDT_TRADE_PERCENTAGE) * \
         PER_TRADE_PERCENTAGE if amount >= Decimal("5") else Decimal("5")
-    print(f'H! 1: trade_usdt = {trade_usdt}')
+
     # ✅ Buy: Allocate a portion of available USDT
     if trade_type == "BUY":
         # usdt_balance = Decimal(get_usdt_balance(client))
         quantity = (trade_usdt / price).quantize(step_size,
-                                                 rounding=ROUND_UP)
-        print(f'H! 2: quantity = {quantity}')
+                                                 rounding=ROUND_DOWN)
+        print(f'')
 
     # ✅ Sell: Trade a portion of the coin balance worth `trade_usdt`
     else:  # trade_type == "SELL"
@@ -194,7 +196,7 @@ def calculate_quantity(client, symbol, amount, trade_type):
         trade_usdt = (available_balance * price *
                       USDT_TRADE_PERCENTAGE) * PER_TRADE_PERCENTAGE
         quantity = (trade_usdt / price).quantize(step_size,
-                                                 rounding=ROUND_UP)
+                                                 rounding=ROUND_DOWN)
     # ✅ Ensure order meets minNotional and minQty
     # if (quantity * price) < min_notional or quantity < min_qty:
     #     print(
@@ -204,6 +206,83 @@ def calculate_quantity(client, symbol, amount, trade_type):
     print(
         f'Trade usdt: {trade_usdt} || Step size: {step_size} || raw quantity: {quantity:.6f}')
     return str(quantity)  # Convert to string for Binance API
+
+
+from decimal import Decimal, ROUND_DOWN, ROUND_UP
+
+def calculate_quantity(client, symbol, amount, trade_type):
+    from _utils.helpers import get_min_notional, get_step_size_and_min_qty
+    USDT_TRADE_PERCENTAGE = Decimal("0.25")  # 25% of total USDT
+    PER_TRADE_PERCENTAGE = Decimal("0.10")  # 10% of allocated balance
+    # Fetch symbol-specific data
+    price = Decimal(get_price(client, symbol))
+    step_size, min_qty = get_step_size_and_min_qty(client, symbol)
+    min_notional = get_min_notional(client, symbol)
+
+    step_size = Decimal(step_size)
+    min_qty = Decimal(min_qty)
+    min_notional = Decimal(min_notional)
+
+    desired_trade_usdt = Decimal('5.0000')  # Simplified from your logic
+    trade_usdt = max(desired_trade_usdt, min_notional)
+
+    if trade_type == "BUY":
+        raw_quantity = trade_usdt / price  # e.g., 5 / 1.1777 ≈ 4.24556339
+        steps = (raw_quantity / step_size).quantize(Decimal('1.'), rounding=ROUND_UP)  # 42.4556339 → 43
+        quantity = steps * step_size  # 43 * 0.1 = 4.3
+        notional = quantity * price  # 4.3 * 1.1777 ≈ 5.06411
+
+        if notional < min_notional:
+            print(f"⚠️ Notional {notional} below {min_notional}")
+            return None
+
+    else:  # trade_type == "SELL"
+        available_balance = Decimal(get_coin_balance(client, symbol) or 0)
+        if available_balance <= 0:
+            print(f"⚠️ No {symbol} balance to sell.")
+            return None
+        # Desired quantity based on percentage of holdings
+        desired_quantity = available_balance * USDT_TRADE_PERCENTAGE * PER_TRADE_PERCENTAGE
+        trade_usdt = desired_quantity * price
+        # Ensure trade_usdt meets min_notional
+        trade_usdt = max(trade_usdt, min_notional)
+        quantity = (trade_usdt / price).quantize(step_size, rounding=ROUND_DOWN)
+        # Ensure quantity meets min_qty
+        if quantity < min_qty:
+            quantity = min_qty
+        # Verify notional value
+        notional = quantity * price
+        if notional < min_notional:
+            min_quantity = (min_notional / price).quantize(step_size, rounding=ROUND_UP)
+            quantity = min_quantity if min_quantity <= available_balance else available_balance.quantize(step_size, rounding=ROUND_DOWN)
+        # Final check against available balance
+        if quantity > available_balance:
+            print(f"⚠️ Insufficient {symbol} balance for sell order.")
+            return None
+
+    # Final validation
+    if quantity < min_qty or notional < min_notional:
+        print(f"⚠️ Cannot meet min_qty ({min_qty}) or min_notional ({min_notional}) for {symbol}.")
+        return None
+
+    return str(quantity)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def calculate_quantity2(client, symbol, amount, trade_type):
@@ -258,7 +337,7 @@ def calculate_quantity2(client, symbol, amount, trade_type):
         if total_value < min_notional or quantity < min_qty:
             # Increase to meet minNotional
             adjusted_quantity = (
-                min_notional / price).quantize(step_size, rounding=ROUND_DOWN)
+                min_notional / price).quantize(step_size, rounding=ROUND_UP)
             total_value = adjusted_quantity * price
             if adjusted_quantity < min_qty:
                 adjusted_quantity = min_qty.quantize(
@@ -267,7 +346,7 @@ def calculate_quantity2(client, symbol, amount, trade_type):
             quantity = adjusted_quantity
             print(
                 f"⚠️ Adjusted BUY quantity to meet filters: {quantity} (Value: {total_value} USDT)")
-            return str(raw_quantity)  # Convert to string for Binance API
+            return str(quantity)  # Convert to string for Binance API
     elif trade_type == "SELL":
         # Get available coin balance
         coin = symbol.replace('USDT', '')
@@ -304,3 +383,17 @@ def calculate_quantity2(client, symbol, amount, trade_type):
         return None
 
 
+# Example usage
+if __name__ == "__main__":
+    from binance.client import Client
+    client = Client('your_api_key', 'your_api_secret')
+    symbol = 'SANDUSDT'
+    total_balance = 200  # Your total USDT balance
+
+    # Test BUY
+    qty_buy = calculate_quantity(client, symbol, total_balance, 'BUY')
+    print(f"BUY Quantity: {qty_buy}")
+
+    # Test SELL
+    qty_sell = calculate_quantity(client, symbol, total_balance, 'SELL')
+    print(f"SELL Quantity: {qty_sell}")
