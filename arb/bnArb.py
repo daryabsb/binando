@@ -125,42 +125,8 @@ class BnArber:
             print(f"WebSocket connection failed: {e}")
 
     def get_client(self, PUBLIC, SECRET, testnet=False):
-
         client = Client(self.public, self.secret, testnet=testnet)
         return client
-
-    def handle_data__1(self, message):
-        message = json.loads(message)
-        market_id = message["stream"].split("@")[0]
-        asks = [(float(a[0]), float(a[1])) for a in message["data"]["asks"]]
-        ask = min(asks, key=lambda t: t[0])
-        bids = [(float(a[0]), float(a[1])) for a in message["data"]["bids"]]
-        bid = max(bids, key=lambda t: t[0])
-        self.data[market_id.upper()] = {"ask": ask, "bid": bid}
-
-    def handle_data__2(self, message):
-        try:
-            message = json.loads(message)
-            market_id = message["stream"].split("@")[0].upper()
-            asks = [(float(a[0]), float(a[1]))
-                    for a in message["data"]["asks"]]
-            ask = min(asks, key=lambda t: t[0])
-            # Ensure format matches get_ask
-            self.data[market_id] = {"ask": [ask[0], ask[1]]}
-        except Exception as e:
-            print(f"Error in handle_data: {e}")
-
-    def handle_data__3(self, message):
-        try:
-            message = json.loads(message)
-            market_id = message["stream"].split("@")[0].upper()
-            asks = [(float(a[0]), float(a[1]))
-                    for a in message["data"]["asks"]]
-            ask = min(asks, key=lambda t: t[0])
-            self.data[market_id] = {"ask": [ask[0], ask[1]]}
-            # print(f"Updated self.data: {self.data}")  # Debug
-        except Exception as e:
-            print(f"Error in handle_data: {e}")
 
     def handle_data(self, message):
         try:
@@ -178,7 +144,6 @@ class BnArber:
         except Exception as e:
             print(f"Error in handle_data: {e}")
 
-    # Assuming this is already in your code as provided
     def get_sma(self, symbol, period=20):
         """Fetch historical prices and calculate SMA."""
         try:
