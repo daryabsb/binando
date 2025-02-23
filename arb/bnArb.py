@@ -348,9 +348,9 @@ class BnArber:
                 elif current_price < sma:
                     sell_signals += 1
 
-                if rsi < 30:
+                if rsi < 40:
                     buy_signals += 1
-                elif rsi > 70:
+                elif rsi > 60:
                     sell_signals += 1
 
                 if macd > macd_signal:
