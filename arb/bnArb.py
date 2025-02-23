@@ -335,7 +335,7 @@ class BnArber:
 
                 # Risk management
                 usdt_balance = self.get_balance("USDT")
-                max_trade_usdt = usdt_balance * MAX_POSITION_PERCENT
+                max_trade_usdt = 150 * MAX_POSITION_PERCENT # usdt_balance
                 euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
                 trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
 
