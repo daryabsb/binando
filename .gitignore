@@ -132,6 +132,8 @@ env.bak/
 venv.bak/
 venv.rar
 
+arb/config.json
+
 # Spyder project settings
 .spyderproject
 .spyproject

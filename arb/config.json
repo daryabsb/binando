@@ -1,6 +1,6 @@
 {
-    "secret": "ka0UEMniJVyL5My7VCAjTThzVtuVqR72ekQiaJRJdfLqv8gXPoOBZTZSZvIHeRFh",
-    "public": "0g1SxoIXk6RWUyBgYl1JuGG279ljuPgIcnfivc58cYPeLLFTi1rE0LqqcUAbLmjK",
+    "public": "ka0UEMniJVyL5My7VCAjTThzVtuVqR72ekQiaJRJdfLqv8gXPoOBZTZSZvIHeRFh",
+    "secret": "0g1SxoIXk6RWUyBgYl1JuGG279ljuPgIcnfivc58cYPeLLFTi1rE0LqqcUAbLmjK",
     "max_amount": 30,
     "currencies": [
         "BURGER",

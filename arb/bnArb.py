@@ -60,6 +60,8 @@ TOLERANCE_FACTOR = 0.1
 
 class BnArber:
     def __init__(self, curs, public, secret, max_amount):
+        self.public = public
+        self.secret = secret
         self.url = "wss://stream.binance.com:9443/stream?streams=btcusdt@depth5"
         self.curs = curs
         self.data = {}
@@ -121,12 +123,7 @@ class BnArber:
 
     def get_client(self, PUBLIC, SECRET, testnet=False):
 
-        # if testnet else PUBLIC
-        API_KEY = "ka0UEMniJVyL5My7VCAjTThzVtuVqR72ekQiaJRJdfLqv8gXPoOBZTZSZvIHeRFh"
-        # if testnet else SECRET
-        API_SECRET = "0g1SxoIXk6RWUyBgYl1JuGG279ljuPgIcnfivc58cYPeLLFTi1rE0LqqcUAbLmjK"
-
-        client = Client(API_KEY, API_SECRET, testnet=testnet)
+        client = Client(self.public, self.secret, testnet=testnet)
         return client
 
     def handle_data__1(self, message):
