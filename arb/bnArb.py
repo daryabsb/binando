@@ -38,7 +38,7 @@ class Client(BinanceClient):
         """Loads exchange filters for all symbols to validate orders."""
         try:
             self.exchange_info = self.get_exchange_info()
-            self.symbols_info = {s["symbol"]: s for s in self.exchange_info["symbols"]}
+            self.symbols_info = {s["symbol"]                                 : s for s in self.exchange_info["symbols"]}
         except Exception as e:
             print(f"⚠️ Error loading exchange info: {e}")
             self.symbols_info = {}
@@ -55,8 +55,10 @@ class Client(BinanceClient):
             print(f"⚠️ Error fetching price for {symbol}: {e}")
             return None
 
+
 GRID_LEVELS_COUNT = 5
-TOLERANCE_FACTOR = 0.1 
+TOLERANCE_FACTOR = 0.1
+
 
 class BnArber:
     def __init__(self, curs, public, secret, max_amount):
@@ -66,7 +68,7 @@ class BnArber:
         self.curs = curs
         self.data = {}
         self.timeout = False
-        self.min_amount = 15
+        self.min_amount = 10
         self.max_amount = max_amount
         self.SMA_WINDOW = 20
         # Client(public, secret, tld='com', testnet=True)
@@ -74,7 +76,7 @@ class BnArber:
         self.precision = {}
 
         self.testnet = True
-        
+
         try:
             for i in self.client.get_exchange_info()['symbols']:
                 for f in i["filters"]:
@@ -114,7 +116,8 @@ class BnArber:
                             self.timeout = True
                             asyncio.create_task(self.get_rates())
                     except websockets.ConnectionClosed:
-                        print("WebSocket connection closed, attempting to reconnect...")
+                        print(
+                            "WebSocket connection closed, attempting to reconnect...")
                         break
                     except Exception as e:
                         print(f"Error in websocket loop: {e}")
@@ -139,18 +142,20 @@ class BnArber:
         try:
             message = json.loads(message)
             market_id = message["stream"].split("@")[0].upper()
-            asks = [(float(a[0]), float(a[1])) for a in message["data"]["asks"]]
+            asks = [(float(a[0]), float(a[1]))
+                    for a in message["data"]["asks"]]
             ask = min(asks, key=lambda t: t[0])
-            self.data[market_id] = {"ask": [ask[0], ask[1]]}  # Ensure format matches get_ask
+            # Ensure format matches get_ask
+            self.data[market_id] = {"ask": [ask[0], ask[1]]}
         except Exception as e:
             print(f"Error in handle_data: {e}")
-
 
     def handle_data__3(self, message):
         try:
             message = json.loads(message)
             market_id = message["stream"].split("@")[0].upper()
-            asks = [(float(a[0]), float(a[1])) for a in message["data"]["asks"]]
+            asks = [(float(a[0]), float(a[1]))
+                    for a in message["data"]["asks"]]
             ask = min(asks, key=lambda t: t[0])
             self.data[market_id] = {"ask": [ask[0], ask[1]]}
             # print(f"Updated self.data: {self.data}")  # Debug
@@ -161,7 +166,8 @@ class BnArber:
         try:
             message = json.loads(message)
             market_id = message["stream"].split("@")[0].upper()
-            asks = [(float(a[0]), float(a[1])) for a in message["data"]["asks"]]
+            asks = [(float(a[0]), float(a[1]))
+                    for a in message["data"]["asks"]]
             if not asks:  # Check if asks is empty
                 print(f"Skipping {market_id}: No ask data available")
                 return
@@ -191,9 +197,6 @@ class BnArber:
         except Exception as e:
             print(f"⚠️ Error calculating SMA for {symbol}: {e}")
             return None
-
-
-
 
     def get_weekly_support_resistance(self, symbol):
         """
@@ -237,7 +240,8 @@ class BnArber:
         - SMA50 (50-period Simple Moving Average)
         """
         try:
-            klines = self.client.get_historical_klines(symbol, interval, lookback)
+            klines = self.client.get_historical_klines(
+                symbol, interval, lookback)
             df = pd.DataFrame(klines, columns=[
                 'timestamp', 'open', 'high', 'low', 'close', 'volume',
                 'close_time', 'qav', 'num_trades', 'taker_base_vol', 'taker_quote_vol', 'ignore'
@@ -245,7 +249,8 @@ class BnArber:
             df['close'] = df['close'].astype(float)
             df['volume'] = df['volume'].astype(float)
 
-            rsi = ta.momentum.RSIIndicator(df['close'], window=14).rsi().iloc[-1]
+            rsi = ta.momentum.RSIIndicator(
+                df['close'], window=14).rsi().iloc[-1]
             macd_series = ta.trend.MACD(df['close'])
             macd = macd_series.macd().iloc[-1]
             macd_signal = macd_series.macd_signal().iloc[-1]
@@ -277,7 +282,8 @@ class BnArber:
         support, resistance = self.get_weekly_support_resistance(symbol)
         if support is None or resistance is None:
             return None
-        grid_levels, grid_spacing = self.calculate_grid_levels(support, resistance)
+        grid_levels, grid_spacing = self.calculate_grid_levels(
+            support, resistance)
         tolerance = grid_spacing * TOLERANCE_FACTOR
         return {
             "support": support,
@@ -286,11 +292,6 @@ class BnArber:
             "grid_spacing": grid_spacing,
             "tolerance": tolerance
         }
-
-
-
-
-
 
     async def get_rates(self):
         SMA_PERIOD = 20
@@ -308,7 +309,8 @@ class BnArber:
             try:
                 symbol = cur + "USDT"
                 if symbol not in self.data:
-                    print(f"Skipping {symbol}: No market data available in self.data")
+                    print(
+                        f"Skipping {symbol}: No market data available in self.data")
                     continue
 
                 ask_data = self.get_ask(symbol)
@@ -318,7 +320,8 @@ class BnArber:
 
                 current_price = ask_data[0]
                 if current_price <= 0:
-                    print(f"Skipping {symbol}: Invalid price - {current_price}")
+                    print(
+                        f"Skipping {symbol}: Invalid price - {current_price}")
                     continue
 
                 current_time = time.time()
@@ -326,18 +329,22 @@ class BnArber:
                     continue
 
                 # Fetch indicators
-                rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = self.get_technical_indicators(symbol)
+                rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = self.get_technical_indicators(
+                    symbol)
                 sma = self.get_sma(symbol, SMA_PERIOD)
 
                 if any(x is None for x in [sma, rsi, macd, macd_signal, bb_lower, bb_upper]) or pd.isna(macd_signal):
-                    print(f"Skipping {symbol}: Indicator data incomplete - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}")
+                    print(
+                        f"Skipping {symbol}: Indicator data incomplete - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}")
                     continue
 
                 # Risk management
                 usdt_balance = self.get_balance("USDT")
-                max_trade_usdt = 150 * MAX_POSITION_PERCENT # usdt_balance
-                euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
-                trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
+                max_trade_usdt = 150 * MAX_POSITION_PERCENT  # usdt_balance
+                euro_available = min(random.randint(
+                    self.min_amount, self.max_amount), max_trade_usdt)
+                trade_amount = self.floor(
+                    euro_available / current_price, self.precision.get(symbol, 8))
 
                 # Trading signals
                 buy_signals = 0
@@ -358,16 +365,19 @@ class BnArber:
                 elif macd < macd_signal:
                     sell_signals += 1
 
-                if current_price < bb_lower * 1.01:  # Near support (1% tolerance)
+                # Near support (1% tolerance)
+                if current_price < bb_lower * 1.01:
                     buy_signals += 1
-                elif current_price > bb_upper * 0.99:  # Near resistance (1% tolerance)
+                # Near resistance (1% tolerance)
+                elif current_price > bb_upper * 0.99:
                     sell_signals += 1
-                
-                
+
                 print(f'{symbol} ||| sma: {sma} | rsi: {rsi} | macd: {macd}')
-                print(f'{symbol} ||| macd_signal: {macd_signal} | bb_lower: {bb_lower}')
+                print(
+                    f'{symbol} ||| macd_signal: {macd_signal} | bb_lower: {bb_lower}')
                 print(f'{symbol} ||| bb_upper: {bb_upper} | sma50: {sma50}')
-                print(f'{symbol} ||| buy signals: {buy_signals} | sell signals: {sell_signals}')
+                print(
+                    f'{symbol} ||| buy signals: {buy_signals} | sell signals: {sell_signals}')
 
                 # Take-profit or stop-loss
                 if cur in self.positions:
@@ -375,27 +385,37 @@ class BnArber:
                     if current_price > pos["buy_price"] * (1 + TAKE_PROFIT_PCT):
                         available_balance = self.get_balance(cur)
                         if available_balance > 0:
-                            sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                            sell_amount = self.floor(
+                                available_balance, self.precision.get(symbol, 8))
                             if sell_amount * current_price > self.min_amount:
-                                order_success = self.order(symbol, "SELL", sell_amount)
+                                order_success = self.order(
+                                    symbol, "SELL", sell_amount)
                                 if order_success:
                                     self.last_trade_time[cur] = current_time
                                     del self.positions[cur]
-                                    print(f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
-                                    print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
-                                    print("Balance:", self.get_balance("USDT"), "USDT")
+                                    print(
+                                        f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
+                                    print(
+                                        f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                                    print("Balance:", self.get_balance(
+                                        "USDT"), "USDT")
                     elif self.check_stop_loss(pos, current_price, STOP_LOSS_PCT):
                         available_balance = self.get_balance(cur)
                         if available_balance > 0:
-                            sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                            sell_amount = self.floor(
+                                available_balance, self.precision.get(symbol, 8))
                             if sell_amount * current_price > self.min_amount:
-                                order_success = self.order(symbol, "SELL", sell_amount)
+                                order_success = self.order(
+                                    symbol, "SELL", sell_amount)
                                 if order_success:
                                     self.last_trade_time[cur] = current_time
                                     del self.positions[cur]
-                                    print(f"STOP LOSS SELL {sell_amount} {symbol} at {current_price}")
-                                    print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
-                                    print("Balance:", self.get_balance("USDT"), "USDT")
+                                    print(
+                                        f"STOP LOSS SELL {sell_amount} {symbol} at {current_price}")
+                                    print(
+                                        f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                                    print("Balance:", self.get_balance(
+                                        "USDT"), "USDT")
 
                 # Execute new trades
                 elif buy_signals >= 3 and trade_amount > 0:
@@ -403,8 +423,10 @@ class BnArber:
                     if order_success:
                         self.last_trade_time[cur] = current_time
                         self.positions[cur] = {"buy_price": current_price}
-                        print(f"BUY {trade_amount} {symbol} at {current_price}")
-                        print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                        print(
+                            f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(
+                            f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
                         print("Balance:", self.get_balance("USDT"), "USDT")
                     else:
                         print(f"Failed to BUY {trade_amount} {symbol}")
@@ -412,16 +434,21 @@ class BnArber:
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
                                 self.last_trade_time[cur] = current_time
                                 if cur in self.positions:
                                     del self.positions[cur]
-                                print(f"SELL {sell_amount} {symbol} at {current_price}")
-                                print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
-                                print("Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price}")
+                                print(
+                                    f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                                print("Balance:", self.get_balance(
+                                    "USDT"), "USDT")
                             else:
                                 print(f"Failed to SELL {sell_amount} {symbol}")
 
@@ -432,20 +459,9 @@ class BnArber:
 
         self.timeout = False
 
-
-
-
-
-
-
-
-
-
-
-
     async def get_rates__8(self):
         SMA_PERIOD = 20
-        COOLDOWN_SECONDS = 30 # 300  # 5-minute cooldown
+        COOLDOWN_SECONDS = 30  # 300  # 5-minute cooldown
         MAX_POSITION_PERCENT = 0.1  # 10% of USDT balance per trade
         STOP_LOSS_PCT = 0.05  # 5% stop loss
         GRID_LEVELS_COUNT = 5  # Number of grid levels
@@ -459,7 +475,8 @@ class BnArber:
             try:
                 symbol = cur + "USDT"
                 if symbol not in self.data:
-                    print(f"Skipping {symbol}: No market data available in self.data")
+                    print(
+                        f"Skipping {symbol}: No market data available in self.data")
                     continue
 
                 # Get current price from WebSocket data
@@ -470,7 +487,8 @@ class BnArber:
 
                 current_price = ask_data[0]
                 if current_price <= 0:
-                    print(f"Skipping {symbol}: Invalid price - {current_price}")
+                    print(
+                        f"Skipping {symbol}: Invalid price - {current_price}")
                     continue
 
                 current_time = time.time()
@@ -478,25 +496,30 @@ class BnArber:
                     continue
 
                 # Fetch technical indicators
-                rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = self.get_technical_indicators(symbol)
+                rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = self.get_technical_indicators(
+                    symbol)
                 sma = self.get_sma(symbol, SMA_PERIOD)
 
                 if any(x is None for x in [sma, rsi, macd, macd_signal, bb_lower, bb_upper]) or pd.isna(macd_signal):
-                    print(f"Skipping {symbol}: Indicator data incomplete - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                    print(
+                        f"Skipping {symbol}: Indicator data incomplete - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
                     continue
 
                 # Calculate grid levels (assume weekly support/resistance from your method)
                 grid_data = self.recalc_grid_levels(symbol)
                 if grid_data is None:
-                    print(f"Skipping {symbol}: Failed to calculate grid levels")
+                    print(
+                        f"Skipping {symbol}: Failed to calculate grid levels")
                     continue
                 grid_levels = grid_data["grid_levels"]
 
                 # Risk management
                 usdt_balance = self.get_balance("USDT")
-                max_trade_usdt = 150 * MAX_POSITION_PERCENT # usdt_balance
-                euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
-                trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
+                max_trade_usdt = 150 * MAX_POSITION_PERCENT  # usdt_balance
+                euro_available = min(random.randint(
+                    self.min_amount, self.max_amount), max_trade_usdt)
+                trade_amount = self.floor(
+                    euro_available / current_price, self.precision.get(symbol, 8))
 
                 # Trading signals
                 buy_signals = 0
@@ -520,24 +543,25 @@ class BnArber:
                 elif macd < macd_signal:
                     sell_signals += 1
 
-
                 print(f'{symbol} ||| sma: {sma} | rsi: {rsi} | macd: {macd}')
-                print(f'{symbol} ||| macd_signal: {macd_signal} | bb_lower: {bb_lower}')
+                print(
+                    f'{symbol} ||| macd_signal: {macd_signal} | bb_lower: {bb_lower}')
                 print(f'{symbol} ||| bb_upper: {bb_upper} | sma50: {sma50}')
 
-
-
                 # Grid: Buy near support (lower grid), sell near resistance (upper grid)
-                nearest_grid = min(grid_levels, key=lambda x: abs(x - current_price))
+                nearest_grid = min(
+                    grid_levels, key=lambda x: abs(x - current_price))
 
                 # if current_price < grid_levels[0] + grid_data["tolerance"]:  # Near support
                 #     buy_signals += 1
                 # elif current_price > grid_levels[-1] - grid_data["tolerance"]:  # Near resistance
                 #     sell_signals += 1
-                
-                if current_price < bb_lower + grid_data["tolerance"]:  # Near support
+
+                # Near support
+                if current_price < bb_lower + grid_data["tolerance"]:
                     buy_signals += 1
-                elif current_price > bb_upper - grid_data["tolerance"]:  # Near resistance
+                # Near resistance
+                elif current_price > bb_upper - grid_data["tolerance"]:
                     sell_signals += 1
 
                 # Stop-loss check
@@ -555,17 +579,22 @@ class BnArber:
                 if cur in self.positions and current_price > self.positions[cur]["buy_price"] * 1.03:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
                                 self.last_trade_time[cur] = current_time
                                 if cur in self.positions:
                                     del self.positions[cur]
-                                print(f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
-                                del self.positions[cur]  # Remove position after selling
+                                print(
+                                    f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
+                                # Remove position after selling
+                                del self.positions[cur]
                             else:
-                                print(f"Failed to execute STOP LOSS SELL {sell_amount} {symbol}")
+                                print(
+                                    f"Failed to execute STOP LOSS SELL {sell_amount} {symbol}")
                     continue
 
                 # Execute trades (require 3/4 signals)
@@ -573,9 +602,12 @@ class BnArber:
                     order_success = self.order(symbol, "BUY", trade_amount)
                     if order_success:
                         self.last_trade_time[cur] = current_time
-                        self.positions[cur] = {"buy_price": current_price}  # Store for stop-loss
-                        print(f"BUY {trade_amount} {symbol} at {current_price}")
-                        print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, Grid: {nearest_grid}")
+                        # Store for stop-loss
+                        self.positions[cur] = {"buy_price": current_price}
+                        print(
+                            f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(
+                            f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, Grid: {nearest_grid}")
                         print("Balance:", self.get_balance("USDT"), "USDT")
                     else:
                         print(f"Failed to BUY {trade_amount} {symbol}")
@@ -583,16 +615,22 @@ class BnArber:
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
                                 self.last_trade_time[cur] = current_time
                                 if cur in self.positions:
-                                    del self.positions[cur]  # Clear position after selling
-                                print(f"SELL {sell_amount} {symbol} at {current_price}")
-                                print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, Grid: {nearest_grid}")
-                                print("Balance:", self.get_balance("USDT"), "USDT")
+                                    # Clear position after selling
+                                    del self.positions[cur]
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price}")
+                                print(
+                                    f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, Grid: {nearest_grid}")
+                                print("Balance:", self.get_balance(
+                                    "USDT"), "USDT")
                             else:
                                 print(f"Failed to SELL {sell_amount} {symbol}")
 
@@ -620,7 +658,8 @@ class BnArber:
             try:
                 symbol = cur + "USDT"
                 if symbol not in self.data:
-                    print(f"Skipping {symbol}: No market data available in self.data")
+                    print(
+                        f"Skipping {symbol}: No market data available in self.data")
                     continue
 
                 # Get current price from WebSocket data
@@ -631,7 +670,8 @@ class BnArber:
 
                 current_price = ask_data[0]
                 if current_price <= 0:
-                    print(f"Skipping {symbol}: Invalid price - {current_price}")
+                    print(
+                        f"Skipping {symbol}: Invalid price - {current_price}")
                     continue
 
                 current_time = time.time()
@@ -640,10 +680,12 @@ class BnArber:
 
                 # Fetch klines for indicators
                 try:
-                    klines = self.client.get_klines(symbol=symbol, interval="15m", limit=max(SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW))
+                    klines = self.client.get_klines(symbol=symbol, interval="15m", limit=max(
+                        SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW))
                     closes = [float(k[4]) for k in klines]
                     if len(closes) < max(SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW):
-                        print(f"Skipping {symbol}: Insufficient klines data ({len(closes)})")
+                        print(
+                            f"Skipping {symbol}: Insufficient klines data ({len(closes)})")
                         continue
                 except Exception as e:
                     print(f"Skipping {symbol}: Failed to fetch klines - {e}")
@@ -658,33 +700,40 @@ class BnArber:
                     print(f"Skipping {symbol}: SMA is None")
                     continue
 
-                rsi = ta.momentum.RSIIndicator(close_series, window=RSI_PERIOD).rsi()
+                rsi = ta.momentum.RSIIndicator(
+                    close_series, window=RSI_PERIOD).rsi()
                 rsi_value = rsi.iloc[-1] if rsi is not None and not rsi.isna().all() else None
                 if rsi_value is None:
                     print(f"Skipping {symbol}: RSI is None")
                     continue
 
-                roc = ta.momentum.ROCIndicator(close_series, window=ROC_PERIOD).roc()
+                roc = ta.momentum.ROCIndicator(
+                    close_series, window=ROC_PERIOD).roc()
                 roc_value = roc.iloc[-1] if roc is not None and not roc.isna().all() else None
                 if roc_value is None:
                     print(f"Skipping {symbol}: ROC is None")
                     continue
 
-                macd_indicator = ta.trend.MACD(close_series, window_fast=MACD_FAST, window_slow=MACD_SLOW, window_sign=MACD_SIGNAL)
+                macd_indicator = ta.trend.MACD(
+                    close_series, window_fast=MACD_FAST, window_slow=MACD_SLOW, window_sign=MACD_SIGNAL)
                 macd_line = macd_indicator.macd().iloc[-1]
                 signal_line = macd_indicator.macd_signal().iloc[-1]
 
-                print(f' sma: {sma} | rsi: {rsi_value} | roc: {roc_value} | macd_line: {macd_line} | signal_line: {signal_line}')
+                print(
+                    f' sma: {sma} | rsi: {rsi_value} | roc: {roc_value} | macd_line: {macd_line} | signal_line: {signal_line}')
 
                 if pd.isna(macd_line) or pd.isna(signal_line):
-                    print(f"Skipping {symbol}: MACD contains NaN - MACD: {macd_line}, Signal: {signal_line}")
+                    print(
+                        f"Skipping {symbol}: MACD contains NaN - MACD: {macd_line}, Signal: {signal_line}")
                     continue
 
                 # Risk management
                 usdt_balance = self.get_balance("USDT")
                 max_trade_usdt = 150.15615952 * MAX_POSITION_PERCENT
-                euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
-                trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
+                euro_available = min(random.randint(
+                    self.min_amount, self.max_amount), max_trade_usdt)
+                trade_amount = self.floor(
+                    euro_available / current_price, self.precision.get(symbol, 8))
 
                 # Trading signals
                 buy_signals = 0
@@ -715,8 +764,10 @@ class BnArber:
                     order_success = self.order(symbol, "BUY", trade_amount)
                     if order_success:
                         self.last_trade_time[cur] = current_time
-                        print(f"BUY {trade_amount} {symbol} at {current_price}")
-                        print(f"Indicators - SMA: {sma}, RSI: {rsi_value}, ROC: {roc_value}, MACD: {macd_line}/{signal_line}")
+                        print(
+                            f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(
+                            f"Indicators - SMA: {sma}, RSI: {rsi_value}, ROC: {roc_value}, MACD: {macd_line}/{signal_line}")
                         print("Balance:", self.get_balance("USDT"), "USDT")
                     else:
                         print(f"Failed to BUY {trade_amount} {symbol}")
@@ -724,14 +775,19 @@ class BnArber:
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
                                 self.last_trade_time[cur] = current_time
-                                print(f"SELL {sell_amount} {symbol} at {current_price}")
-                                print(f"Indicators - SMA: {sma}, RSI: {rsi_value}, ROC: {roc_value}, MACD: {macd_line}/{signal_line}")
-                                print("Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price}")
+                                print(
+                                    f"Indicators - SMA: {sma}, RSI: {rsi_value}, ROC: {roc_value}, MACD: {macd_line}/{signal_line}")
+                                print("Balance:", self.get_balance(
+                                    "USDT"), "USDT")
                             else:
                                 print(f"Failed to SELL {sell_amount} {symbol}")
 
@@ -760,7 +816,8 @@ class BnArber:
                 symbol = cur + "USDT"
                 print('data = : ', self.data)
                 if cur not in self.data:
-                    print(f"Skipping {symbol}: No market data available in self.data")
+                    print(
+                        f"Skipping {symbol}: No market data available in self.data")
                     continue
 
                 # Check WebSocket data
@@ -771,7 +828,8 @@ class BnArber:
 
                 current_price = ask_data[0]
                 if current_price <= 0:
-                    print(f"Skipping {symbol}: Invalid price - {current_price}")
+                    print(
+                        f"Skipping {symbol}: Invalid price - {current_price}")
                     continue
 
                 current_time = time.time()
@@ -779,10 +837,12 @@ class BnArber:
                     continue
 
                 # Fetch klines for indicators
-                klines = self.client.get_klines(symbol=symbol, interval="15m", limit=max(SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW))
+                klines = self.client.get_klines(symbol=symbol, interval="15m", limit=max(
+                    SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW))
                 closes = [float(k[4]) for k in klines]
                 if len(closes) < max(SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW):
-                    print(f"Skipping {symbol}: Insufficient klines data ({len(closes)})")
+                    print(
+                        f"Skipping {symbol}: Insufficient klines data ({len(closes)})")
                     continue
 
                 df = pd.DataFrame(closes, columns=["close"])
@@ -791,20 +851,25 @@ class BnArber:
                 sma = self.get_sma(symbol, SMA_PERIOD)
                 rsi = ta.rsi(df["close"], length=RSI_PERIOD).iloc[-1]
                 roc = ta.roc(df["close"], length=ROC_PERIOD).iloc[-1]
-                macd = ta.macd(df["close"], fast=MACD_FAST, slow=MACD_SLOW, signal=MACD_SIGNAL)
+                macd = ta.macd(df["close"], fast=MACD_FAST,
+                               slow=MACD_SLOW, signal=MACD_SIGNAL)
                 macd_line = macd[f'MACD_{MACD_FAST}_{MACD_SLOW}_{MACD_SIGNAL}'].iloc[-1]
                 signal_line = macd[f'MACDs_{MACD_FAST}_{MACD_SLOW}_{MACD_SIGNAL}'].iloc[-1]
-                print(f' sma: {sma} | rsi: {rsi} | roc: {roc} | macd: {macd} | macd_line: {macd_line} | signal_line: {signal_line}')
-                
+                print(
+                    f' sma: {sma} | rsi: {rsi} | roc: {roc} | macd: {macd} | macd_line: {macd_line} | signal_line: {signal_line}')
+
                 if sma is None or rsi is None or roc is None or macd_line is None or signal_line is None:
-                    print(f"Skipping {symbol}: One or more indicators are None - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
+                    print(
+                        f"Skipping {symbol}: One or more indicators are None - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
                     continue
 
                 # Risk management
                 usdt_balance = self.get_balance("USDT")
                 max_trade_usdt = usdt_balance * MAX_POSITION_PERCENT
-                euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
-                trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
+                euro_available = min(random.randint(
+                    self.min_amount, self.max_amount), max_trade_usdt)
+                trade_amount = self.floor(
+                    euro_available / current_price, self.precision.get(symbol, 8))
 
                 # Trading signals
                 buy_signals = 0
@@ -835,8 +900,10 @@ class BnArber:
                     order_success = self.order(symbol, "BUY", trade_amount)
                     if order_success:
                         self.last_trade_time[cur] = current_time
-                        print(f"BUY {trade_amount} {symbol} at {current_price}")
-                        print(f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
+                        print(
+                            f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(
+                            f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
                         print("Balance:", self.get_balance("USDT"), "USDT")
                     else:
                         print(f"Failed to BUY {trade_amount} {symbol}")
@@ -844,14 +911,19 @@ class BnArber:
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
                                 self.last_trade_time[cur] = current_time
-                                print(f"SELL {sell_amount} {symbol} at {current_price}")
-                                print(f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
-                                print("Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price}")
+                                print(
+                                    f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
+                                print("Balance:", self.get_balance(
+                                    "USDT"), "USDT")
                             else:
                                 print(f"Failed to SELL {sell_amount} {symbol}")
 
@@ -890,7 +962,8 @@ class BnArber:
                 current_price = self.get_ask(symbol)[0]
 
                 # Fetch klines for all indicators
-                klines = self.client.get_klines(symbol=symbol, interval="15m", limit=max(SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW))
+                klines = self.client.get_klines(symbol=symbol, interval="15m", limit=max(
+                    SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW))
                 closes = [float(k[4]) for k in klines]  # Closing prices
                 if len(closes) < max(SMA_PERIOD, RSI_PERIOD, ROC_PERIOD, MACD_SLOW):
                     print(f"Skipping {symbol} due to insufficient data")
@@ -902,19 +975,24 @@ class BnArber:
                 sma = self.get_sma(symbol, SMA_PERIOD)
                 rsi = ta.rsi(df["close"], length=RSI_PERIOD).iloc[-1]
                 roc = ta.roc(df["close"], length=ROC_PERIOD).iloc[-1]
-                macd = ta.macd(df["close"], fast=MACD_FAST, slow=MACD_SLOW, signal=MACD_SIGNAL)
+                macd = ta.macd(df["close"], fast=MACD_FAST,
+                               slow=MACD_SLOW, signal=MACD_SIGNAL)
                 macd_line = macd[f'MACD_{MACD_FAST}_{MACD_SLOW}_{MACD_SIGNAL}'].iloc[-1]
                 signal_line = macd[f'MACDs_{MACD_FAST}_{MACD_SLOW}_{MACD_SIGNAL}'].iloc[-1]
-                print(f' sma: {sma} | rsi: {rsi} | roc: {roc} | macd: {macd} | macd_line: {macd_line} | signal_line: {signal_line}')
+                print(
+                    f' sma: {sma} | rsi: {rsi} | roc: {roc} | macd: {macd} | macd_line: {macd_line} | signal_line: {signal_line}')
                 if sma is None or rsi is None or roc is None or macd_line is None:
-                    print(f"Skipping {symbol} due to insufficient indicator data")
+                    print(
+                        f"Skipping {symbol} due to insufficient indicator data")
                     continue
 
                 # Risk management: Limit position size
                 usdt_balance = self.get_balance("USDT")
-                max_trade_usdt = 150.59890092 * MAX_POSITION_PERCENT # usdt_balance
-                euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
-                trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
+                max_trade_usdt = 150.59890092 * MAX_POSITION_PERCENT  # usdt_balance
+                euro_available = min(random.randint(
+                    self.min_amount, self.max_amount), max_trade_usdt)
+                trade_amount = self.floor(
+                    euro_available / current_price, self.precision.get(symbol, 8))
 
                 # Trading signals (require multiple confirmations)
                 buy_signals = 0
@@ -949,8 +1027,10 @@ class BnArber:
                     order_success = self.order(symbol, "BUY", trade_amount)
                     if order_success:
                         self.last_trade_time[cur] = current_time
-                        print(f"BUY {trade_amount} {symbol} at {current_price}")
-                        print(f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
+                        print(
+                            f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(
+                            f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
                         print("Balance:", self.get_balance("USDT"), "USDT")
                     else:
                         print(f"Failed to BUY {trade_amount} {symbol}")
@@ -958,14 +1038,19 @@ class BnArber:
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
                                 self.last_trade_time[cur] = current_time
-                                print(f"SELL {sell_amount} {symbol} at {current_price}")
-                                print(f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
-                                print("Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price}")
+                                print(
+                                    f"Indicators - SMA: {sma}, RSI: {rsi}, ROC: {roc}, MACD: {macd_line}/{signal_line}")
+                                print("Balance:", self.get_balance(
+                                    "USDT"), "USDT")
                             else:
                                 print(f"Failed to SELL {sell_amount} {symbol}")
 
@@ -984,7 +1069,7 @@ class BnArber:
             try:
                 # Construct the USDT pair symbol
                 symbol = cur + "USDT"
-                
+
                 # Skip if we don't have current market data
                 if symbol not in self.data:
                     continue
@@ -1000,8 +1085,10 @@ class BnArber:
                     continue
 
                 # Determine trade amount
-                euro_available = random.randint(self.min_amount, self.max_amount)
-                trade_amount = self.floor(euro_available / current_price, self.precision.get(symbol, 8))
+                euro_available = random.randint(
+                    self.min_amount, self.max_amount)
+                trade_amount = self.floor(
+                    euro_available / current_price, self.precision.get(symbol, 8))
 
                 # Trading logic based on SMA
                 if current_price > sma:
@@ -1009,7 +1096,8 @@ class BnArber:
                     if trade_amount > 0:
                         order_success = self.order(symbol, "BUY", trade_amount)
                         if order_success:
-                            print(f"BUY {trade_amount} {symbol} at {current_price} (Price > SMA: {sma})")
+                            print(
+                                f"BUY {trade_amount} {symbol} at {current_price} (Price > SMA: {sma})")
                             print("Balance:", self.get_balance("USDT"), "USDT")
                         else:
                             print(f"Failed to BUY {trade_amount} {symbol}")
@@ -1017,16 +1105,21 @@ class BnArber:
                     # Price is below SMA (bearish), attempt to SELL existing holdings
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:  # Ensure minimum trade size
-                            order_success = self.order(symbol, "SELL", sell_amount)
+                            order_success = self.order(
+                                symbol, "SELL", sell_amount)
                             if order_success:
-                                print(f"SELL {sell_amount} {symbol} at {current_price} (Price < SMA: {sma})")
-                                print("Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price} (Price < SMA: {sma})")
+                                print("Balance:", self.get_balance(
+                                    "USDT"), "USDT")
                             else:
                                 print(f"Failed to SELL {sell_amount} {symbol}")
                 else:
-                    print(f"No action for {symbol}: Price ({current_price}) equals SMA ({sma})")
+                    print(
+                        f"No action for {symbol}: Price ({current_price}) equals SMA ({sma})")
 
                 # Small delay to avoid overwhelming the API
                 await asyncio.sleep(1)
@@ -1073,12 +1166,12 @@ class BnArber:
                     self.min_amount, self.max_amount)
                 x = self.floor(euro_available / self.get_ask(cur+"USDT")
                                [0], self.precision.get(cur+"USDT", 8))
-                
+
                 y = self.floor(x * 0.999, self.precision.get(cur+"BTC", 8))
 
                 z = self.floor((y * 0.999) * self.get_bid(cur+"BTC")
                                [0], self.precision.get("BTCUSDT", 8))
-                
+
                 a = self.get_ask(cur+"USDT")[0] * x
                 b = self.get_bid("BTCUSDT")[0] * z
                 arbitrage = a / x * x / y * y / b if x and y and b else 0
@@ -1410,7 +1503,7 @@ class BnArber:
 
     def get_ask__1(self, market):
         return self.data[market]["ask"]
-    
+
     def get_ask(self, market):
         return self.data.get(market, {}).get("ask")
 

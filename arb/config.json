@@ -1,7 +1,7 @@
 {
     "public": "ka0UEMniJVyL5My7VCAjTThzVtuVqR72ekQiaJRJdfLqv8gXPoOBZTZSZvIHeRFh",
     "secret": "0g1SxoIXk6RWUyBgYl1JuGG279ljuPgIcnfivc58cYPeLLFTi1rE0LqqcUAbLmjK",
-    "max_amount": 30,
+    "max_amount": 15,
     "currencies": [
         "BURGER",
         "1MBABYDOGE",
