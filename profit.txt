@@ -2263,3 +2263,1155 @@ Current USDT Balance: 226718.89656952
 Profit/Loss: 213451.48832490 USDT
 Timestamp: 2025-02-23 14:04
 =====================
+
+=== Profit Report ===
+Current USDT Balance: 228427.62908218      
+Profit/Loss: 1880.41105266 USDT
+Timestamp: 2025-02-24 05:50
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228427.62908218      
+Profit/Loss: 1880.41105266 USDT
+Timestamp: 2025-02-24 05:55
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:00
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:05
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:10
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:15
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:20
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:25
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:30
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:35
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:40
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:45
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:50
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 06:55
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 07:00
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 07:05
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228416.67711218      
+Profit/Loss: 1869.45908266 USDT
+Timestamp: 2025-02-24 07:10
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 228927.34769218      
+Profit/Loss: 2380.12966266 USDT
+Timestamp: 2025-02-24 07:15
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 229639.71013218      
+Profit/Loss: 3092.49210266 USDT
+Timestamp: 2025-02-24 07:20
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:25
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:30
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:35
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:40
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:45
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:50
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 07:55
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 08:00
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 08:05
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 08:10
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 08:15
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 230864.62312218      
+Profit/Loss: 4317.40509266 USDT
+Timestamp: 2025-02-24 08:20
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234072.64246218      
+Profit/Loss: 7525.42443266 USDT
+Timestamp: 2025-02-24 08:25
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 08:30
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 08:35
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 08:40
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 08:45
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 08:50
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 08:55
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:00
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:05
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:10
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:15
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:20
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:25
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:30
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:35
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:40
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:45
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:50
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234379.34578218      
+Profit/Loss: 7832.12775266 USDT
+Timestamp: 2025-02-24 09:55
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234847.76869218      
+Profit/Loss: 8300.55066266 USDT
+Timestamp: 2025-02-24 10:00
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234832.78351218      
+Profit/Loss: 8285.56548266 USDT
+Timestamp: 2025-02-24 10:05
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234817.83491218      
+Profit/Loss: 8270.61688266 USDT
+Timestamp: 2025-02-24 10:10
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:15
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:20
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:25
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:30
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:35
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:40
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234805.26571218      
+Profit/Loss: 8258.04768266 USDT
+Timestamp: 2025-02-24 10:45
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234791.27083218      
+Profit/Loss: 8244.05280266 USDT
+Timestamp: 2025-02-24 10:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234791.27083218      
+Profit/Loss: 8244.05280266 USDT
+Timestamp: 2025-02-24 10:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234791.27083218      
+Profit/Loss: 8244.05280266 USDT
+Timestamp: 2025-02-24 11:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234779.27433618      
+Profit/Loss: 8232.05630666 USDT
+Timestamp: 2025-02-24 11:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234767.48673618      
+Profit/Loss: 8220.26870666 USDT
+Timestamp: 2025-02-24 11:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234767.48673618      
+Profit/Loss: 8220.26870666 USDT
+Timestamp: 2025-02-24 11:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234756.49673618      
+Profit/Loss: 8209.27870666 USDT
+Timestamp: 2025-02-24 11:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234756.49673618      
+Profit/Loss: 8209.27870666 USDT
+Timestamp: 2025-02-24 11:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234743.49821718      
+Profit/Loss: 8196.28018766 USDT
+Timestamp: 2025-02-24 11:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234731.51781718      
+Profit/Loss: 8184.29978766 USDT
+Timestamp: 2025-02-24 11:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234716.55781718      
+Profit/Loss: 8169.33978766 USDT
+Timestamp: 2025-02-24 11:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234716.55781718      
+Profit/Loss: 8169.33978766 USDT
+Timestamp: 2025-02-24 11:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234704.57485718      
+Profit/Loss: 8157.35682766 USDT
+Timestamp: 2025-02-24 11:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234666.67303718      
+Profit/Loss: 8119.45500766 USDT
+Timestamp: 2025-02-24 11:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 235005.22425518      
+Profit/Loss: 8458.00622566 USDT
+Timestamp: 2025-02-24 12:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234994.25047518      
+Profit/Loss: 8447.03244566 USDT
+Timestamp: 2025-02-24 12:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 234981.25372518      
+Profit/Loss: 8434.03569566 USDT
+Timestamp: 2025-02-24 12:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236420.32786718      
+Profit/Loss: 9873.10983766 USDT
+Timestamp: 2025-02-24 12:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 12:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236807.42779718      
+Profit/Loss: 10260.20976766 USDT
+Timestamp: 2025-02-24 13:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236796.44109718      
+Profit/Loss: 10249.22306766 USDT
+Timestamp: 2025-02-24 13:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236771.47992218      
+Profit/Loss: 10224.26189266 USDT
+Timestamp: 2025-02-24 14:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 236757.49497218      
+Profit/Loss: 10210.27694266 USDT
+Timestamp: 2025-02-24 14:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237192.46669218      
+Profit/Loss: 10645.24866266 USDT
+Timestamp: 2025-02-24 14:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237192.46669218      
+Profit/Loss: 10645.24866266 USDT
+Timestamp: 2025-02-24 14:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237190.67429218      
+Profit/Loss: 10643.45626266 USDT
+Timestamp: 2025-02-24 14:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237190.67429218      
+Profit/Loss: 10643.45626266 USDT
+Timestamp: 2025-02-24 14:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 14:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 14:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 14:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 14:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 14:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 14:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237654.31334218      
+Profit/Loss: 11107.09531266 USDT
+Timestamp: 2025-02-24 15:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 237896.21517618      
+Profit/Loss: 11348.99714666 USDT
+Timestamp: 2025-02-24 15:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238267.36781618      
+Profit/Loss: 11720.14978666 USDT
+Timestamp: 2025-02-24 15:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238267.36781618      
+Profit/Loss: 11720.14978666 USDT
+Timestamp: 2025-02-24 15:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238267.36781618      
+Profit/Loss: 11720.14978666 USDT
+Timestamp: 2025-02-24 15:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238267.36781618      
+Profit/Loss: 11720.14978666 USDT
+Timestamp: 2025-02-24 16:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238267.36781618      
+Profit/Loss: 11720.14978666 USDT
+Timestamp: 2025-02-24 16:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238279.63061618      
+Profit/Loss: 11732.41258666 USDT
+Timestamp: 2025-02-24 16:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238264.63176818      
+Profit/Loss: 11717.41373866 USDT
+Timestamp: 2025-02-24 16:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238249.65576818      
+Profit/Loss: 11702.43773866 USDT
+Timestamp: 2025-02-24 16:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238207.69324418      
+Profit/Loss: 11660.47521466 USDT
+Timestamp: 2025-02-24 16:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238207.69324418      
+Profit/Loss: 11660.47521466 USDT
+Timestamp: 2025-02-24 17:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238207.69324418      
+Profit/Loss: 11660.47521466 USDT
+Timestamp: 2025-02-24 17:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238207.69324418      
+Profit/Loss: 11660.47521466 USDT
+Timestamp: 2025-02-24 17:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238207.69324418      
+Profit/Loss: 11660.47521466 USDT
+Timestamp: 2025-02-24 17:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238207.69324418      
+Profit/Loss: 11660.47521466 USDT
+Timestamp: 2025-02-24 17:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238222.14085418      
+Profit/Loss: 11674.92282466 USDT
+Timestamp: 2025-02-24 17:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238222.14085418      
+Profit/Loss: 11674.92282466 USDT
+Timestamp: 2025-02-24 17:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238222.14085418      
+Profit/Loss: 11674.92282466 USDT
+Timestamp: 2025-02-24 17:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238222.14085418      
+Profit/Loss: 11674.92282466 USDT
+Timestamp: 2025-02-24 17:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238211.31457418      
+Profit/Loss: 11664.09654466 USDT
+Timestamp: 2025-02-24 17:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238211.31457418      
+Profit/Loss: 11664.09654466 USDT
+Timestamp: 2025-02-24 17:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238211.31457418      
+Profit/Loss: 11664.09654466 USDT
+Timestamp: 2025-02-24 17:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238211.31457418      
+Profit/Loss: 11664.09654466 USDT
+Timestamp: 2025-02-24 18:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238211.31457418      
+Profit/Loss: 11664.09654466 USDT
+Timestamp: 2025-02-24 18:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238211.31457418      
+Profit/Loss: 11664.09654466 USDT
+Timestamp: 2025-02-24 18:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238430.83485218      
+Profit/Loss: 11883.61682266 USDT
+Timestamp: 2025-02-24 18:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238419.00435218      
+Profit/Loss: 11871.78632266 USDT
+Timestamp: 2025-02-24 18:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 238419.00435218      
+Profit/Loss: 11871.78632266 USDT
+Timestamp: 2025-02-24 18:26
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 239547.56777516      
+Profit/Loss: 13000.34974564 USDT
+Timestamp: 2025-02-24 18:31
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 239852.12237516      
+Profit/Loss: 13304.90434564 USDT
+Timestamp: 2025-02-24 18:36
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 239852.12237516      
+Profit/Loss: 13304.90434564 USDT
+Timestamp: 2025-02-24 18:41
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 240320.61007016      
+Profit/Loss: 13773.39204064 USDT
+Timestamp: 2025-02-24 18:46
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 241785.17745536      
+Profit/Loss: 15237.95942584 USDT
+Timestamp: 2025-02-24 18:51
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242200.02425536      
+Profit/Loss: 15652.80622584 USDT
+Timestamp: 2025-02-24 18:56
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242200.02425536      
+Profit/Loss: 15652.80622584 USDT
+Timestamp: 2025-02-24 19:01
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242200.02425536      
+Profit/Loss: 15652.80622584 USDT
+Timestamp: 2025-02-24 19:06
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242200.02425536      
+Profit/Loss: 15652.80622584 USDT
+Timestamp: 2025-02-24 19:11
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242210.22901536
+Profit/Loss: 15663.01098584 USDT
+Timestamp: 2025-02-24 19:16
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242221.45925536      
+Profit/Loss: 15674.24122584 USDT
+Timestamp: 2025-02-24 19:21
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242221.45925536      
+Profit/Loss: 15674.24122584 USDT
+Timestamp: 2025-02-24 19:27
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242221.45925536      
+Profit/Loss: 15674.24122584 USDT
+Timestamp: 2025-02-24 19:32
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242289.45967336      
+Profit/Loss: 15742.24164384 USDT
+Timestamp: 2025-02-24 19:37
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 19:42
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 19:47
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 19:52
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 19:57
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:02
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:07
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:12
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:17
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:22
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:27
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:32
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:37
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:42
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:47
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:52
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 20:57
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:02
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:07
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:12
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:17
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:22
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:27
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:32
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:37
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242302.73224336      
+Profit/Loss: 15755.51421384 USDT
+Timestamp: 2025-02-24 21:42
+=====================
+
+=== Profit Report ===
+Current USDT Balance: 242292.74898336      
+Profit/Loss: 15745.53095384 USDT
+Timestamp: 2025-02-24 21:47
+=====================

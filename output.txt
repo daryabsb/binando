@@ -1,0 +1,1695 @@
+TRUMPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+SHIBUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 203665
+SHIBUSDT ||| current_price: 6.874e-05 
+SHIBUSDT ||| sma: 1.5070000000000003e-05 | rsi: 100.0 | macd: 0.0
+SHIBUSDT ||| macd_signal: 0.0 | bb_lower: 1.507e-05
+SHIBUSDT ||| bb_upper: 1.507e-05 | sma50: 1.507e-05
+SHIBUSDT ||| buy signals: 1 | sell signals: 2
+XRPUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 4
+XRPUSDT ||| current_price: 2.4582 
+XRPUSDT ||| sma: 2.4564649999999997 | rsi: 50.04414778032347 | macd: -0.008461818179295033
+XRPUSDT ||| macd_signal: -0.009977726503094631 | bb_lower: 2.4132105308667473
+XRPUSDT ||| bb_upper: 2.499719469133253 | sma50: 2.4697
+XRPUSDT ||| buy signals: 2 | sell signals: 0
+ENSUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 0.41
+ENSUSDT ||| current_price: 26.44 
+ENSUSDT ||| sma: 26.153000000000002 | rsi: 56.78940331928734 | macd: -0.04059282168806533
+ENSUSDT ||| macd_signal: -0.08707529897310348 | bb_lower: 25.76740435687119
+ENSUSDT ||| bb_upper: 26.538595643128808 | sma50: 26.326400000000003
+ENSUSDT ||| buy signals: 2 | sell signals: 1
+MANTAUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 35.3
+MANTAUSDT ||| current_price: 0.368 
+MANTAUSDT ||| sma: 0.36630000000000007 | rsi: 49.853840471571445 | macd: -0.0014943066029305951
+MANTAUSDT ||| macd_signal: -0.0018584366444088928 | bb_lower: 0.3603636711681374
+MANTAUSDT ||| bb_upper: 0.37223632883186253 | sma50: 0.36985999999999997
+MANTAUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+TURBOUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 3582
+TURBOUSDT ||| current_price: 0.00335 
+TURBOUSDT ||| sma: 0.00334955 | rsi: 47.15433897230613 | macd: -2.5477734747733887e-05
+TURBOUSDT ||| macd_signal: -2.852674706702558e-05 | bb_lower: 0.0032761947684210595
+TURBOUSDT ||| bb_upper: 0.0034229052315789417 | sma50: 0.0034034000000000004
+TURBOUSDT ||| buy signals: 2 | sell signals: 0
+SUIUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 3.9
+SUIUSDT ||| current_price: 3.0542 
+SUIUSDT ||| sma: 3.096645 | rsi: 40.14601064092177 | macd: -0.053586227380224116
+SUIUSDT ||| macd_signal: -0.055076860156717165 | bb_lower: 2.938273696096795
+SUIUSDT ||| bb_upper: 3.255016303903205 | sma50: 3.2046939999999995
+SUIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+LTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 0.121
+LTCUSDT ||| current_price: 123.42 
+LTCUSDT ||| sma: 122.9565 | rsi: 51.76014541363512 | macd: -0.1625952922594962
+LTCUSDT ||| macd_signal: -0.2601155717648105 | bb_lower: 121.21494580905426
+LTCUSDT ||| bb_upper: 124.69805419094575 | sma50: 123.34559999999999
+LTCUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+BNXUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 12.0
+BNXUSDT ||| current_price: 0.9999 
+BNXUSDT ||| sma: 1.014115 | rsi: 44.392384251020104 | macd: -0.01428417532378623
+BNXUSDT ||| macd_signal: -0.012649228867358472 | bb_lower: 0.9590607985254528
+BNXUSDT ||| bb_upper: 1.069169201474547 | sma50: 1.0309840000000001
+BNXUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+TRXUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 44.4
+TRXUSDT ||| current_price: 0.2477 
+TRXUSDT ||| sma: 0.247035 | rsi: 57.02456961216566 | macd: 0.0001437086732498094
+TRXUSDT ||| macd_signal: 0.00010280523392951724 | bb_lower: 0.2448955841918882
+TRXUSDT ||| bb_upper: 0.24917441580811187 | sma50: 0.246278
+TRXUSDT ||| buy signals: 2 | sell signals: 1
+DOTUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 2.13
+DOTUSDT ||| current_price: 4.693 
+DOTUSDT ||| sma: 4.690600000000001 | rsi: 49.782951527591 | macd: -0.018688304788196497
+DOTUSDT ||| macd_signal: -0.021232029324227027 | bb_lower: 4.636060473049405
+DOTUSDT ||| bb_upper: 4.745139526950597 | sma50: 4.73272
+DOTUSDT ||| buy signals: 2 | sell signals: 0
+CAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 6.38
+CAKEUSDT ||| current_price: 2.351 
+CAKEUSDT ||| sma: 2.3638500000000002 | rsi: 43.72805469310607 | macd: -0.015609105219269281
+CAKEUSDT ||| macd_signal: -0.015243058780814042 | bb_lower: 2.3183119938952093
+CAKEUSDT ||| bb_upper: 2.4093880061047903 | sma50: 2.3884
+CAKEUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+STPTUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 119.6
+STPTUSDT ||| current_price: 0.10867 
+STPTUSDT ||| sma: 0.106648 | rsi: 56.04193126348206 | macd: -0.0002421061310074052
+STPTUSDT ||| macd_signal: -0.0005664795722011279 | bb_lower: 0.10420026145187028
+STPTUSDT ||| bb_upper: 0.1090957385481297 | sma50: 0.108475
+STPTUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SCRUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 24.5
+SCRUSDT ||| current_price: 0.612 
+SCRUSDT ||| sma: 0.6059 | rsi: 54.97245693271285 | macd: -0.0002729332984694466
+SCRUSDT ||| macd_signal: -0.0013604860780419223 | bb_lower: 0.5976562144617907
+SCRUSDT ||| bb_upper: 0.6141437855382093 | sma50: 0.60912
+SCRUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+NEARUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 4.5
+NEARUSDT ||| current_price: 3.325 
+NEARUSDT ||| sma: 3.3052000000000006 | rsi: 54.50133902670073 | macd: -0.005376300544859713
+NEARUSDT ||| macd_signal: -0.008416664256399274 | bb_lower: 3.26338325694174
+NEARUSDT ||| bb_upper: 3.3470167430582602 | sma50: 3.3223000000000003
+NEARUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+AUDIOUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 149.4
+AUDIOUSDT ||| current_price: 0.0937 
+AUDIOUSDT ||| sma: 0.09364500000000002 | rsi: 52.38238237557833 | macd: -0.0002318321489651054
+AUDIOUSDT ||| macd_signal: -0.00026680538721568904 | bb_lower: 0.09236363354187838
+AUDIOUSDT ||| bb_upper: 0.09492636645812164 | sma50: 0.09405200000000001
+AUDIOUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+WLDUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 8.6
+WLDUSDT ||| current_price: 1.156 
+WLDUSDT ||| sma: 1.16005 | rsi: 46.3226296971688 | macd: -0.007443963211758886
+WLDUSDT ||| macd_signal: -0.008045361122355368 | bb_lower: 1.1354860019540831
+WLDUSDT ||| bb_upper: 1.184613998045917 | sma50: 1.1743199999999998
+WLDUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ETHFIUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 13.9
+ETHFIUSDT ||| current_price: 1.076 
+ETHFIUSDT ||| sma: 1.0756 | rsi: 48.768118388316665 | macd: -0.005462274597127559
+ETHFIUSDT ||| macd_signal: -0.006234306994003681 | bb_lower: 1.0560613204130906
+ETHFIUSDT ||| bb_upper: 1.0951386795869096 | sma50: 1.08648
+ETHFIUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+DGBUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 1562.5
+DGBUSDT ||| current_price: 0.00768 
+DGBUSDT ||| sma: 0.0077044999999999995 | rsi: 46.97694537361057 | macd: -5.095560949325631e-05
+DGBUSDT ||| macd_signal: -5.470606162446497e-05 | bb_lower: 0.007529402884089924
+DGBUSDT ||| bb_upper: 0.007879597115910077 | sma50: 0.007802
+DGBUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+WINGUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 4.37
+WINGUSDT ||| current_price: 3.432 
+WINGUSDT ||| sma: 3.46705 | rsi: 39.66579747723102 | macd: -0.02333890706707553
+WINGUSDT ||| macd_signal: -0.02090996795423182 | bb_lower: 3.3889744596560494
+WINGUSDT ||| bb_upper: 3.5451255403439514 | sma50: 3.49774
+WINGUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+AIUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 55.5
+AIUSDT ||| current_price: 0.252 
+AIUSDT ||| sma: 0.252395 | rsi: 46.20039361891557 | macd: -0.001465480122688767
+AIUSDT ||| macd_signal: -0.0016635132047943806 | bb_lower: 0.24804552876776872
+AIUSDT ||| bb_upper: 0.2567444712322312 | sma50: 0.255802
+AIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BTTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 3095238
+BTTCUSDT ||| current_price: 4.2e-06 
+BTTCUSDT ||| sma: 8.500000000000001e-07 | rsi: 100.0 | macd: 0.0
+BTTCUSDT ||| macd_signal: 0.0 | bb_lower: 8.5e-07
+BTTCUSDT ||| bb_upper: 8.5e-07 | sma50: 8.5e-07
+BTTCUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+JTOUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 3.7
+JTOUSDT ||| current_price: 2.655 
+JTOUSDT ||| sma: 2.6542000000000003 | rsi: 49.27097320800233 | macd: -0.00562814249667154
+JTOUSDT ||| macd_signal: -0.005877031385960934 | bb_lower: 2.6273776212837006
+JTOUSDT ||| bb_upper: 2.6810223787162992 | sma50: 2.6636200000000003
+JTOUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SFPUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 20
+SFPUSDT ||| current_price: 0.6296 
+SFPUSDT ||| sma: 0.6291350000000001 | rsi: 50.69108719375205 | macd: -0.0017823660651323792
+SFPUSDT ||| macd_signal: -0.002029103466588623 | bb_lower: 0.6219577372905857
+SFPUSDT ||| bb_upper: 0.6363122627094143 | sma50: 0.631756
+SFPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+DIAUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 21.7
+DIAUSDT ||| current_price: 0.505 
+DIAUSDT ||| sma: 0.5055000000000001 | rsi: 47.25428845621828 | macd: -0.0040955023694164705
+DIAUSDT ||| macd_signal: -0.004363466758974907 | bb_lower: 0.49217258464668245
+DIAUSDT ||| bb_upper: 0.5188274153533174 | sma50: 0.513622
+DIAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+JUPUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 17.8
+JUPUSDT ||| current_price: 0.7281 
+JUPUSDT ||| sma: 0.7277849999999999 | rsi: 50.44601123124598 | macd: -0.002741784695465266
+JUPUSDT ||| macd_signal: -0.0030415588505563656 | bb_lower: 0.7130066002219434
+JUPUSDT ||| bb_upper: 0.7425633997780566 | sma50: 0.73107
+JUPUSDT ||| buy signals: 2 | sell signals: 0
+BELUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 14.6
+BELUSDT ||| current_price: 0.887 
+BELUSDT ||| sma: 0.8893 | rsi: 46.67868804784052 | macd: -0.007233580176692067
+BELUSDT ||| macd_signal: -0.00723450481135573 | bb_lower: 0.8662693248036459
+BELUSDT ||| bb_upper: 0.9123306751963542 | sma50: 0.902676
+BELUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+JUVUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 7.97
+JUVUSDT ||| current_price: 1.379 
+JUVUSDT ||| sma: 1.4082500000000002 | rsi: 40.43168111299164 | macd: -0.02141142289390885
+JUVUSDT ||| macd_signal: -0.01903225054074755 | bb_lower: 1.3492283937866827
+JUVUSDT ||| bb_upper: 1.4672716062133178 | sma50: 1.4446800000000002
+JUVUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+WOOUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 108.1
+WOOUSDT ||| current_price: 0.1202 
+WOOUSDT ||| sma: 0.11989 | rsi: 50.94119908903496 | macd: -0.00048098611663810464
+WOOUSDT ||| macd_signal: -0.0006010278569846313 | bb_lower: 0.11785835042391665
+WOOUSDT ||| bb_upper: 0.12192164957608337 | sma50: 0.12097999999999999
+WOOUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BLURUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 72.6
+BLURUSDT ||| current_price: 0.1377 
+BLURUSDT ||| sma: 0.138765 | rsi: 41.33612808617196 | macd: -0.0010675126302130689
+BLURUSDT ||| macd_signal: -0.001057720038701919 | bb_lower: 0.13489497416029267
+BLURUSDT ||| bb_upper: 0.14263502583970733 | sma50: 0.140406
+BLURUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+STRKUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 69.12
+STRKUSDT ||| current_price: 0.217 
+STRKUSDT ||| sma: 0.217225 | rsi: 48.73766905748343 | macd: -0.0010449966758540596
+STRKUSDT ||| macd_signal: -0.0012013883324155988 | bb_lower: 0.2121456791792601
+STRKUSDT ||| bb_upper: 0.2223043208207399 | sma50: 0.21895399999999998
+STRKUSDT ||| buy signals: 1 | sell signals: 1
+DFUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 158
+DFUSDT ||| current_price: 0.07565 
+DFUSDT ||| sma: 0.075618 | rsi: 50.18989352320115 | macd: -8.615339838703717e-05
+DFUSDT ||| macd_signal: -7.939506840231203e-05 | bb_lower: 0.0750002103918
+DFUSDT ||| bb_upper: 0.0762357896082 | sma50: 0.0756936
+DFUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+FLOKIUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 135135
+FLOKIUSDT ||| current_price: 8.88e-05 
+FLOKIUSDT ||| sma: 8.9061e-05 | rsi: 45.60443419025093 | macd: -4.4897388380729067e-07
+FLOKIUSDT ||| macd_signal: -4.682056399160853e-07 | bb_lower: 8.758274562405522e-05
+FLOKIUSDT ||| bb_upper: 9.05392543759448e-05 | sma50: 8.98954e-05
+FLOKIUSDT ||| buy signals: 1 | sell signals: 1
+SANDUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 30
+SANDUSDT ||| current_price: 0.3298 
+SANDUSDT ||| sma: 0.32999500000000004 | rsi: 49.0842503006057 | macd: -0.0017023840228589382
+SANDUSDT ||| macd_signal: -0.0017538949150423244 | bb_lower: 0.3230996464920193
+SANDUSDT ||| bb_upper: 0.3368903535079807 | sma50: 0.33247
+SANDUSDT ||| buy signals: 1 | sell signals: 1
+COOKIEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 65.7
+COOKIEUSDT ||| current_price: 0.1977 
+COOKIEUSDT ||| sma: 0.19875500000000001 | rsi: 46.31404745179972 | macd: -0.0010477484491800138
+COOKIEUSDT ||| macd_signal: -0.0010202498070990907 | bb_lower: 0.1945628764331183
+COOKIEUSDT ||| bb_upper: 0.2029471235668817 | sma50: 0.200198
+COOKIEUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+HARDUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 97
+HARDUSDT ||| current_price: 0.133 
+HARDUSDT ||| sma: 0.133375 | rsi: 47.03653992760275 | macd: -0.0005113634043267257
+HARDUSDT ||| macd_signal: -0.0004728148218990923 | bb_lower: 0.13136216617675484
+HARDUSDT ||| bb_upper: 0.13538783382324515 | sma50: 0.133922
+HARDUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+UNIUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 1.79
+UNIUSDT ||| current_price: 8.379 
+UNIUSDT ||| sma: 8.40235 | rsi: 44.892699479325486 | macd: -0.06625056718084466
+UNIUSDT ||| macd_signal: -0.06828472374816466 | bb_lower: 8.235441312389069
+UNIUSDT ||| bb_upper: 8.569258687610931 | sma50: 8.5313
+UNIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SYNUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 37.4
+SYNUSDT ||| current_price: 0.3204 
+SYNUSDT ||| sma: 0.32116 | rsi: 47.20723903882793 | macd: -0.0017681848090327357
+SYNUSDT ||| macd_signal: -0.0019605179457413205 | bb_lower: 0.3148682911701204
+SYNUSDT ||| bb_upper: 0.3274517088298796 | sma50: 0.324524
+SYNUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SOLUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 0.083
+SOLUSDT ||| current_price: 154.96 
+SOLUSDT ||| sma: 155.759 | rsi: 44.74012153044331 | macd: -1.4322594427778483
+SOLUSDT ||| macd_signal: -1.430426351922399 | bb_lower: 150.50581848781135
+SOLUSDT ||| bb_upper: 161.01218151218868 | sma50: 157.7702
+SOLUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping TSTUSDT: No market data available in self.data
+Skipping KAITOUSDT: No market data available in self.data
+BAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 80.2
+BAKEUSDT ||| current_price: 0.1868 
+BAKEUSDT ||| sma: 0.18795000000000003 | rsi: 43.972418609180295 | macd: -0.0017176640946426902
+BAKEUSDT ||| macd_signal: -0.0016129889546431402 | bb_lower: 0.18234268335119147
+BAKEUSDT ||| bb_upper: 0.19355731664880854 | sma50: 0.190252
+BAKEUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+GLMUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 35.4
+GLMUSDT ||| current_price: 0.3387 
+GLMUSDT ||| sma: 0.33269 | rsi: 64.0192610640299 | macd: 0.00016915378702336836
+GLMUSDT ||| macd_signal: -0.001040622699868711 | bb_lower: 0.32727228830594113
+GLMUSDT ||| bb_upper: 0.33810771169405884 | sma50: 0.33551
+GLMUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+PNUTUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 91.4
+PNUTUSDT ||| current_price: 0.164 
+PNUTUSDT ||| sma: 0.16501000000000005 | rsi: 43.871420535826644 | macd: -0.001070063198362975
+PNUTUSDT ||| macd_signal: -0.0010865182565870447 | bb_lower: 0.161802571123158
+PNUTUSDT ||| bb_upper: 0.168217428876842 | sma50: 0.1668
+PNUTUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ADAUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 16.4
+ADAUSDT ||| current_price: 0.7298 
+ADAUSDT ||| sma: 0.726335 | rsi: 52.06431883716452 | macd: -0.0029228039355673197
+ADAUSDT ||| macd_signal: -0.0039001538500208362 | bb_lower: 0.7125889787574751
+ADAUSDT ||| bb_upper: 0.7400810212425248 | sma50: 0.733148
+ADAUSDT ||| buy signals: 2 | sell signals: 0
+ENAUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 24.49
+ENAUSDT ||| current_price: 0.4082 
+ENAUSDT ||| sma: 0.40950000000000003 | rsi: 46.615103051889236 | macd: -0.0014871164876738563
+ENAUSDT ||| macd_signal: -0.0014346301887379958 | bb_lower: 0.4022988889746098
+ENAUSDT ||| bb_upper: 0.41670111102539015 | sma50: 0.410358
+ENAUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+TRUUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 258
+TRUUSDT ||| current_price: 0.0464 
+TRUUSDT ||| sma: 0.046340000000000006 | rsi: 46.10850419956211 | macd: -0.0004403174115676853
+TRUUSDT ||| macd_signal: -0.0005309057630119416 | bb_lower: 0.04525114739289454
+TRUUSDT ||| bb_upper: 0.04742885260710546 | sma50: 0.047514
+TRUUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+OMUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 1
+OMUSDT ||| current_price: 8.2921 
+OMUSDT ||| sma: 8.320085 | rsi: 49.84514708464985 | macd: -0.06928682633860994
+OMUSDT ||| macd_signal: -0.06188104454790643 | bb_lower: 8.023764192259458
+OMUSDT ||| bb_upper: 8.616405807740543 | sma50: 8.39317
+OMUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+CETUSUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 94.7
+CETUSUSDT ||| current_price: 0.1266 
+CETUSUSDT ||| sma: 0.126495 | rsi: 47.95761975107761 | macd: -0.0011551173275478888
+CETUSUSDT ||| macd_signal: -0.0013114108479291844 | bb_lower: 0.12263211247898632
+CETUSUSDT ||| bb_upper: 0.13035788752101368 | sma50: 0.128994
+CETUSUSDT ||| buy signals: 2 | sell signals: 0
+OGNUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 157
+OGNUSDT ||| current_price: 0.0763 
+OGNUSDT ||| sma: 0.07594 | rsi: 49.866738133121736 | macd: -0.0004103539888759
+OGNUSDT ||| macd_signal: -0.0005185861511970331 | bb_lower: 0.07468397452255117
+OGNUSDT ||| bb_upper: 0.07719602547744885 | sma50: 0.076986
+OGNUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+BBUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 73.6
+BBUSDT ||| current_price: 0.163 
+BBUSDT ||| sma: 0.161855 | rsi: 52.52398728330186 | macd: -0.00021878931490407205
+BBUSDT ||| macd_signal: -0.0005077434848657469 | bb_lower: 0.15908915474041044
+BBUSDT ||| bb_upper: 0.16462084525958956 | sma50: 0.163126
+BBUSDT ||| buy signals: 2 | sell signals: 1
+Skipping BTTCUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+Skipping ANIIMEUSDT: No market data available in self.data
+PROMUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 2.28
+PROMUSDT ||| current_price: 6.564 
+PROMUSDT ||| sma: 6.55885 | rsi: 49.709718093568554 | macd: -0.02436887541773025
+PROMUSDT ||| macd_signal: -0.029813928376869442 | bb_lower: 6.410464994018946
+PROMUSDT ||| bb_upper: 6.707235005981056 | sma50: 6.607559999999999
+PROMUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+CVCUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 112
+CVCUSDT ||| current_price: 0.1244 
+CVCUSDT ||| sma: 0.12452500000000001 | rsi: 46.701044182775114 | macd: -0.0008466113246728413
+CVCUSDT ||| macd_signal: -0.0008911255648604866 | bb_lower: 0.12180038993615842
+CVCUSDT ||| bb_upper: 0.1272496100638416 | sma50: 0.12603999999999999
+CVCUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SLPUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 4858
+SLPUSDT ||| current_price: 0.002264 
+SLPUSDT ||| sma: 0.002283 | rsi: 38.78922861547218 | macd: -2.0418713766267357e-05
+SLPUSDT ||| macd_signal: -1.981265782032301e-05 | bb_lower: 0.0022330560313951575
+SLPUSDT ||| bb_upper: 0.002332943968604843 | sma50: 0.0023214
+SLPUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+LUMIAUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 33.03
+LUMIAUSDT ||| current_price: 0.454 
+LUMIAUSDT ||| sma: 0.45799999999999996 | rsi: 45.35817113069742 | macd: -0.0034055285695405724
+LUMIAUSDT ||| macd_signal: -0.003385481362000354 | bb_lower: 0.44461343957545557
+LUMIAUSDT ||| bb_upper: 0.47138656042454447 | sma50: 0.46316
+LUMIAUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ARKUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 33
+ARKUSDT ||| current_price: 0.4436 
+ARKUSDT ||| sma: 0.44389500000000004 | rsi: 47.9114814835981 | macd: -0.0017083653822393408
+ARKUSDT ||| macd_signal: -0.0016957941599062391 | bb_lower: 0.4377900921382901
+ARKUSDT ||| bb_upper: 0.44999990786170996 | sma50: 0.44604
+ARKUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+LINAUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 5756
+LINAUSDT ||| current_price: 0.002432 
+LINAUSDT ||| sma: 0.00243955 | rsi: 46.673213338901505 | macd: -1.875081203495674e-05
+LINAUSDT ||| macd_signal: -2.1650422497222003e-05 | bb_lower: 0.0023924056472098476
+LINAUSDT ||| bb_upper: 0.0024866943527901524 | sma50: 0.00248522
+LINAUSDT ||| buy signals: 1 | sell signals: 1
+MKRUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 0.0068
+MKRUSDT ||| current_price: 1456.0 
+MKRUSDT ||| sma: 1501.45 | rsi: 37.40006687967159 | macd: -14.222870563882225
+MKRUSDT ||| macd_signal: -7.299111221996602 | bb_lower: 1430.5741225803893
+MKRUSDT ||| bb_upper: 1572.3258774196108 | sma50: 1491.68
+MKRUSDT ||| buy signals: 1 | sell signals: 2
+CELRUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 908.4
+CELRUSDT ||| current_price: 0.01321 
+CELRUSDT ||| sma: 0.013038 | rsi: 59.659346830630156 | macd: -1.684877936404018e-05
+CELRUSDT ||| macd_signal: -4.05256450878601e-05 | bb_lower: 0.01286484111342465
+CELRUSDT ||| bb_upper: 0.013211158886575348 | sma50: 0.0131356
+CELRUSDT ||| buy signals: 2 | sell signals: 1
+TRBUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 0.31
+TRBUSDT ||| current_price: 35.42 
+TRBUSDT ||| sma: 34.739 | rsi: 63.9827178987104 | macd: -0.04930174517309638
+TRBUSDT ||| macd_signal: -0.17163469561770933 | bb_lower: 33.91739425513186
+TRBUSDT ||| bb_upper: 35.560605744868134 | sma50: 35.0542
+TRBUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+REZUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 652.7
+REZUSDT ||| current_price: 0.01532 
+REZUSDT ||| sma: 0.015400500000000001 | rsi: 43.533905088131974 | macd: -0.0001271505058951395
+REZUSDT ||| macd_signal: -0.0001357110755137271 | bb_lower: 0.01500917021580266
+REZUSDT ||| bb_upper: 0.015791829784197336 | sma50: 0.015648
+REZUSDT ||| buy signals: 1 | sell signals: 1
+Skipping BTTCUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ARKMUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 19.4
+ARKMUSDT ||| current_price: 0.669 
+ARKMUSDT ||| sma: 0.6769 | rsi: 39.74010686326121 | macd: -0.008440182457625456
+ARKMUSDT ||| macd_signal: -0.008066558988189726 | bb_lower: 0.6534658369042122
+ARKMUSDT ||| bb_upper: 0.7003341630957879 | sma50: 0.6903400000000001
+ARKMUSDT ||| buy signals: 1 | sell signals: 2
+BURGERUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 31.1
+BURGERUSDT ||| current_price: 0.3215 
+BURGERUSDT ||| sma: 0.3232300000000001 | rsi: 42.110488664523665 | macd: -0.004499540052655959
+BURGERUSDT ||| macd_signal: -0.004474046538006642 | bb_lower: 0.31037385749923396
+BURGERUSDT ||| bb_upper: 0.33608614250076607 | sma50: 0.331732
+BURGERUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+1MBABYDOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 8355
+1MBABYDOGEUSDT ||| current_price: 0.0015558 
+1MBABYDOGEUSDT ||| sma: 0.00155966 | rsi: 48.474625937708836 | macd: -7.004215556770475e-06
+1MBABYDOGEUSDT ||| macd_signal: -6.892249190972088e-06 | bb_lower: 0.001529335725894923
+1MBABYDOGEUSDT ||| bb_upper: 0.001589984274105077 | sma50: 0.0015673780000000001
+1MBABYDOGEUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+DOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 57
+DOGEUSDT ||| current_price: 0.22751 
+DOGEUSDT ||| sma: 0.22782100000000002 | rsi: 47.84896100735157 | macd: -0.0012274437369560465
+DOGEUSDT ||| macd_signal: -0.0013085195985112028 | bb_lower: 0.2230962274128809
+DOGEUSDT ||| bb_upper: 0.23254577258711903 | sma50: 0.22983040000000002
+DOGEUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+PEPEUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 237699
+PEPEUSDT ||| current_price: 4.207e-05 
+PEPEUSDT ||| sma: 4.681999999999999e-05 | rsi: 100.0 | macd: 0.0
+PEPEUSDT ||| macd_signal: 0.0 | bb_lower: 4.682e-05
+PEPEUSDT ||| bb_upper: 4.682e-05 | sma50: 4.682e-05
+PEPEUSDT ||| buy signals: 1 | sell signals: 2
+TFUELUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 258
+TFUELUSDT ||| current_price: 0.05038 
+TFUELUSDT ||| sma: 0.05141650000000001 | rsi: 34.70988748468575 | macd: -0.000756651496939334
+TFUELUSDT ||| macd_signal: -0.0007277316329980889 | bb_lower: 0.04989365693520286
+TFUELUSDT ||| bb_upper: 0.05293934306479713 | sma50: 0.0532126
+TFUELUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRUMPUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 0.798
+TRUMPUSDT ||| current_price: 15.02 
+TRUMPUSDT ||| sma: 14.970500000000001 | rsi: 51.47276663280141 | macd: -0.04659279905059677
+TRUMPUSDT ||| macd_signal: -0.061790117233463865 | bb_lower: 14.745069301114656
+TRUMPUSDT ||| bb_upper: 15.195930698885347 | sma50: 15.052200000000001
+TRUMPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SHIBUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 218213
+SHIBUSDT ||| current_price: 6.874e-05 
+SHIBUSDT ||| sma: 1.5070000000000003e-05 | rsi: 100.0 | macd: 0.0
+SHIBUSDT ||| macd_signal: 0.0 | bb_lower: 1.507e-05
+SHIBUSDT ||| bb_upper: 1.507e-05 | sma50: 1.507e-05
+SHIBUSDT ||| buy signals: 1 | sell signals: 2
+XRPUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 5
+XRPUSDT ||| current_price: 2.4596 
+XRPUSDT ||| sma: 2.456515 | rsi: 50.392779118972705 | macd: -0.008386003621202676
+XRPUSDT ||| macd_signal: -0.009967590364173289 | bb_lower: 2.4132503134762366
+XRPUSDT ||| bb_upper: 2.4997796865237643 | sma50: 2.46972
+XRPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+ENSUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 0.49
+ENSUSDT ||| current_price: 26.33 
+ENSUSDT ||| sma: 26.152 | rsi: 56.2745391607102 | macd: -0.042243915932132836
+ENSUSDT ||| macd_signal: -0.08747620631771826 | bb_lower: 25.769084865799325
+ENSUSDT ||| bb_upper: 26.53491513420067 | sma50: 26.326
+ENSUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+MANTAUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 27.2
+MANTAUSDT ||| current_price: 0.367 
+MANTAUSDT ||| sma: 0.36630000000000007 | rsi: 49.851890068996944 | macd: -0.0014949249656929786
+MANTAUSDT ||| macd_signal: -0.0018593457160405247 | bb_lower: 0.360363671168141
+MANTAUSDT ||| bb_upper: 0.3722363288318589 | sma50: 0.36986
+MANTAUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+TURBOUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 3887
+TURBOUSDT ||| current_price: 0.003344 
+TURBOUSDT ||| sma: 0.0033462500000000003 | rsi: 45.97417135849282 | macd: -2.3090857976046462e-05
+TURBOUSDT ||| macd_signal: -2.7516477950367755e-05 | bb_lower: 0.00327744048030979
+TURBOUSDT ||| bb_upper: 0.0034150595196902095 | sma50: 0.00340092
+TURBOUSDT ||| buy signals: 1 | sell signals: 1
+SUIUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 4.5
+SUIUSDT ||| current_price: 3.0518 
+SUIUSDT ||| sma: 3.0890600000000004 | rsi: 39.60429476499082 | macd: -0.05021801660872027
+SUIUSDT ||| macd_signal: -0.05414756014242065 | bb_lower: 2.9366940536733965
+SUIUSDT ||| bb_upper: 3.2414259463266033 | sma50: 3.200174
+SUIUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+LTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 0.121
+LTCUSDT ||| current_price: 123.51 
+LTCUSDT ||| sma: 122.98100000000001 | rsi: 52.19760150995476 | macd: -0.09791565620542997
+LTCUSDT ||| macd_signal: -0.22665705945867543 | bb_lower: 121.21952448214553
+LTCUSDT ||| bb_upper: 124.74247551785452 | sma50: 123.35520000000001
+LTCUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+BNXUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 11.0
+BNXUSDT ||| current_price: 0.9919 
+BNXUSDT ||| sma: 1.011395 | rsi: 40.575886052515585 | macd: -0.01421902424458299
+BNXUSDT ||| macd_signal: -0.013057419810657597 | bb_lower: 0.956262052500342
+BNXUSDT ||| bb_upper: 1.0665279474996576 | sma50: 1.029608
+BNXUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRXUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 60.6
+TRXUSDT ||| current_price: 0.2475 
+TRXUSDT ||| sma: 0.247 | rsi: 55.385847591554665 | macd: 0.00016448495352094916
+TRXUSDT ||| macd_signal: 0.0001139375555519523 | bb_lower: 0.24490429009641151
+TRXUSDT ||| bb_upper: 0.24909570990358854 | sma50: 0.24636
+TRXUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+DOTUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 2.98
+DOTUSDT ||| current_price: 4.697 
+DOTUSDT ||| sma: 4.689449999999999 | rsi: 49.57854856553026 | macd: -0.01598096857680531
+DOTUSDT ||| macd_signal: -0.020218980676484255 | bb_lower: 4.6363257117695245
+DOTUSDT ||| bb_upper: 4.742574288230475 | sma50: 4.73082
+DOTUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+CAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 4.69
+CAKEUSDT ||| current_price: 2.345 
+CAKEUSDT ||| sma: 2.36085 | rsi: 40.2806697778211 | macd: -0.015551914590616
+CAKEUSDT ||| macd_signal: -0.015409119886478698 | bb_lower: 2.3165723532693985
+CAKEUSDT ||| bb_upper: 2.4051276467306018 | sma50: 2.38706
+CAKEUSDT ||| buy signals: 0 | sell signals: 2
+STPTUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 138.0
+STPTUSDT ||| current_price: 0.10863 
+STPTUSDT ||| sma: 0.10670200000000002 | rsi: 56.35988982924745 | macd: -7.827774808782939e-05
+STPTUSDT ||| macd_signal: -0.0004678220800211491 | bb_lower: 0.10412201085273601
+STPTUSDT ||| bb_upper: 0.109281989147264 | sma50: 0.10844200000000001
+STPTUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SCRUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 16.3
+SCRUSDT ||| current_price: 0.612 
+SCRUSDT ||| sma: 0.60585 | rsi: 54.6445401944662 | macd: 0.0001421699882546701
+SCRUSDT ||| macd_signal: -0.001047191297431321 | bb_lower: 0.5977685397359148
+SCRUSDT ||| bb_upper: 0.6139314602640852 | sma50: 0.60902
+SCRUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+NEARUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 3.9
+NEARUSDT ||| current_price: 3.321 
+NEARUSDT ||| sma: 3.3049500000000003 | rsi: 54.5310672959292 | macd: -0.0031741922440402526
+NEARUSDT ||| macd_signal: -0.007402424399474082 | bb_lower: 3.263648789363992
+NEARUSDT ||| bb_upper: 3.3462512106360087 | sma50: 3.3224199999999997
+NEARUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+AUDIOUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 117.3
+AUDIOUSDT ||| current_price: 0.0937 
+AUDIOUSDT ||| sma: 0.093615 | rsi: 50.616405140334344 | macd: -0.00020330440516226622
+AUDIOUSDT ||| macd_signal: -0.00025673062098201585 | bb_lower: 0.09235599245435118
+AUDIOUSDT ||| bb_upper: 0.09487400754564883 | sma50: 0.09403
+AUDIOUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+WLDUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 12.1
+WLDUSDT ||| current_price: 1.157 
+WLDUSDT ||| sma: 1.1589500000000001 | rsi: 46.319136989525916 | macd: -0.006699932199855985
+WLDUSDT ||| macd_signal: -0.007780639006184285 | bb_lower: 1.1359589147711593
+WLDUSDT ||| bb_upper: 1.181941085228841 | sma50: 1.1737
+WLDUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ETHFIUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 11.1
+ETHFIUSDT ||| current_price: 1.075 
+ETHFIUSDT ||| sma: 1.0745999999999998 | rsi: 47.250515153095066 | macd: -0.0050013622480120645
+ETHFIUSDT ||| macd_signal: -0.006017608800635531 | bb_lower: 1.0565733530572026
+ETHFIUSDT ||| bb_upper: 1.0926266469427974 | sma50: 1.08598
+ETHFIUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+DGBUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 1562.5
+DGBUSDT ||| current_price: 0.00768 
+DGBUSDT ||| sma: 0.007696499999999999 | rsi: 45.999283749956156 | macd: -4.593497268607326e-05
+DGBUSDT ||| macd_signal: -5.297366213382291e-05 | bb_lower: 0.007532637252555599
+DGBUSDT ||| bb_upper: 0.007860362747444402 | sma50: 0.007799199999999999
+DGBUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+WINGUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 3.2
+WINGUSDT ||| current_price: 3.429 
+WINGUSDT ||| sma: 3.4625500000000002 | rsi: 39.03852458996909 | macd: -0.022788626042203664
+WINGUSDT ||| macd_signal: -0.02129708001401174 | bb_lower: 3.38616813042352
+WINGUSDT ||| bb_upper: 3.5389318695764804 | sma50: 3.4953799999999995
+WINGUSDT ||| buy signals: 1 | sell signals: 2
+AIUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 55.5
+AIUSDT ||| current_price: 0.2518 
+AIUSDT ||| sma: 0.25217 | rsi: 44.96832632971697 | macd: -0.001361163737171156
+AIUSDT ||| macd_signal: -0.0016050469372040866 | bb_lower: 0.24813758137093836
+AIUSDT ||| bb_upper: 0.2562024186290616 | sma50: 0.25562999999999997
+AIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+BTTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 3571428
+BTTCUSDT ||| current_price: 4.2e-06 
+BTTCUSDT ||| sma: 8.500000000000001e-07 | rsi: 100.0 | macd: 0.0
+BTTCUSDT ||| macd_signal: 0.0 | bb_lower: 8.5e-07
+BTTCUSDT ||| bb_upper: 8.5e-07 | sma50: 8.5e-07
+BTTCUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+JTOUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 5.6
+JTOUSDT ||| current_price: 2.658 
+JTOUSDT ||| sma: 2.65415 | rsi: 50.261869675529695 | macd: -0.004469893519145618
+JTOUSDT ||| macd_signal: -0.005565313412770772 | bb_lower: 2.6274346486079523
+JTOUSDT ||| bb_upper: 2.6808653513920486 | sma50: 2.66334
+JTOUSDT ||| buy signals: 2 | sell signals: 1
+SFPUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 23
+SFPUSDT ||| current_price: 0.6305 
+SFPUSDT ||| sma: 0.62892 | rsi: 51.59720001267064 | macd: -0.0014195651706238044
+SFPUSDT ||| macd_signal: -0.0019028176719221598 | bb_lower: 0.6222083385067538
+SFPUSDT ||| bb_upper: 0.6356316614932462 | sma50: 0.631682
+SFPUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+DIAUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 21.8
+DIAUSDT ||| current_price: 0.5039 
+DIAUSDT ||| sma: 0.5049950000000001 | rsi: 46.12669464173573 | macd: -0.0036201505722417426
+DIAUSDT ||| macd_signal: -0.0042108617511051535 | bb_lower: 0.4922995716889903
+DIAUSDT ||| bb_upper: 0.5176904283110096 | sma50: 0.5132439999999999
+DIAUSDT ||| buy signals: 1 | sell signals: 1
+JUPUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 16.4
+JUPUSDT ||| current_price: 0.7283 
+JUPUSDT ||| sma: 0.7272900000000001 | rsi: 50.49661803792182 | macd: -0.002316347822202247
+JUPUSDT ||| macd_signal: -0.0029073020948178355 | bb_lower: 0.7131851214113674
+JUPUSDT ||| bb_upper: 0.7413948785886326 | sma50: 0.730998
+JUPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+BELUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 13.5
+BELUSDT ||| current_price: 0.8851 
+BELUSDT ||| sma: 0.8883300000000001 | rsi: 46.354924554761034 | macd: -0.006415448505486809
+BELUSDT ||| macd_signal: -0.007061428161247942 | bb_lower: 0.8666826352643109
+BELUSDT ||| bb_upper: 0.9099773647356892 | sma50: 0.9023300000000001
+BELUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+JUVUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 7.28
+JUVUSDT ||| current_price: 1.372 
+JUVUSDT ||| sma: 1.405 | rsi: 39.42431386646326 | macd: -0.021369065986423408
+JUVUSDT ||| macd_signal: -0.019469395214214022 | bb_lower: 1.3454953783307586
+JUVUSDT ||| bb_upper: 1.464504621669241 | sma50: 1.4439200000000003
+JUVUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+WOOUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 99.6
+WOOUSDT ||| current_price: 0.1204 
+WOOUSDT ||| sma: 0.11984500000000001 | rsi: 51.38694922739596 | macd: -0.0003665176095803413
+WOOUSDT ||| macd_signal: -0.0005505149312776629 | bb_lower: 0.11792408875790687
+WOOUSDT ||| bb_upper: 0.12176591124209309 | sma50: 0.12094
+WOOUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BLURUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 101.7
+BLURUSDT ||| current_price: 0.1376 
+BLURUSDT ||| sma: 0.1385 | rsi: 39.90721297695266 | macd: -0.001035170572052685
+BLURUSDT ||| macd_signal: -0.001056271954817929 | bb_lower: 0.13501173395509997
+BLURUSDT ||| bb_upper: 0.14198826604490006 | sma50: 0.14034400000000002
+BLURUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+STRKUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 68.96
+STRKUSDT ||| current_price: 0.2175 
+STRKUSDT ||| sma: 0.217035 | rsi: 50.43656248410155 | macd: -0.000863452299233125
+STRKUSDT ||| macd_signal: -0.0011330338705479843 | bb_lower: 0.21232531848210573
+STRKUSDT ||| bb_upper: 0.22174468151789428 | sma50: 0.21891200000000002
+STRKUSDT ||| buy signals: 2 | sell signals: 0
+DFUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 172
+DFUSDT ||| current_price: 0.07558 
+DFUSDT ||| sma: 0.07562750000000001 | rsi: 49.88714525045801 | macd: -7.364604391892071e-05
+DFUSDT ||| macd_signal: -7.837289314778427e-05 | bb_lower: 0.07501643944653585
+DFUSDT ||| bb_upper: 0.07623856055346415 | sma50: 0.075706
+DFUSDT ||| buy signals: 2 | sell signals: 1
+FLOKIUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 135089
+FLOKIUSDT ||| current_price: 8.883e-05 
+FLOKIUSDT ||| sma: 8.89875e-05 | rsi: 45.87491729549125 | macd: -4.0460288003343046e-07
+FLOKIUSDT ||| macd_signal: -4.5449237407973706e-07 | bb_lower: 8.763863566286306e-05
+FLOKIUSDT ||| bb_upper: 9.033636433713694e-05 | sma50: 8.9858e-05
+FLOKIUSDT ||| buy signals: 1 | sell signals: 1
+SANDUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 42
+SANDUSDT ||| current_price: 0.3294 
+SANDUSDT ||| sma: 0.32975000000000004 | rsi: 48.206325906770914 | macd: -0.001483410693933096
+SANDUSDT ||| macd_signal: -0.001697899908855801 | bb_lower: 0.32315409217772223
+SANDUSDT ||| bb_upper: 0.33634590782227775 | sma50: 0.33236000000000004
+SANDUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+COOKIEUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 50.6
+COOKIEUSDT ||| current_price: 0.1976 
+COOKIEUSDT ||| sma: 0.19856500000000002 | rsi: 46.116507465526944 | macd: -0.0009387545715980605
+COOKIEUSDT ||| macd_signal: -0.0009983690075471242 | bb_lower: 0.19462075102205686
+COOKIEUSDT ||| bb_upper: 0.20250924897794312 | sma50: 0.200024
+COOKIEUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+HARDUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 112
+HARDUSDT ||| current_price: 0.1329 
+HARDUSDT ||| sma: 0.13325 | rsi: 46.294647487641086 | macd: -0.0004765961407040553
+HARDUSDT ||| macd_signal: -0.0004750656187979308 | bb_lower: 0.1314306594601341
+HARDUSDT ||| bb_upper: 0.1350693405398659 | sma50: 0.133924
+HARDUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+UNIUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 1.67
+UNIUSDT ||| current_price: 8.355 
+UNIUSDT ||| sma: 8.3944 | rsi: 43.129946986106845 | macd: -0.06095074180895388
+UNIUSDT ||| macd_signal: -0.06686236372843991 | bb_lower: 8.235165079206842
+UNIUSDT ||| bb_upper: 8.55363492079316 | sma50: 8.524840000000001
+UNIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SYNUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 40.6
+SYNUSDT ||| current_price: 0.3197 
+SYNUSDT ||| sma: 0.320805 | rsi: 44.42126709990514 | macd: -0.001674062463520254
+SYNUSDT ||| macd_signal: -0.0019080013677927792 | bb_lower: 0.3149612084226085
+SYNUSDT ||| bb_upper: 0.3266487915773915 | sma50: 0.32435200000000003
+SYNUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SOLUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 0.077
+SOLUSDT ||| current_price: 155.2 
+SOLUSDT ||| sma: 155.56799999999998 | rsi: 43.274930890313314 | macd: -1.2991291663886102
+SOLUSDT ||| macd_signal: -1.4025723886481094 | bb_lower: 150.50587270313125
+SOLUSDT ||| bb_upper: 160.56712729686873 | sma50: 157.67520000000002
+SOLUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping TSTUSDT: No market data available in self.data
+Skipping KAITOUSDT: No market data available in self.data
+BAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 70.0
+BAKEUSDT ||| current_price: 0.1857 
+BAKEUSDT ||| sma: 0.187635 | rsi: 41.18862789439299 | macd: -0.0016331681324854297
+BAKEUSDT ||| macd_signal: -0.0016242065659681105 | bb_lower: 0.18225828167001415
+BAKEUSDT ||| bb_upper: 0.19301171832998584 | sma50: 0.190164
+BAKEUSDT ||| buy signals: 0 | sell signals: 2
+GLMUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 38.3
+GLMUSDT ||| current_price: 0.3392 
+GLMUSDT ||| sma: 0.332795 | rsi: 63.00451034618274 | macd: 0.00042371438508126413
+GLMUSDT ||| macd_signal: -0.0007686061786517202 | bb_lower: 0.3271266757326402
+GLMUSDT ||| bb_upper: 0.3384633242673598 | sma50: 0.33542
+GLMUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+PNUTUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 91.5
+PNUTUSDT ||| current_price: 0.1638 
+PNUTUSDT ||| sma: 0.16474500000000003 | rsi: 43.0737376263734 | macd: -0.001060132503607647
+PNUTUSDT ||| macd_signal: -0.0010875501467160291 | bb_lower: 0.16188389881339374
+PNUTUSDT ||| bb_upper: 0.16760610118660627 | sma50: 0.16653799999999996
+PNUTUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ADAUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 16.4
+ADAUSDT ||| current_price: 0.7305 
+ADAUSDT ||| sma: 0.726065 | rsi: 52.701314906779054 | macd: -0.002264539574390545
+ADAUSDT ||| macd_signal: -0.003575470996010262 | bb_lower: 0.7128467890771805
+ADAUSDT ||| bb_upper: 0.7392832109228195 | sma50: 0.7329720000000001
+ADAUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ENAUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 26.89
+ENAUSDT ||| current_price: 0.409 
+ENAUSDT ||| sma: 0.409255 | rsi: 48.72417877663794 | macd: -0.0012453433201672914
+ENAUSDT ||| macd_signal: -0.0013883802046238268 | bb_lower: 0.40249409029789657
+ENAUSDT ||| bb_upper: 0.4160159097021035 | sma50: 0.41029000000000004
+ENAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRUUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 259
+TRUUSDT ||| current_price: 0.0463 
+TRUUSDT ||| sma: 0.04628 | rsi: 44.4418860555429 | macd: -0.00039475921299978595
+TRUUSDT ||| macd_signal: -0.0005040400925483801 | bb_lower: 0.04533005263303679
+TRUUSDT ||| bb_upper: 0.04722994736696321 | sma50: 0.047459999999999995
+TRUUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+OMUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 1
+OMUSDT ||| current_price: 8.2547 
+OMUSDT ||| sma: 8.309650000000001 | rsi: 46.54078873574363 | macd: -0.06466106737222965
+OMUSDT ||| macd_signal: -0.06283601308819164 | bb_lower: 8.01590640092079
+OMUSDT ||| bb_upper: 8.60339359907921 | sma50: 8.387948
+OMUSDT ||| buy signals: 0 | sell signals: 2
+CETUSUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 95.3
+CETUSUSDT ||| current_price: 0.1258 
+CETUSUSDT ||| sma: 0.126305 | rsi: 44.19209758890227 | macd: -0.0010874828077218068
+CETUSUSDT ||| macd_signal: -0.0012729998250625859 | bb_lower: 0.12263649894371083
+CETUSUSDT ||| bb_upper: 0.12997350105628916 | sma50: 0.12885
+CETUSUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+OGNUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 131
+OGNUSDT ||| current_price: 0.0761 
+OGNUSDT ||| sma: 0.07591 | rsi: 48.85977739900818 | macd: -0.0003530819143198749
+OGNUSDT ||| macd_signal: -0.0004851943819835433 | bb_lower: 0.07470020662921277
+OGNUSDT ||| bb_upper: 0.07711979337078724 | sma50: 0.076932
+OGNUSDT ||| buy signals: 2 | sell signals: 0
+BBUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 86.0
+BBUSDT ||| current_price: 0.1627 
+BBUSDT ||| sma: 0.16183000000000003 | rsi: 51.6710355906073 | macd: -0.00015933222181324647
+BBUSDT ||| macd_signal: -0.00044042851569464257 | bb_lower: 0.15910229033803192
+BBUSDT ||| bb_upper: 0.16455770966196803 | sma50: 0.163064
+BBUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping ANIIMEUSDT: No market data available in self.data
+PROMUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 1.97
+PROMUSDT ||| current_price: 6.566 
+PROMUSDT ||| sma: 6.549300000000001 | rsi: 48.934347979005395 | macd: -0.021630451945704898
+PROMUSDT ||| macd_signal: -0.0282559959651427 | bb_lower: 6.428960314110431
+PROMUSDT ||| bb_upper: 6.669639685889568 | sma50: 6.60718
+PROMUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+CVCUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 113
+CVCUSDT ||| current_price: 0.1238 
+CVCUSDT ||| sma: 0.12437000000000001 | rsi: 43.40069961040171 | macd: -0.0007865572979531554
+CVCUSDT ||| macd_signal: -0.0008705755539313187 | bb_lower: 0.12185914357240674
+CVCUSDT ||| bb_upper: 0.12688085642759328 | sma50: 0.125972
+CVCUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SLPUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 4422
+SLPUSDT ||| current_price: 0.002261 
+SLPUSDT ||| sma: 0.0022799499999999998 | rsi: 38.31485418289839 | macd: -1.9393013649652516e-05
+SLPUSDT ||| macd_signal: -1.9760074243228987e-05 | bb_lower: 0.002232526482627271
+SLPUSDT ||| bb_upper: 0.0023273735173727295 | sma50: 0.00231942
+SLPUSDT ||| buy signals: 2 | sell signals: 1
+LUMIAUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 33.03
+LUMIAUSDT ||| current_price: 0.454 
+LUMIAUSDT ||| sma: 0.4573 | rsi: 45.35817113069742 | macd: -0.0031437263845421892
+LUMIAUSDT ||| macd_signal: -0.003337130294101226 | bb_lower: 0.44485652781576007
+LUMIAUSDT ||| bb_upper: 0.46974347218424 | sma50: 0.46298
+LUMIAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ARKUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 24
+ARKUSDT ||| current_price: 0.4424 
+ARKUSDT ||| sma: 0.4435200000000001 | rsi: 46.126022352547245 | macd: -0.0015888735621721883
+ARKUSDT ||| macd_signal: -0.0016782391001884949 | bb_lower: 0.4379750563573679
+ARKUSDT ||| bb_upper: 0.44906494364263216 | sma50: 0.445886
+ARKUSDT ||| buy signals: 1 | sell signals: 1
+Skipping BTTCUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+LINAUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 4111
+LINAUSDT ||| current_price: 0.002432 
+LINAUSDT ||| sma: 0.002437 | rsi: 44.58509231040955 | macd: -1.733656027551626e-05
+LINAUSDT ||| macd_signal: -2.082594065117148e-05 | bb_lower: 0.0023936041476636024
+LINAUSDT ||| bb_upper: 0.0024803958523363975 | sma50: 0.00248262
+LINAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+MKRUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 0.0075
+MKRUSDT ||| current_price: 1452.0 
+MKRUSDT ||| sma: 1497.8 | rsi: 36.609709280987246 | macd: -15.02532383547964
+MKRUSDT ||| macd_signal: -8.84435374469321 | bb_lower: 1424.6683379103165
+MKRUSDT ||| bb_upper: 1570.9316620896834 | sma50: 1491.06
+MKRUSDT ||| buy signals: 1 | sell signals: 2
+CELRUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 1059.0
+CELRUSDT ||| current_price: 0.01322 
+CELRUSDT ||| sma: 0.013040999999999999 | rsi: 58.853243490791414 | macd: -3.594279416879384e-06
+CELRUSDT ||| macd_signal: -3.313937195366396e-05 | bb_lower: 0.012859021979349116
+CELRUSDT ||| bb_upper: 0.013222978020650885 | sma50: 0.013133599999999999
+CELRUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRBUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 0.282
+TRBUSDT ||| current_price: 35.42 
+TRBUSDT ||| sma: 34.7545 | rsi: 63.39586949318059 | macd: 0.0062310297768064515
+TRBUSDT ||| macd_signal: -0.13555100922826388 | bb_lower: 33.89251450128188
+TRBUSDT ||| bb_upper: 35.61648549871812 | sma50: 35.0562
+TRBUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+REZUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 982.9
+REZUSDT ||| current_price: 0.01526 
+REZUSDT ||| sma: 0.015375000000000002 | rsi: 40.6944555585556 | macd: -0.0001227506954874398
+REZUSDT ||| macd_signal: -0.00013311899950846964 | bb_lower: 0.015012701780297039
+REZUSDT ||| bb_upper: 0.01573729821970296 | sma50: 0.0156302
+REZUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ARKMUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 21.0
+ARKMUSDT ||| current_price: 0.666 
+ARKMUSDT ||| sma: 0.67545 | rsi: 36.76129979375728 | macd: -0.008229022253635532
+ARKMUSDT ||| macd_signal: -0.008099051641278887 | bb_lower: 0.6528537613749548
+ARKMUSDT ||| bb_upper: 0.6980462386250452 | sma50: 0.6896800000000001
+ARKMUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+BURGERUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 40.6
+BURGERUSDT ||| current_price: 0.3197 
+BURGERUSDT ||| sma: 0.3222150000000001 | rsi: 42.110488664523665 | macd: -0.004177382183559342
+BURGERUSDT ||| macd_signal: -0.004414713667117182 | bb_lower: 0.31212931212063333
+BURGERUSDT ||| bb_upper: 0.33230068787936673 | sma50: 0.33173
+BURGERUSDT ||| buy signals: 1 | sell signals: 1
+1MBABYDOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 7079
+1MBABYDOGEUSDT ||| current_price: 0.0015538 
+1MBABYDOGEUSDT ||| sma: 0.001558265 | rsi: 47.79552517887309 | macd: -6.29100167582209e-06
+1MBABYDOGEUSDT ||| macd_signal: -6.793697693640065e-06 | bb_lower: 0.00152959806608652
+1MBABYDOGEUSDT ||| bb_upper: 0.0015869319339134802 | sma50: 0.0015668120000000001
+1MBABYDOGEUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+DOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 66
+DOGEUSDT ||| current_price: 0.22699 
+DOGEUSDT ||| sma: 0.227634 | rsi: 46.01888389887531 | macd: -0.0011119056221592372
+DOGEUSDT ||| macd_signal: -0.0012680480852920917 | bb_lower: 0.2231048349555363
+DOGEUSDT ||| bb_upper: 0.23216316504446366 | sma50: 0.22975479999999998
+DOGEUSDT ||| buy signals: 1 | sell signals: 1
+PEPEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 309008
+PEPEUSDT ||| current_price: 4.207e-05 
+PEPEUSDT ||| sma: 4.681999999999999e-05 | rsi: 100.0 | macd: 0.0
+PEPEUSDT ||| macd_signal: 0.0 | bb_lower: 4.682e-05
+PEPEUSDT ||| bb_upper: 4.682e-05 | sma50: 4.682e-05
+PEPEUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TFUELUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 278
+TFUELUSDT ||| current_price: 0.05034 
+TFUELUSDT ||| sma: 0.05129450000000001 | rsi: 33.92449149069208 | macd: -0.0007500205024512235
+TFUELUSDT ||| macd_signal: -0.0007321894068887158 | bb_lower: 0.04983866381416014
+TFUELUSDT ||| bb_upper: 0.05275033618583986 | sma50: 0.0530708
+TFUELUSDT ||| buy signals: 1 | sell signals: 2
+TRUMPUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 0.733
+TRUMPUSDT ||| current_price: 14.99 
+TRUMPUSDT ||| sma: 14.9625 | rsi: 50.21502077796914 | macd: -0.03879292515110855
+TRUMPUSDT ||| macd_signal: -0.05719067881699281 | bb_lower: 14.753801653097263
+TRUMPUSDT ||| bb_upper: 15.171198346902738 | sma50: 15.0498
+TRUMPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+SHIBUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 174570
+SHIBUSDT ||| current_price: 6.874e-05 
+SHIBUSDT ||| sma: 1.5070000000000003e-05 | rsi: 100.0 | macd: 0.0
+SHIBUSDT ||| macd_signal: 0.0 | bb_lower: 1.507e-05
+SHIBUSDT ||| bb_upper: 1.507e-05 | sma50: 1.507e-05
+SHIBUSDT ||| buy signals: 1 | sell signals: 2
+XRPUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 5
+XRPUSDT ||| current_price: 2.4608 
+XRPUSDT ||| sma: 2.45538 | rsi: 50.83865210999563 | macd: -0.006866748403451695
+XRPUSDT ||| macd_signal: -0.00934742197202897 | bb_lower: 2.4138066142826986
+XRPUSDT ||| bb_upper: 2.496953385717302 | sma50: 2.4690779999999997
+XRPUSDT ||| buy signals: 2 | sell signals: 0
+ENSUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 0.45
+ENSUSDT ||| current_price: 26.39 
+ENSUSDT ||| sma: 26.153999999999996 | rsi: 56.2745391607102 | macd: -0.019624712599043193
+ENSUSDT ||| macd_signal: -0.07390590757398324 | bb_lower: 25.7663713116913
+ENSUSDT ||| bb_upper: 26.54162868830869 | sma50: 26.323
+ENSUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+MANTAUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 27.2
+MANTAUSDT ||| current_price: 0.367 
+MANTAUSDT ||| sma: 0.3660500000000001 | rsi: 49.851890068996944 | macd: -0.0012590963787869058
+MANTAUSDT ||| macd_signal: -0.0017392958485898012 | bb_lower: 0.36070303824588584
+MANTAUSDT ||| bb_upper: 0.37139696175411413 | sma50: 0.3697
+MANTAUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+TURBOUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 4504
+TURBOUSDT ||| current_price: 0.00333 
+TURBOUSDT ||| sma: 0.0033458000000000003 | rsi: 44.07226288104007 | macd: -2.3808806693995186e-05
+TURBOUSDT ||| macd_signal: -2.7660067693957498e-05 | bb_lower: 0.0032768200028994105
+TURBOUSDT ||| bb_upper: 0.00341477999710059 | sma50: 0.0034007399999999998
+TURBOUSDT ||| buy signals: 1 | sell signals: 1
+SUIUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 4.2
+SUIUSDT ||| current_price: 3.0402 
+SUIUSDT ||| sma: 3.088535 | rsi: 38.257239547728545 | macd: -0.0510556234463273
+SUIUSDT ||| macd_signal: -0.054315081509942055 | bb_lower: 2.935571405965336
+SUIUSDT ||| bb_upper: 3.2414985940346637 | sma50: 3.199964
+SUIUSDT ||| buy signals: 2 | sell signals: 1
+LTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 0.081
+LTCUSDT ||| current_price: 123.3 
+LTCUSDT ||| sma: 122.97350000000002 | rsi: 51.32761331847664 | macd: -0.10988146817125255
+LTCUSDT ||| macd_signal: -0.22905022185183996 | bb_lower: 121.2193246951913
+LTCUSDT ||| bb_upper: 124.72767530480873 | sma50: 123.3522
+LTCUSDT ||| buy signals: 2 | sell signals: 0
+BNXUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 14.1
+BNXUSDT ||| current_price: 0.9896 
+BNXUSDT ||| sma: 1.011315 | rsi: 40.008941137135935 | macd: -0.014346659572218257
+BNXUSDT ||| macd_signal: -0.01308294687618465 | bb_lower: 0.9560617186494773
+BNXUSDT ||| bb_upper: 1.0665682813505226 | sma50: 1.029576
+BNXUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRXUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 44.4
+TRXUSDT ||| current_price: 0.2475 
+TRXUSDT ||| sma: 0.247005 | rsi: 56.338777345658606 | macd: 0.0001724621614981603
+TRXUSDT ||| macd_signal: 0.00011553299714739453 | bb_lower: 0.24490502380965903
+TRXUSDT ||| bb_upper: 0.24910497619034097 | sma50: 0.24636200000000003
+TRXUSDT ||| buy signals: 2 | sell signals: 1
+DOTUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 2.13
+DOTUSDT ||| current_price: 4.69 
+DOTUSDT ||| sma: 4.68905 | rsi: 47.77002875449422 | macd: -0.016619145214981756
+DOTUSDT ||| macd_signal: -0.020346616004119543 | bb_lower: 4.63603877477369
+DOTUSDT ||| bb_upper: 4.74206122522631 | sma50: 4.730659999999999
+DOTUSDT ||| buy signals: 2 | sell signals: 0
+CAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 5.53
+CAKEUSDT ||| current_price: 2.348 
+CAKEUSDT ||| sma: 2.3609999999999998 | rsi: 41.722039897827635 | macd: -0.015312598351299389
+CAKEUSDT ||| macd_signal: -0.015361256638615376 | bb_lower: 2.316931870926939
+CAKEUSDT ||| bb_upper: 2.4050681290730607 | sma50: 2.38712
+CAKEUSDT ||| buy signals: 1 | sell signals: 1
+STPTUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 120.2
+STPTUSDT ||| current_price: 0.10808 
+STPTUSDT ||| sma: 0.10667100000000002 | rsi: 53.55238100512976 | macd: -0.00012773643754653008
+STPTUSDT ||| macd_signal: -0.00047771381791288927 | bb_lower: 0.10417373029089769
+STPTUSDT ||| bb_upper: 0.10916826970910232 | sma50: 0.10842960000000001
+STPTUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SCRUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 22.9
+SCRUSDT ||| current_price: 0.611 
+SCRUSDT ||| sma: 0.6058 | rsi: 53.316143113629025 | macd: 6.239790848250326e-05
+SCRUSDT ||| macd_signal: -0.0010631457133857545 | bb_lower: 0.5978350768993048
+SCRUSDT ||| bb_upper: 0.6137649231006952 | sma50: 0.609
+SCRUSDT ||| buy signals: 2 | sell signals: 1
+NEARUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 3.0
+NEARUSDT ||| current_price: 3.313 
+NEARUSDT ||| sma: 3.3043 | rsi: 51.28344335160194 | macd: -0.004211229281076978
+NEARUSDT ||| macd_signal: -0.007609831806881427 | bb_lower: 3.263946065867131
+NEARUSDT ||| bb_upper: 3.344653934132869 | sma50: 3.3221600000000002
+NEARUSDT ||| buy signals: 2 | sell signals: 1
+AUDIOUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 160.2
+AUDIOUSDT ||| current_price: 0.0936 
+AUDIOUSDT ||| sma: 0.09360500000000002 | rsi: 48.67327223019262 | macd: -0.0002192588211166746
+AUDIOUSDT ||| macd_signal: -0.00025992150417289753 | bb_lower: 0.09234567478386214
+AUDIOUSDT ||| bb_upper: 0.09486432521613787 | sma50: 0.094026
+AUDIOUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+WLDUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 11.2
+WLDUSDT ||| current_price: 1.154 
+WLDUSDT ||| sma: 1.1587500000000002 | rsi: 43.9738097840026 | macd: -0.007019020518944208
+WLDUSDT ||| macd_signal: -0.007844456670001929 | bb_lower: 1.1356253378403094
+WLDUSDT ||| bb_upper: 1.1818746621596905 | sma50: 1.1736199999999999
+WLDUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRBUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 0.365
+TRBUSDT ||| current_price: 35.54 
+TRBUSDT ||| sma: 34.7935 | rsi: 63.98602679232685 | macd: 0.07621511237488932
+TRBUSDT ||| macd_signal: -0.08947454091705526 | bb_lower: 33.82515553649546
+TRBUSDT ||| bb_upper: 35.761844463504545 | sma50: 35.064
+TRBUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+REZUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 721.7
+REZUSDT ||| current_price: 0.01524 
+REZUSDT ||| sma: 0.015360500000000001 | rsi: 41.77132421542071 | macd: -0.0001118275466484471
+REZUSDT ||| macd_signal: -0.00012810944228970676 | bb_lower: 0.015016844649394167
+REZUSDT ||| bb_upper: 0.015704155350605833 | sma50: 0.015614600000000001
+REZUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ARKMUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 16.6
+ARKMUSDT ||| current_price: 0.66 
+ARKMUSDT ||| sma: 0.6741499999999999 | rsi: 33.91996084579151 | macd: -0.008168575650560284
+ARKMUSDT ||| macd_signal: -0.008091065750382261 | bb_lower: 0.6517600468959844
+ARKMUSDT ||| bb_upper: 0.6965399531040156 | sma50: 0.68884
+ARKMUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BURGERUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 43.7
+BURGERUSDT ||| current_price: 0.32 
+BURGERUSDT ||| sma: 0.3215750000000001 | rsi: 42.66875850198412 | macd: -0.003835194079719495
+BURGERUSDT ||| macd_signal: -0.00429527159511237 | bb_lower: 0.31300181506089986
+BURGERUSDT ||| bb_upper: 0.33014818493910014 | sma50: 0.33173
+BURGERUSDT ||| buy signals: 1 | sell signals: 1
+Skipping BTTCUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+1MBABYDOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 7080
+1MBABYDOGEUSDT ||| current_price: 0.0015535 
+1MBABYDOGEUSDT ||| sma: 0.0015574500000000002 | rsi: 48.173022865620645 | macd: -5.185682978331007e-06
+1MBABYDOGEUSDT ||| macd_signal: -6.405142434846447e-06 | bb_lower: 0.0015301440665788579
+1MBABYDOGEUSDT ||| bb_upper: 0.001584755933421142 | sma50: 0.001566354
+1MBABYDOGEUSDT ||| buy signals: 1 | sell signals: 1
+Skipping BTTCUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+DOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 66
+DOGEUSDT ||| current_price: 0.22702 
+DOGEUSDT ||| sma: 0.2275105 | rsi: 46.080134686760545 | macd: -0.0009528008401509247
+DOGEUSDT ||| macd_signal: -0.0011927238118241425 | bb_lower: 0.22316552830849368
+DOGEUSDT ||| bb_upper: 0.23185547169150633 | sma50: 0.229684
+DOGEUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+PEPEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 356548
+PEPEUSDT ||| current_price: 4.207e-05 
+PEPEUSDT ||| sma: 4.681999999999999e-05 | rsi: 100.0 | macd: 0.0
+PEPEUSDT ||| macd_signal: 0.0 | bb_lower: 4.682e-05
+PEPEUSDT ||| bb_upper: 4.682e-05 | sma50: 4.682e-05
+PEPEUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TFUELUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 258
+TFUELUSDT ||| current_price: 0.05032 
+TFUELUSDT ||| sma: 0.05122200000000001 | rsi: 33.92919681703154 | macd: -0.0007384278046575418
+TFUELUSDT ||| macd_signal: -0.0007338450864110009 | bb_lower: 0.04972237871447483
+TFUELUSDT ||| bb_upper: 0.052721621285525176 | sma50: 0.05291499999999999
+TFUELUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRUMPUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 0.869
+TRUMPUSDT ||| current_price: 14.95 
+TRUMPUSDT ||| sma: 14.953000000000001 | rsi: 47.073396647773265 | macd: -0.0356182537841363
+TRUMPUSDT ||| macd_signal: -0.05275583042173672 | bb_lower: 14.762306528690605
+TRUMPUSDT ||| bb_upper: 15.143693471309394 | sma50: 15.0464
+TRUMPUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SHIBUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 174570
+SHIBUSDT ||| current_price: 6.874e-05 
+SHIBUSDT ||| sma: 1.5070000000000003e-05 | rsi: 100.0 | macd: 0.0
+SHIBUSDT ||| macd_signal: 0.0 | bb_lower: 1.507e-05
+SHIBUSDT ||| bb_upper: 1.507e-05 | sma50: 1.507e-05
+SHIBUSDT ||| buy signals: 1 | sell signals: 2
+XRPUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 4
+XRPUSDT ||| current_price: 2.4644 
+XRPUSDT ||| sma: 2.455195 | rsi: 51.60098172513866 | macd: -0.004527282208024008
+XRPUSDT ||| macd_signal: -0.008222307963108548 | bb_lower: 2.4142595642505147
+XRPUSDT ||| bb_upper: 2.496130435749486 | sma50: 2.468808
+XRPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+ENSUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 0.53
+ENSUSDT ||| current_price: 26.24 
+ENSUSDT ||| sma: 26.155500000000004 | rsi: 50.54751674906019 | macd: -0.01139783740849154
+ENSUSDT ||| macd_signal: -0.0608097521717643 | bb_lower: 25.761927897330235
+ENSUSDT ||| bb_upper: 26.549072102669765 | sma50: 26.3182
+ENSUSDT ||| buy signals: 2 | sell signals: 0
+MANTAUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 40.9
+MANTAUSDT ||| current_price: 0.366 
+MANTAUSDT ||| sma: 0.36595000000000005 | rsi: 49.85189006899694 | macd: -0.0010599817152133761
+MANTAUSDT ||| macd_signal: -0.0016034329770215187 | bb_lower: 0.3607548099168555
+MANTAUSDT ||| bb_upper: 0.3711451900831445 | sma50: 0.36954
+MANTAUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+TURBOUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 4209
+TURBOUSDT ||| current_price: 0.003326 
+TURBOUSDT ||| sma: 0.0033425500000000006 | rsi: 41.711572062560315 | macd: -2.2418939272659394e-05
+TURBOUSDT ||| macd_signal: -2.6538169629821737e-05 | bb_lower: 0.0032769131962996365
+TURBOUSDT ||| bb_upper: 0.0034081868037003646 | sma50: 0.00339788
+TURBOUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SUIUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 4.2
+SUIUSDT ||| current_price: 3.0447 
+SUIUSDT ||| sma: 3.0810500000000003 | rsi: 38.81693346640818 | macd: -0.047643611855127777
+SUIUSDT ||| macd_signal: -0.05292242406089092 | bb_lower: 2.936087349637911
+SUIUSDT ||| bb_upper: 3.2260126503620894 | sma50: 3.1947460000000003
+SUIUSDT ||| buy signals: 2 | sell signals: 1
+LTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 0.113
+LTCUSDT ||| current_price: 123.41 
+LTCUSDT ||| sma: 122.97350000000002 | rsi: 51.295148857988764 | macd: -0.030906340502255603
+LTCUSDT ||| macd_signal: -0.18142077723770503 | bb_lower: 121.22357114430328
+LTCUSDT ||| bb_upper: 124.7234288556967 | sma50: 123.36740000000002
+LTCUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping BTTCUSDT: No ask data available
+BNXUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 11.1
+BNXUSDT ||| current_price: 0.9862 
+BNXUSDT ||| sma: 1.008445 | rsi: 38.573768254028714 | macd: -0.013936716790283854
+BNXUSDT ||| macd_signal: -0.01322474827912705 | bb_lower: 0.9546389603761807
+BNXUSDT ||| bb_upper: 1.0622510396238194 | sma50: 1.028444
+BNXUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+TRXUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 56.5
+TRXUSDT ||| current_price: 0.2475 
+TRXUSDT ||| sma: 0.24703 | rsi: 55.09718964314729 | macd: 0.00023002114910275484
+TRXUSDT ||| macd_signal: 0.00014481239645465073 | bb_lower: 0.24489542744325732
+TRXUSDT ||| bb_upper: 0.24916457255674268 | sma50: 0.24646
+TRXUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+DOTUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 2.56
+DOTUSDT ||| current_price: 4.686 
+DOTUSDT ||| sma: 4.6884 | rsi: 46.849826647246566 | macd: -0.014002064692034466
+DOTUSDT ||| macd_signal: -0.018864034077923125 | bb_lower: 4.636072569335055
+DOTUSDT ||| bb_upper: 4.740727430664944 | sma50: 4.72872
+DOTUSDT ||| buy signals: 1 | sell signals: 1
+CAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 4.27
+CAKEUSDT ||| current_price: 2.339 
+CAKEUSDT ||| sma: 2.35895 | rsi: 39.917517813484146 | macd: -0.01461195683771388
+CAKEUSDT ||| macd_signal: -0.015122779055132885 | bb_lower: 2.3158525522797424
+CAKEUSDT ||| bb_upper: 2.402047447720258 | sma50: 2.3860200000000003
+CAKEUSDT ||| buy signals: 3 | sell signals: 1
+BUY 4.27 CAKEUSDT
+BUY 4.27 CAKEUSDT at 2.339
+Indicators - SMA: 2.35895, RSI: 39.917517813484146, MACD: -0.01461195683771388/-0.015122779055132885, BB: 2.3158525522797424/2.402047447720258
+Balance: 242292.74898336 USDT
+Skipping SHIBUSDT: No ask data available
+STPTUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 130.0
+STPTUSDT ||| current_price: 0.10763 
+STPTUSDT ||| sma: 0.10674050000000002 | rsi: 52.00527585432265 | macd: -6.809684767090929e-05
+STPTUSDT ||| macd_signal: -0.00039624461757811275 | bb_lower: 0.1042054775148926
+STPTUSDT ||| bb_upper: 0.10927552248510743 | sma50: 0.10837859999999999
+STPTUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+SCRUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 16.3
+SCRUSDT ||| current_price: 0.61 
+SCRUSDT ||| sma: 0.6061 | rsi: 52.87854035684418 | macd: 0.00044610986934146
+SCRUSDT ||| macd_signal: -0.0007237312390609558 | bb_lower: 0.597546638087863
+SCRUSDT ||| bb_upper: 0.6146533619121369 | sma50: 0.6089
+SCRUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+NEARUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 4.5
+NEARUSDT ||| current_price: 3.299 
+NEARUSDT ||| sma: 3.3036000000000003 | rsi: 47.54892094704006 | macd: -0.00389308455768278
+NEARUSDT ||| macd_signal: -0.006787319500315844 | bb_lower: 3.2632842462553424
+NEARUSDT ||| bb_upper: 3.343915753744658 | sma50: 3.32154
+NEARUSDT ||| buy signals: 1 | sell signals: 1
+AUDIOUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 160.7
+AUDIOUSDT ||| current_price: 0.0933 
+AUDIOUSDT ||| sma: 0.09360000000000002 | rsi: 50.616405140334344 | macd: -0.00016608840365266164
+AUDIOUSDT ||| macd_signal: -0.00023860217124677796 | bb_lower: 0.09235260270963927
+AUDIOUSDT ||| bb_upper: 0.09484739729036071 | sma50: 0.09401
+AUDIOUSDT ||| buy signals: 1 | sell signals: 1
+WLDUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 9.5
+WLDUSDT ||| current_price: 1.149 
+WLDUSDT ||| sma: 1.1576499999999998 | rsi: 41.581552610866154 | macd: -0.006740509851833165
+WLDUSDT ||| macd_signal: -0.007589187266875538 | bb_lower: 1.1353495515740193
+WLDUSDT ||| bb_upper: 1.1799504484259804 | sma50: 1.17288
+WLDUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ETHFIUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 14.0
+ETHFIUSDT ||| current_price: 1.07 
+ETHFIUSDT ||| sma: 1.0738 | rsi: 43.78358909380797 | macd: -0.00473450796120356
+ETHFIUSDT ||| macd_signal: -0.0057398832027174135 | bb_lower: 1.0565303734840648
+ETHFIUSDT ||| bb_upper: 1.0910696265159354 | sma50: 1.08544
+ETHFIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+DGBUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 1832.4
+DGBUSDT ||| current_price: 0.00764 
+DGBUSDT ||| sma: 0.0076895 | rsi: 41.808352497717856 | macd: -4.359285606860084e-05
+DGBUSDT ||| macd_signal: -5.070004815056681e-05 | bb_lower: 0.007530192121977511
+DGBUSDT ||| bb_upper: 0.007848807878022487 | sma50: 0.0077954
+DGBUSDT ||| buy signals: 1 | sell signals: 1
+WINGUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 3.52
+WINGUSDT ||| current_price: 3.404 
+WINGUSDT ||| sma: 3.4575500000000003 | rsi: 33.51479313327965 | macd: -0.02399886041167587
+WINGUSDT ||| macd_signal: -0.021833071884740634 | bb_lower: 3.379600080179648
+WINGUSDT ||| bb_upper: 3.5354999198203516 | sma50: 3.4923599999999997
+WINGUSDT ||| buy signals: 2 | sell signals: 2
+AIUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 55.8
+AIUSDT ||| current_price: 0.2508 
+AIUSDT ||| sma: 0.25198 | rsi: 41.685478297086554 | macd: -0.0013265931130692077
+AIUSDT ||| macd_signal: -0.0015456957658903409 | bb_lower: 0.24805031807902933
+AIUSDT ||| bb_upper: 0.25590968192097063 | sma50: 0.255446
+AIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+BTTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 2857142
+BTTCUSDT ||| current_price: 4.2e-06 
+BTTCUSDT ||| sma: 8.500000000000001e-07 | rsi: 100.0 | macd: 0.0
+BTTCUSDT ||| macd_signal: 0.0 | bb_lower: 8.5e-07
+BTTCUSDT ||| bb_upper: 8.5e-07 | sma50: 8.5e-07
+BTTCUSDT ||| buy signals: 1 | sell signals: 2
+JTOUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 5.6
+JTOUSDT ||| current_price: 2.648 
+JTOUSDT ||| sma: 2.6534999999999997 | rsi: 47.429943870135375 | macd: -0.004084013115861929
+JTOUSDT ||| macd_signal: -0.005216137089435531 | bb_lower: 2.6270009434130097
+JTOUSDT ||| bb_upper: 2.6799990565869907 | sma50: 2.66268
+JTOUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SFPUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 19
+SFPUSDT ||| current_price: 0.6279 
+SFPUSDT ||| sma: 0.62871 | rsi: 47.1297879997249 | macd: -0.001250407410962051
+SFPUSDT ||| macd_signal: -0.0017648229421015833 | bb_lower: 0.6222571246719046
+SFPUSDT ||| bb_upper: 0.6351628753280953 | sma50: 0.631562
+SFPUSDT ||| buy signals: 2 | sell signals: 1
+DIAUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 27.8
+DIAUSDT ||| current_price: 0.5028 
+DIAUSDT ||| sma: 0.5046550000000001 | rsi: 44.37869681966672 | macd: -0.0031930390996239844
+DIAUSDT ||| macd_signal: -0.003978322203221096 | bb_lower: 0.4922890022642792
+DIAUSDT ||| bb_upper: 0.5170209977357207 | sma50: 0.5128240000000001
+DIAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+JUPUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 15.1
+JUPUSDT ||| current_price: 0.7242 
+JUPUSDT ||| sma: 0.7263250000000002 | rsi: 45.361980265178985 | macd: -0.0022923031470626354
+JUPUSDT ||| macd_signal: -0.0027967231709303464 | bb_lower: 0.714042512466928
+JUPUSDT ||| bb_upper: 0.738607487533072 | sma50: 0.730848
+JUPUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+BELUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 15.8
+BELUSDT ||| current_price: 0.882 
+BELUSDT ||| sma: 0.8874150000000001 | rsi: 43.3138500828458 | macd: -0.005952685472701669
+BELUSDT ||| macd_signal: -0.006807502467924333 | bb_lower: 0.8666302676226045
+BELUSDT ||| bb_upper: 0.9081997323773956 | sma50: 0.9019840000000001
+BELUSDT ||| buy signals: 1 | sell signals: 1
+JUVUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 10.21
+JUVUSDT ||| current_price: 1.371 
+JUVUSDT ||| sma: 1.4027000000000003 | rsi: 40.889223592488385 | macd: -0.020681872097035647
+JUVUSDT ||| macd_signal: -0.019668436062550844 | bb_lower: 1.3426197203734873
+JUVUSDT ||| bb_upper: 1.4627802796265124 | sma50: 1.44262
+JUVUSDT ||| buy signals: 0 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+WOOUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 100.5
+WOOUSDT ||| current_price: 0.1194 
+WOOUSDT ||| sma: 0.11978500000000002 | rsi: 45.6482330962133 | macd: -0.000357255083344693
+WOOUSDT ||| macd_signal: -0.000511040420532492 | bb_lower: 0.11789050798365376
+WOOUSDT ||| bb_upper: 0.12167949201634624 | sma50: 0.12086999999999999
+WOOUSDT ||| buy signals: 1 | sell signals: 1
+Skipping BTTCUSDT: No ask data available
+BLURUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 109.4
+BLURUSDT ||| current_price: 0.1371 
+BLURUSDT ||| sma: 0.138295 | rsi: 39.162587202630014 | macd: -0.0009803882802583153
+BLURUSDT ||| macd_signal: -0.0010337396370688563 | bb_lower: 0.13512547322144097
+BLURUSDT ||| bb_upper: 0.14146452677855903 | sma50: 0.14029
+BLURUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+STRKUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 50.92
+STRKUSDT ||| current_price: 0.216 
+STRKUSDT ||| sma: 0.21678999999999998 | rsi: 44.02442146992355 | macd: -0.0008454176008228231
+STRKUSDT ||| macd_signal: -0.0010761389426156413 | bb_lower: 0.21238959092810672
+STRKUSDT ||| bb_upper: 0.22119040907189336 | sma50: 0.21882400000000002
+STRKUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+DFUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 198
+DFUSDT ||| current_price: 0.07574 
+DFUSDT ||| sma: 0.07564600000000002 | rsi: 51.40690405263682 | macd: -4.1786369025520465e-05
+DFUSDT ||| macd_signal: -6.847923306212202e-05 | bb_lower: 0.0750299026051021
+DFUSDT ||| bb_upper: 0.07626209739489791 | sma50: 0.0757188
+DFUSDT ||| buy signals: 3 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+FLOKIUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 135685
+FLOKIUSDT ||| current_price: 8.844e-05 
+FLOKIUSDT ||| sma: 8.892e-05 | rsi: 42.59890666918291 | macd: -3.934405757671203e-07
+FLOKIUSDT ||| macd_signal: -4.4078382435596137e-07 | bb_lower: 8.762180124788249e-05
+FLOKIUSDT ||| bb_upper: 9.021819875211753e-05 | sma50: 8.98096e-05
+FLOKIUSDT ||| buy signals: 2 | sell signals: 1
+SANDUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 33
+SANDUSDT ||| current_price: 0.329 
+SANDUSDT ||| sma: 0.32937999999999995 | rsi: 47.28136656676366 | macd: -0.001145067480042672
+SANDUSDT ||| macd_signal: -0.0015016971319529483 | bb_lower: 0.3231878759702357
+SANDUSDT ||| bb_upper: 0.33557212402976433 | sma50: 0.332098
+SANDUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+COOKIEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 76.2
+COOKIEUSDT ||| current_price: 0.1966 
+COOKIEUSDT ||| sma: 0.19821999999999998 | rsi: 42.70330929674781 | macd: -0.0009302565086313774
+COOKIEUSDT ||| macd_signal: -0.0009625660392406263 | bb_lower: 0.19430766054642415
+COOKIEUSDT ||| bb_upper: 0.20213233945357587 | sma50: 0.19968599999999997
+COOKIEUSDT ||| buy signals: 1 | sell signals: 1
+HARDUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 105
+HARDUSDT ||| current_price: 0.1321 
+HARDUSDT ||| sma: 0.13305500000000003 | rsi: 44.891842123804174 | macd: -0.00043487382350784753
+HARDUSDT ||| macd_signal: -0.000465580824847549 | bb_lower: 0.13145440636012778
+HARDUSDT ||| bb_upper: 0.13465559363987223 | sma50: 0.1339
+HARDUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+UNIUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 1.19
+UNIUSDT ||| current_price: 8.354 
+UNIUSDT ||| sma: 8.382000000000001 | rsi: 43.141211645184114 | macd: -0.0500829256684554
+UNIUSDT ||| macd_signal: -0.06095061670207086 | bb_lower: 8.238592887205677
+UNIUSDT ||| bb_upper: 8.525407112794326 | sma50: 8.50954
+UNIUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SYNUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 47.0
+SYNUSDT ||| current_price: 0.3186 
+SYNUSDT ||| sma: 0.32023 | rsi: 41.62593050834214 | macd: -0.0015745048651243376
+SYNUSDT ||| macd_signal: -0.0017742647895418028 | bb_lower: 0.31486153653267673
+SYNUSDT ||| bb_upper: 0.3255984634673232 | sma50: 0.323926
+SYNUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SOLUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 0.09
+SOLUSDT ||| current_price: 154.14 
+SOLUSDT ||| sma: 155.08300000000003 | rsi: 41.356976374794776 | macd: -1.1234804445086297
+SOLUSDT ||| macd_signal: -1.3084984597453209 | bb_lower: 150.56444226550096
+SOLUSDT ||| bb_upper: 159.60155773449904 | sma50: 157.45680000000002
+SOLUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping TSTUSDT: No market data available in self.data
+Skipping KAITOUSDT: No market data available in self.data
+BAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 70.2
+BAKEUSDT ||| current_price: 0.1851 
+BAKEUSDT ||| sma: 0.18708 | rsi: 38.16584103682468 | macd: -0.0015255535342243443
+BAKEUSDT ||| macd_signal: -0.0015894413498591508 | bb_lower: 0.18200945762269888
+BAKEUSDT ||| bb_upper: 0.19215054237730111 | sma50: 0.18991799999999998
+BAKEUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+GLMUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 40.7
+GLMUSDT ||| current_price: 0.3439 
+GLMUSDT ||| sma: 0.33404999999999996 | rsi: 71.29348658970989 | macd: 0.001754640648077177
+GLMUSDT ||| macd_signal: 8.606792691810602e-05 | bb_lower: 0.32496319638156834
+GLMUSDT ||| bb_upper: 0.3431368036184316 | sma50: 0.335544
+GLMUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+PNUTUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 91.5
+PNUTUSDT ||| current_price: 0.1639 
+PNUTUSDT ||| sma: 0.16443000000000002 | rsi: 43.655733843775785 | macd: -0.0009176758679668162
+PNUTUSDT ||| macd_signal: -0.0010318808433150484 | bb_lower: 0.16210268394926697
+PNUTUSDT ||| bb_upper: 0.16675731605073302 | sma50: 0.16613400000000003
+PNUTUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ADAUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 20.5
+ADAUSDT ||| current_price: 0.7289 
+ADAUSDT ||| sma: 0.725705 | rsi: 50.43089594380266 | macd: -0.0013298246101645095
+ADAUSDT ||| macd_signal: -0.0027793545397940033 | bb_lower: 0.713050597603998
+ADAUSDT ||| bb_upper: 0.7383594023960021 | sma50: 0.732498
+ADAUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ENAUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 27.26
+ENAUSDT ||| current_price: 0.4035 
+ENAUSDT ||| sma: 0.408165 | rsi: 40.568453820117576 | macd: -0.001675433360051215
+ENAUSDT ||| macd_signal: -0.0014425175307458658 | bb_lower: 0.4017724183618829
+ENAUSDT ||| bb_upper: 0.4145575816381171 | sma50: 0.409962
+ENAUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRUUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 303
+TRUUSDT ||| current_price: 0.0461 
+TRUUSDT ||| sma: 0.04617 | rsi: 39.81555546901454 | macd: -0.0003609628165191642
+TRUUSDT ||| macd_signal: -0.0004552318530205032 | bb_lower: 0.04538744009813923
+TRUUSDT ||| bb_upper: 0.04695255990186078 | sma50: 0.047336
+TRUUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+OMUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 1
+OMUSDT ||| current_price: 8.266 
+OMUSDT ||| sma: 8.289620000000001 | rsi: 47.22592572381106 | macd: -0.050551377163595035
+OMUSDT ||| macd_signal: -0.059272447009308865 | bb_lower: 8.016235350833282
+OMUSDT ||| bb_upper: 8.563004649166716 | sma50: 8.379142
+OMUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+CETUSUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 79.8
+CETUSUSDT ||| current_price: 0.1253 
+CETUSUSDT ||| sma: 0.12603 | rsi: 42.16014217706841 | macd: -0.0009376943503522361
+CETUSUSDT ||| macd_signal: -0.001153707897310014 | bb_lower: 0.12263229489213756
+CETUSUSDT ||| bb_upper: 0.12942770510786245 | sma50: 0.12853
+CETUSUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+OGNUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 197
+OGNUSDT ||| current_price: 0.0759 
+OGNUSDT ||| sma: 0.075845 | rsi: 44.87971065738513 | macd: -0.00031420376441181064
+OGNUSDT ||| macd_signal: -0.0004246154117234099 | bb_lower: 0.0746728651954657
+OGNUSDT ||| bb_upper: 0.07701713480453429 | sma50: 0.076814
+OGNUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BBUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 68.1
+BBUSDT ||| current_price: 0.1613 
+BBUSDT ||| sma: 0.16175 | rsi: 45.0858156319794 | macd: -0.00023578616046696088
+BBUSDT ||| macd_signal: -0.00035618717432134945 | bb_lower: 0.159033016378409
+BBUSDT ||| bb_upper: 0.164466983621591 | sma50: 0.162882
+BBUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping ANIIMEUSDT: No market data available in self.data
+PROMUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 2.13
+PROMUSDT ||| current_price: 6.55 
+PROMUSDT ||| sma: 6.537750000000001 | rsi: 47.05957909756169 | macd: -0.017441541885074408
+PROMUSDT ||| macd_signal: -0.02419299688036894 | bb_lower: 6.452467235035425
+PROMUSDT ||| bb_upper: 6.623032764964575 | sma50: 6.60438
+PROMUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+CVCUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 121
+CVCUSDT ||| current_price: 0.1231 
+CVCUSDT ||| sma: 0.12408000000000001 | rsi: 38.44540793404144 | macd: -0.0007580558850156655
+CVCUSDT ||| macd_signal: -0.000828026413767007 | bb_lower: 0.12181055072759976
+CVCUSDT ||| bb_upper: 0.12634944927240024 | sma50: 0.125804
+CVCUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SLPUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 5762
+SLPUSDT ||| current_price: 0.002256 
+SLPUSDT ||| sma: 0.0022748000000000004 | rsi: 38.55464460690205 | macd: -1.710434162204271e-05
+SLPUSDT ||| macd_signal: -1.881124098336002e-05 | bb_lower: 0.0022335951459169965
+SLPUSDT ||| bb_upper: 0.0023160048540830035 | sma50: 0.00231546
+SLPUSDT ||| buy signals: 2 | sell signals: 1
+LUMIAUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 28.76
+LUMIAUSDT ||| current_price: 0.452 
+LUMIAUSDT ||| sma: 0.45585 | rsi: 40.78721437041235 | macd: -0.0032940017776235675
+LUMIAUSDT ||| macd_signal: -0.0033313678496773007 | bb_lower: 0.4440470342709988
+LUMIAUSDT ||| bb_upper: 0.4676529657290013 | sma50: 0.46228
+LUMIAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+ARKUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 31
+ARKUSDT ||| current_price: 0.4397 
+ARKUSDT ||| sma: 0.44281499999999996 | rsi: 40.53656375243963 | macd: -0.0016773109336070124
+ARKUSDT ||| macd_signal: -0.0016634115870037174 | bb_lower: 0.43748310540238866
+ARKUSDT ||| bb_upper: 0.4481468945976115 | sma50: 0.445422
+ARKUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+LINAUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 4966
+LINAUSDT ||| current_price: 0.002416 
+LINAUSDT ||| sma: 0.00243325 | rsi: 40.33444461857196 | macd: -1.636006776522701e-05
+LINAUSDT ||| macd_signal: -1.9204291647817873e-05 | bb_lower: 0.0023906548124783744
+LINAUSDT ||| bb_upper: 0.0024758451875216267 | sma50: 0.0024768
+LINAUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+MKRUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 0.0083
+MKRUSDT ||| current_price: 1444.0 
+MKRUSDT ||| sma: 1489.3999999999999 | rsi: 34.57739576419695 | macd: -17.137944110723993
+MKRUSDT ||| macd_signal: -11.752272230819285 | bb_lower: 1411.6403703712538
+MKRUSDT ||| bb_upper: 1567.1596296287464 | sma50: 1489.46
+MKRUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+CELRUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 1069.5
+CELRUSDT ||| current_price: 0.01309 
+CELRUSDT ||| sma: 0.0130455 | rsi: 49.876284162920946 | macd: 5.230244653469523e-07
+CELRUSDT ||| macd_signal: -2.077002893445881e-05 | bb_lower: 0.012855924157657114
+CELRUSDT ||| bb_upper: 0.013235075842342882 | sma50: 0.0131264
+CELRUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+TRBUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 0.337
+TRBUSDT ||| current_price: 35.52 
+TRBUSDT ||| sma: 34.823499999999996 | rsi: 63.156882380120955 | macd: 0.11728049673692453
+TRBUSDT ||| macd_signal: -0.04663953975946211 | bb_lower: 33.790963802087354
+TRBUSDT ||| bb_upper: 35.85603619791265 | sma50: 35.064
+TRBUSDT ||| buy signals: 2 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+REZUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 923.4
+REZUSDT ||| current_price: 0.01516 
+REZUSDT ||| sma: 0.015337 | rsi: 39.33898851945055 | macd: -0.00011422861684644812
+REZUSDT ||| macd_signal: -0.00012611363423822505 | bb_lower: 0.015005572783254099
+REZUSDT ||| bb_upper: 0.015668427216745898 | sma50: 0.015593999999999998
+REZUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ARKMUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 19.7
+ARKMUSDT ||| current_price: 0.659 
+ARKMUSDT ||| sma: 0.6725 | rsi: 32.0399960368771 | macd: -0.008449321025236656
+ARKMUSDT ||| macd_signal: -0.008172571040945981 | bb_lower: 0.6501885679527284
+ARKMUSDT ||| bb_upper: 0.6948114320472718 | sma50: 0.68774
+ARKMUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BURGERUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 31.3
+BURGERUSDT ||| current_price: 0.3191 
+BURGERUSDT ||| sma: 0.32099 | rsi: 40.29031398101115 | macd: -0.003783695778545426
+BURGERUSDT ||| macd_signal: -0.004216472628476743 | bb_lower: 0.3130148134818054
+BURGERUSDT ||| bb_upper: 0.3289651865181946 | sma50: 0.33157200000000003
+BURGERUSDT ||| buy signals: 1 | sell signals: 1
+1MBABYDOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 8373
+1MBABYDOGEUSDT ||| current_price: 0.0015526 
+1MBABYDOGEUSDT ||| sma: 0.0015559950000000001 | rsi: 46.51301087717605 | macd: -5.19857346552321e-06
+1MBABYDOGEUSDT ||| macd_signal: -6.233769833997511e-06 | bb_lower: 0.0015299048121892567
+1MBABYDOGEUSDT ||| bb_upper: 0.001582085187810743 | sma50: 0.001565476
+1MBABYDOGEUSDT ||| buy signals: 1 | sell signals: 1
+DOGEUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 66
+DOGEUSDT ||| current_price: 0.2268 
+DOGEUSDT ||| sma: 0.2273175 | rsi: 45.34887391887284 | macd: -0.0009097480834411587
+DOGEUSDT ||| macd_signal: -0.001139337363703136 | bb_lower: 0.2231706560193311
+DOGEUSDT ||| bb_upper: 0.23146434398066892 | sma50: 0.2295512
+DOGEUSDT ||| buy signals: 1 | sell signals: 1
+PEPEUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 332778
+PEPEUSDT ||| current_price: 4.207e-05 
+PEPEUSDT ||| sma: 4.681999999999999e-05 | rsi: 100.0 | macd: 0.0
+PEPEUSDT ||| macd_signal: 0.0 | bb_lower: 4.682e-05
+PEPEUSDT ||| bb_upper: 4.682e-05 | sma50: 4.682e-05
+PEPEUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+TFUELUSDT ||| max_trade_usdt: 15.0 | euro_available: 11 | trade_amount: 218
+TFUELUSDT ||| current_price: 0.05042
+TFUELUSDT ||| sma: 0.051134000000000006 | rsi: 35.41966852834294 | macd: -0.0007111785019399963
+TFUELUSDT ||| macd_signal: -0.0007290710422694015 | bb_lower: 0.049668334280949154
+TFUELUSDT ||| bb_upper: 0.052599665719050843 | sma50: 0.052786799999999995
+TFUELUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+TRUMPUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 1.002
+TRUMPUSDT ||| current_price: 14.96
+TRUMPUSDT ||| sma: 14.946 | rsi: 48.44146040326246 | macd: -0.031766955233518246
+TRUMPUSDT ||| macd_signal: -0.04857987356255413 | bb_lower: 14.769093244899956
+TRUMPUSDT ||| bb_upper: 15.122906755100047 | sma50: 15.0424
+TRUMPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+SHIBUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 203665
+SHIBUSDT ||| current_price: 6.874e-05
+SHIBUSDT ||| sma: 1.5070000000000003e-05 | rsi: 100.0 | macd: 0.0
+SHIBUSDT ||| macd_signal: 0.0 | bb_lower: 1.507e-05
+SHIBUSDT ||| bb_upper: 1.507e-05 | sma50: 1.507e-05
+SHIBUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+XRPUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 4
+XRPUSDT ||| current_price: 2.4656
+XRPUSDT ||| sma: 2.4544599999999996 | rsi: 52.1663459174122 | macd: -0.003338172555033214
+XRPUSDT ||| macd_signal: -0.0072501825913088664 | bb_lower: 2.414815408943965
+XRPUSDT ||| bb_upper: 2.4941045910560353 | sma50: 2.468108
+XRPUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+ENSUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 0.38
+ENSUSDT ||| current_price: 26.11
+ENSUSDT ||| sma: 26.144500000000004 | rsi: 47.38971052519334 | macd: -0.02042300366880312
+ENSUSDT ||| macd_signal: -0.05354185097766928 | bb_lower: 25.757693846998375
+ENSUSDT ||| bb_upper: 26.531306153001626 | sma50: 26.3054
+ENSUSDT ||| buy signals: 1 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+MANTAUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 41.0
+MANTAUSDT ||| current_price: 0.365
+MANTAUSDT ||| sma: 0.36585 | rsi: 49.851890068996944 | macd: -0.0008919006344624281
+MANTAUSDT ||| macd_signal: -0.0014611264814881999 | bb_lower: 0.36081909550876196
+MANTAUSDT ||| bb_upper: 0.37088090449123795 | sma50: 0.36932000000000004
+MANTAUSDT ||| buy signals: 1 | sell signals: 1
+TURBOUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 3923
+TURBOUSDT ||| current_price: 0.003313
+TURBOUSDT ||| sma: 0.0033386500000000003 | rsi: 39.515674614330145 | macd: -2.2331375497440867e-05
+TURBOUSDT ||| macd_signal: -2.5704810577163818e-05 | bb_lower: 0.0032757810092334857
+TURBOUSDT ||| bb_upper: 0.003401518990766514 | sma50: 0.0033946799999999997
+TURBOUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+SUIUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 4.9
+SUIUSDT ||| current_price: 3.0383
+SUIUSDT ||| sma: 3.072995 | rsi: 37.93037237225881 | macd: -0.04518497884302919
+SUIUSDT ||| macd_signal: -0.05136541095170228 | bb_lower: 2.937854044327778
+SUIUSDT ||| bb_upper: 3.2081359556722213 | sma50: 3.1888300000000003
+SUIUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+LTCUSDT ||| max_trade_usdt: 15.0 | euro_available: 10 | trade_amount: 0.08
+LTCUSDT ||| current_price: 123.47
+LTCUSDT ||| sma: 122.97149999999999 | rsi: 51.68627351731084 | macd: 0.0020191752157359133
+LTCUSDT ||| macd_signal: -0.1443338996498805 | bb_lower: 121.2247742058352
+LTCUSDT ||| bb_upper: 124.71822579416484 | sma50: 123.348
+LTCUSDT ||| buy signals: 2 | sell signals: 0
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+BNXUSDT ||| max_trade_usdt: 15.0 | euro_available: 15 | trade_amount: 15.2
+BNXUSDT ||| current_price: 0.9818
+BNXUSDT ||| sma: 1.00565 | rsi: 36.798151628296296 | macd: -0.01395728658200246
+BNXUSDT ||| macd_signal: -0.01336792875008941 | bb_lower: 0.9523572800468956
+BNXUSDT ||| bb_upper: 1.0589427199531043 | sma50: 1.027316
+BNXUSDT ||| buy signals: 1 | sell signals: 2
+Skipping SHIBUSDT: No ask data available
+TRXUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 48.4
+TRXUSDT ||| current_price: 0.2476
+TRXUSDT ||| sma: 0.24700500000000003 | rsi: 55.094098045897795 | macd: 0.00024095986864494656
+TRXUSDT ||| macd_signal: 0.00016367824751480292 | bb_lower: 0.2449050238096591
+TRXUSDT ||| bb_upper: 0.24910497619034092 | sma50: 0.24654
+TRXUSDT ||| buy signals: 2 | sell signals: 1
+DOTUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 2.77
+DOTUSDT ||| current_price: 4.677 
+DOTUSDT ||| sma: 4.686350000000001 | rsi: 45.189018824799696 | macd: -0.013680043253567753
+DOTUSDT ||| macd_signal: -0.017874653421103885 | bb_lower: 4.6351161244878485
+DOTUSDT ||| bb_upper: 4.73758387551215 | sma50: 4.72574
+DOTUSDT ||| buy signals: 2 | sell signals: 1
+CAKEUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 5.56
+CAKEUSDT ||| current_price: 2.338 
+CAKEUSDT ||| sma: 2.35665 | rsi: 38.997321077895926 | macd: -0.01457283136824028
+CAKEUSDT ||| macd_signal: -0.015012789450588704 | bb_lower: 2.3138094817958517
+CAKEUSDT ||| bb_upper: 2.3994905182041486 | sma50: 2.38434
+CAKEUSDT ||| buy signals: 2 | sell signals: 1
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+Skipping SHIBUSDT: No ask data available
+STPTUSDT ||| max_trade_usdt: 15.0 | euro_available: 13 | trade_amount: 120.3
+STPTUSDT ||| current_price: 0.10799 
+STPTUSDT ||| sma: 0.1067985 | rsi: 52.93408520056298 | macd: -2.081520299887507e-05
+STPTUSDT ||| macd_signal: -0.0003254565394012849 | bb_lower: 0.10422911661093556
+STPTUSDT ||| bb_upper: 0.10936788338906442 | sma50: 0.10832119999999999
+STPTUSDT ||| buy signals: 2 | sell signals: 0
+SCRUSDT ||| max_trade_usdt: 15.0 | euro_available: 12 | trade_amount: 19.7
+SCRUSDT ||| current_price: 0.609 
+SCRUSDT ||| sma: 0.60615 | rsi: 50.10397058848545 | macd: 0.000457259835890067
+SCRUSDT ||| macd_signal: -0.00047404215306916497 | bb_lower: 0.5974949436743603
+SCRUSDT ||| bb_upper: 0.6148050563256396 | sma50: 0.60866
+SCRUSDT ||| buy signals: 2 | sell signals: 1
+NEARUSDT ||| max_trade_usdt: 15.0 | euro_available: 14 | trade_amount: 4.2
+NEARUSDT ||| current_price: 3.291 
+NEARUSDT ||| sma: 3.3018000000000005 | rsi: 45.699782667232235 | macd: -0.004670068411139816
+NEARUSDT ||| macd_signal: -0.006366050994087785 | bb_lower: 3.2624421545305147
+NEARUSDT ||| bb_upper: 3.3411578454694855 | sma50: 3.3202800000000003
+NEARUSDT ||| buy signals: 2 | sell signals: 1
