@@ -16,36 +16,42 @@ import time
 from binance.client import Client as BinanceClient
 # from BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
 
-load_dotenv()
+GRID_LEVELS_COUNT = 5
+TOLERANCE_FACTOR = 0.1
+MAX_POSITION_PERCENT = 0.1  # 10% of USDT balance per trade
+SMA_PERIOD = 20
 
+
+load_dotenv()
 
 
 def initialize_database():
     conn = sqlite3.connect('testnet_account.db')
     c = conn.cursor()
-    
+
     # Create my_account table
     c.execute('''CREATE TABLE IF NOT EXISTS my_account
                  (symbol TEXT PRIMARY KEY, balance REAL, pnl REAL, updated TEXT)''')
-    
+
     # Create account_pnl table
     c.execute('''CREATE TABLE IF NOT EXISTS account_pnl
                  (account_pnl REAL, updated TEXT)''')
-    
+
     # Insert initial USDT record if not exists
     c.execute("SELECT COUNT(*) FROM my_account WHERE symbol = 'USDT'")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO my_account (symbol, balance, pnl, updated) VALUES (?, ?, ?, ?)",
                   ('USDT', 150.0, 150.0, datetime.now().isoformat()))
-    
+
     # Insert initial account_pnl if not exists
     c.execute("SELECT COUNT(*) FROM account_pnl")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO account_pnl (account_pnl, updated) VALUES (?, ?)",
                   (150.0, datetime.now().isoformat()))
-    
+
     conn.commit()
     conn.close()
+
 
 class Client(BinanceClient):
     """Handles Binance API requests with automatic time synchronization and exchange info loading."""
@@ -91,20 +97,14 @@ class Client(BinanceClient):
             return None
 
 
-GRID_LEVELS_COUNT = 5
-TOLERANCE_FACTOR = 0.1
-MAX_POSITION_PERCENT = 0.1  # 10% of USDT balance per trade
-SMA_PERIOD = 20
-
 class BnArber:
     def __init__(self, curs, max_amount):
         initialize_database()
-        self.public = os.getenv("public") # public
+        self.public = os.getenv("public")  # public
         # Retrieve the variables
-        self.secret = os.getenv("secret") # secret
+        self.secret = os.getenv("secret")  # secret
         self.url = "wss://stream.binance.com:9443/stream?streams=btcusdt@depth5"
         self.curs = curs
-        self.symbols = [] # curs
         self.data = {}
         self.timeout = False
         self.min_amount = 10
@@ -149,10 +149,9 @@ class BnArber:
             async with websockets.connect(self.url) as websocket:
                 while True:
                     try:
-                        
+
                         message = await websocket.recv()
                         self.handle_data(message)
-                        self.get_sorted_symbols()
                         if not self.timeout:
                             self.timeout = True
                             asyncio.create_task(self.get_rates())
@@ -189,18 +188,20 @@ class BnArber:
         """Fetch 24h trading volume of a symbol from Binance."""
         try:
             ticker = self.client.get_ticker(symbol=symbol)
-            return Decimal(ticker["quoteVolume"])  # Volume in quote currency (USDT)
+            # Volume in quote currency (USDT)
+            return Decimal(ticker["quoteVolume"])
         except Exception as e:
             print(f"Error fetching volume for {symbol}: {e}")
             return Decimal('0.0')
 
-    async def get_sorted_symbols(self):
+    def get_sorted_symbols(self):
         """
         Sort and filter symbols by highest volume and price momentum.
         Returns a list of symbol strings (e.g., ['DOGEUSDT', 'LTCUSDT', ...]).
         """
         trending_coins = []
-        VOLUME_THRESHOLD = Decimal('100000.0')  # Minimum 24h volume in USDT (adjustable)
+        # Minimum 24h volume in USDT (adjustable)
+        VOLUME_THRESHOLD = Decimal('100000.0')
 
         for cur in self.curs:
             symbol = cur + "USDT"
@@ -210,16 +211,19 @@ class BnArber:
                 if not ask_data or not isinstance(ask_data, (list, tuple)) or len(ask_data) < 1:
                     print(f"⚠️ Skipping {symbol}: No ask data available")
                     continue
-                current_price = float(ask_data[0])  # Convert to float for consistency
+                # Convert to float for consistency
+                current_price = float(ask_data[0])
 
                 # Fetch 24-hour ticker data
                 ticker = self.client.get_ticker(symbol=symbol)
                 volume = self.get_volume(symbol)  # Already Decimal
-                price_change_percent = Decimal(ticker['priceChangePercent'])  # Convert to Decimal
+                price_change_percent = Decimal(
+                    ticker['priceChangePercent'])  # Convert to Decimal
 
                 # Skip low-volume symbols
                 if volume < VOLUME_THRESHOLD:
-                    print(f"⚠️ Skipping {symbol}: Volume {float(volume):.2f} USDT below threshold {float(VOLUME_THRESHOLD)}")
+                    print(
+                        f"⚠️ Skipping {symbol}: Volume {float(volume):.2f} USDT below threshold {float(VOLUME_THRESHOLD)}")
                     continue
 
                 trending_coins.append({
@@ -234,14 +238,11 @@ class BnArber:
                 continue
 
         # Sort by a combined score: volume (primary) and price change (secondary)
-        sorted_coins = sorted(trending_coins, key=lambda x: (float(x["volume"]) * (1 + abs(float(x["price_change_percent"])) / 100)), reverse=True)
+        sorted_coins = sorted(trending_coins, key=lambda x: (float(
+            x["volume"]) * (1 + abs(float(x["price_change_percent"])) / 100)), reverse=True)
 
         # Return just the symbol strings
         self.symbols = [coin["symbol"] for coin in sorted_coins]
-
-
-
-
 
     def get_sma(self, symbol, period=20):
         """Fetch historical prices and calculate SMA."""
@@ -365,7 +366,7 @@ class BnArber:
         TAKE_PROFIT_PCT = 0.03  # 3% take profit
         MIN_TRADE_USDT = 6.0  # Minimum trade size
         SELL_THRESHOLD_RANGE = (5.5, 6.5)  # Sell if PNL between 5.5-6.5 USD
-        
+
         if not hasattr(self, 'last_trade_time'):
             self.last_trade_time = {cur: 0 for cur in self.curs}
         if not hasattr(self, 'positions'):
@@ -373,8 +374,9 @@ class BnArber:
 
         conn = sqlite3.connect('testnet_account.db')
         c = conn.cursor()
-        for symbol in self.symbols:
-            cur = symbol.replace("USDT", "")
+        for cur in self.curs:
+            # cur = symbol.replace("USDT", "")
+            symbol = cur + "USDT"
             try:
                 # symbol = cur + "USDT"
                 if symbol not in self.data:
@@ -408,13 +410,15 @@ class BnArber:
                     if SELL_THRESHOLD_RANGE[0] <= asset_value <= SELL_THRESHOLD_RANGE[1]:
                         sell_amount = available_balance  # Sell all
                         trade_value = sell_amount * current_price
-                        c.execute("UPDATE my_account SET balance = 0, pnl = 0 WHERE symbol = ?", (cur,))
+                        c.execute(
+                            "UPDATE my_account SET balance = 0, pnl = 0 WHERE symbol = ?", (cur,))
                         c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
-                                (trade_value, trade_value))
+                                  (trade_value, trade_value))
                         self.last_trade_time[cur] = current_time
                         if cur in self.positions:
                             del self.positions[cur]
-                        print(f"LOW VALUE SELL {sell_amount} {symbol} at {current_price} (Value: {asset_value:.2f} USD)")
+                        print(
+                            f"LOW VALUE SELL {sell_amount} {symbol} at {current_price} (Value: {asset_value:.2f} USD)")
                         print("USDT Balance:", self.get_balance("USDT"), "USDT")
 
                 # Take-profit or stop-loss
@@ -423,61 +427,72 @@ class BnArber:
                     if current_price > pos["buy_price"] * (1 + TAKE_PROFIT_PCT):
                         available_balance = self.get_balance(cur)
                         if available_balance > 0:
-                            sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                            sell_amount = self.floor(
+                                available_balance, self.precision.get(symbol, 8))
                             if sell_amount * current_price > self.min_amount:
                                 trade_value = sell_amount * current_price
                                 c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
-                                        (sell_amount, cur))
+                                          (sell_amount, cur))
                                 c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
-                                        (trade_value, trade_value))
+                                          (trade_value, trade_value))
                                 self.last_trade_time[cur] = current_time
                                 del self.positions[cur]
-                                print(f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
-                                print("USDT Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
+                                print("USDT Balance:",
+                                      self.get_balance("USDT"), "USDT")
                     elif self.check_stop_loss(pos, current_price, STOP_LOSS_PCT):
                         available_balance = self.get_balance(cur)
                         if available_balance > 0:
-                            sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                            sell_amount = self.floor(
+                                available_balance, self.precision.get(symbol, 8))
                             if sell_amount * current_price > self.min_amount:
                                 trade_value = sell_amount * current_price
                                 c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
-                                        (sell_amount, cur))
+                                          (sell_amount, cur))
                                 c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
-                                        (trade_value, trade_value))
+                                          (trade_value, trade_value))
                                 self.last_trade_time[cur] = current_time
                                 del self.positions[cur]
-                                print(f"STOP LOSS SELL {sell_amount} {symbol} at {current_price}")
-                                print("USDT Balance:", self.get_balance("USDT"), "USDT")
+                                print(
+                                    f"STOP LOSS SELL {sell_amount} {symbol} at {current_price}")
+                                print("USDT Balance:",
+                                      self.get_balance("USDT"), "USDT")
                 # Execute new trades
                 elif buy_signals >= 3 and trade_amount > 0 and usdt_balance >= MIN_TRADE_USDT:
                     trade_value = trade_amount * current_price
                     if usdt_balance >= trade_value:
                         c.execute("INSERT OR REPLACE INTO my_account (symbol, balance, pnl, updated) VALUES (?, ?, ?, ?)",
-                                (cur, trade_amount, trade_value, datetime.now().isoformat()))
+                                  (cur, trade_amount, trade_value, datetime.now().isoformat()))
                         c.execute("UPDATE my_account SET balance = balance - ?, pnl = balance - ? WHERE symbol = 'USDT'",
-                                (trade_value, trade_value))
+                                  (trade_value, trade_value))
                         self.last_trade_time[cur] = current_time
                         self.positions[cur] = {"buy_price": current_price}
-                        print(f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(
+                            f"BUY {trade_amount} {symbol} at {current_price}")
                         print("USDT Balance:", self.get_balance("USDT"), "USDT")
                     else:
-                        print(f"Insufficient USDT balance for BUY {trade_amount} {symbol}")
+                        print(
+                            f"Insufficient USDT balance for BUY {trade_amount} {symbol}")
 
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(
+                            available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
                             trade_value = sell_amount * current_price
                             c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
-                                    (sell_amount, cur))
+                                      (sell_amount, cur))
                             c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
-                                    (trade_value, trade_value))
+                                      (trade_value, trade_value))
                             self.last_trade_time[cur] = current_time
                             if cur in self.positions:
                                 del self.positions[cur]
-                            print(f"SELL {sell_amount} {symbol} at {current_price}")
-                            print("USDT Balance:", self.get_balance("USDT"), "USDT")
+                            print(
+                                f"SELL {sell_amount} {symbol} at {current_price}")
+                            print("USDT Balance:",
+                                  self.get_balance("USDT"), "USDT")
 
                 # Update account_pnl
                 c.execute("SELECT symbol, balance FROM my_account")
@@ -486,12 +501,13 @@ class BnArber:
                     if symbol == 'USDT':
                         total_pnl += balance
                     else:
-                        price = current_price if symbol == cur else (self.get_ask(symbol + "USDT")[0] if symbol + "USDT" in self.data else 0)
+                        price = current_price if symbol == cur else (self.get_ask(
+                            symbol + "USDT")[0] if symbol + "USDT" in self.data else 0)
                         total_pnl += balance * price if price else 0
 
                 c.execute("DELETE FROM my_account WHERE balance <= 0")
                 c.execute("UPDATE account_pnl SET account_pnl = ?, updated = ?",
-                        (total_pnl, datetime.now().isoformat()))
+                          (total_pnl, datetime.now().isoformat()))
 
                 conn.commit()
                 await asyncio.sleep(5)
@@ -504,11 +520,13 @@ class BnArber:
 
     async def get_signals(self, symbol, current_price):
         """Calculate buy and sell signals based on technical indicators."""
-        rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = self.get_technical_indicators(symbol)
+        rsi, macd, macd_signal, bb_lower, bb_upper, sma50 = self.get_technical_indicators(
+            symbol)
         sma = self.get_sma(symbol, SMA_PERIOD)
 
         if any(x is None for x in [sma, rsi, macd, macd_signal, bb_lower, bb_upper]) or pd.isna(macd_signal):
-            print(f"Skipping {symbol}: Indicator data incomplete - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}")
+            print(
+                f"Skipping {symbol}: Indicator data incomplete - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}")
             return 0, 0
 
         buy_signals = 0
@@ -541,25 +559,27 @@ class BnArber:
         print(f'{symbol} ||| bb_upper: {bb_upper} | sma50: {sma50}')
         print(
             f'{symbol} ||| buy signals: {buy_signals} | sell signals: {sell_signals}')
-        
+
         return buy_signals, sell_signals
 
     def get_trade_amount(self, symbol, current_price):
         """Calculate trade amount with a minimum of 6 USDT."""
         usdt_balance = self.get_balance("USDT")
         max_trade_usdt = usdt_balance * MAX_POSITION_PERCENT
-        euro_available = min(random.randint(self.min_amount, self.max_amount), max_trade_usdt)
-        
+        euro_available = min(random.randint(
+            self.min_amount, self.max_amount), max_trade_usdt)
+
         # Enforce minimum 6 USDT for buys
         trade_usdt = max(euro_available, 6.0) if usdt_balance >= 6.0 else 0.0
-        trade_amount = self.floor(trade_usdt / current_price, self.precision.get(symbol, 8))
+        trade_amount = self.floor(
+            trade_usdt / current_price, self.precision.get(symbol, 8))
         print(f'{symbol} ||| max_trade_usdt: {max_trade_usdt} | euro_available: {euro_available} | trade_amount: {trade_amount}')
         return trade_amount
 
     async def get_rates__1(self):
         SMA_PERIOD = 20
         COOLDOWN_SECONDS = 60  # 1-minute cooldown
-        
+
         STOP_LOSS_PCT = 0.05  # 5% stop loss
         TAKE_PROFIT_PCT = 0.03  # 3% take profit
 
