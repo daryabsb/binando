@@ -1,4 +1,6 @@
+import os
 import sqlite3
+from dotenv import load_dotenv
 import websockets
 import asyncio
 import json
@@ -12,6 +14,10 @@ import ta
 import time
 from binance.client import Client as BinanceClient
 # from BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
+
+load_dotenv()
+
+
 
 def initialize_database():
     conn = sqlite3.connect('testnet_account.db')
@@ -89,10 +95,11 @@ TOLERANCE_FACTOR = 0.1
 
 
 class BnArber:
-    def __init__(self, curs, public, secret, max_amount):
+    def __init__(self, curs, max_amount):
         initialize_database()
-        self.public = public
-        self.secret = secret
+        self.public = os.getenv("public") # public
+        # Retrieve the variables
+        self.secret = os.getenv("secret") # secret
         self.url = "wss://stream.binance.com:9443/stream?streams=btcusdt@depth5"
         self.curs = curs
         self.data = {}
@@ -101,7 +108,7 @@ class BnArber:
         self.max_amount = max_amount
         self.SMA_WINDOW = 20
         # Client(public, secret, tld='com', testnet=True)
-        self.client = self.get_client(public, secret, testnet=True)
+        self.client = self.get_client(self.public, self.secret, testnet=True)
         self.precision = {}
 
         self.testnet = True
@@ -389,6 +396,7 @@ class BnArber:
                                 available_balance, self.precision.get(symbol, 8))
                             
                             if sell_amount * current_price > self.min_amount:
+                                
                                 trade_value = sell_amount * current_price
                                 c.execute("UPDATE my_account SET balance = balance - ?, pnl = ? WHERE symbol = ?",
                                       (sell_amount, trade_value, cur))
@@ -431,61 +439,53 @@ class BnArber:
 
                 # Execute new trades
                 elif buy_signals >= 3 and trade_amount > 0:
-                    # Simulate buy (update database)
                     trade_value = trade_amount * current_price
-                    c.execute("INSERT OR REPLACE INTO my_account (symbol, balance, pnl, updated) VALUES (?, ?, ?, ?)",
-                            (cur, trade_amount, trade_value, datetime.now().isoformat()))
-                    c.execute("UPDATE my_account SET balance = balance - ?, pnl = ? WHERE symbol = 'USDT'",
-                            (trade_value, self.get_balance("USDT") - trade_value, 'USDT'))
-                    # order_success = self.order(symbol, "BUY", trade_amount)
-                    if order_success:
+                    if usdt_balance >= trade_value:
+                        # Simulate buy
+                        c.execute("INSERT OR REPLACE INTO my_account (symbol, balance, pnl, updated) VALUES (?, ?, ?, ?)",
+                                (cur, trade_amount, trade_value, datetime.now().isoformat()))
+                        c.execute("UPDATE my_account SET balance = balance - ?, pnl = balance - ? WHERE symbol = 'USDT'",
+                                (trade_value, trade_value))
                         self.last_trade_time[cur] = current_time
                         self.positions[cur] = {"buy_price": current_price}
-                        print(
-                            f"BUY {trade_amount} {symbol} at {current_price}")
-                        print(
-                            f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
-                        print("Balance:", self.get_balance("USDT"), "USDT")
+                        print(f"BUY {trade_amount} {symbol} at {current_price}")
+                        print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                        print("USDT Balance:", self.get_balance("USDT"), "USDT")
                     else:
-                        print(f"Failed to BUY {trade_amount} {symbol}")
+                        print(f"Insufficient USDT balance for BUY {trade_amount} {symbol}")
 
                 elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(
-                            available_balance, self.precision.get(symbol, 8))
+                        sell_amount = self.floor(available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
                             trade_value = sell_amount * current_price
-                            c.execute("UPDATE my_account SET balance = balance - ?, pnl = ? WHERE symbol = ?",
-                                    (sell_amount, trade_value, cur))
-                            c.execute("UPDATE my_account SET balance = balance + ?, pnl = ? WHERE symbol = 'USDT'",
-                                    (trade_value, self.get_balance("USDT") + trade_value, 'USDT'))
-                            order_success = True # self.order(
-                            #     symbol, "SELL", sell_amount)
-                            if order_success:
-                                self.last_trade_time[cur] = current_time
-                                if cur in self.positions:
-                                    del self.positions[cur]
-                                print(
-                                    f"SELL {sell_amount} {symbol} at {current_price}")
-                                print(
-                                    f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
-                                print("Balance:", self.get_balance(
-                                    "USDT"), "USDT")
-                                
-                            else:
-                                print(f"Failed to SELL {sell_amount} {symbol}")
-                # Update account_pnl
+                            c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
+                                    (sell_amount, cur))
+                            c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
+                                    (trade_value, trade_value))
+                            self.last_trade_time[cur] = current_time
+                            if cur in self.positions:
+                                del self.positions[cur]
+                            print(f"SELL {sell_amount} {symbol} at {current_price}")
+                            print(f"Indicators - SMA: {sma}, RSI: {rsi}, MACD: {macd}/{macd_signal}, BB: {bb_lower}/{bb_upper}")
+                            print("USDT Balance:", self.get_balance("USDT"), "USDT")
+
+                # Update account_pnl with real-time total USD value
                 c.execute("SELECT symbol, balance FROM my_account")
                 total_pnl = 0
-                for row in c.fetchall():
-                    sym, bal = row
-                    if sym == 'USDT':
-                        total_pnl += bal
+                for symbol, balance in c.fetchall():
+                    if symbol == 'USDT':
+                        total_pnl += balance
                     else:
-                        total_pnl += bal * current_price if sym == cur else bal * self.get_ask(sym + "USDT")[0] if sym + "USDT" in self.data else 0
+                        price = current_price if symbol == cur else (self.get_ask(symbol + "USDT")[0] if symbol + "USDT" in self.data else 0)
+                        total_pnl += balance * price if price else 0  # Use 0 if no price available
+
+                # Remove assets with zero balance
+                c.execute("DELETE FROM my_account WHERE balance <= 0")
+
                 c.execute("UPDATE account_pnl SET account_pnl = ?, updated = ?",
-                      (total_pnl, datetime.now().isoformat()))
+                        (total_pnl, datetime.now().isoformat()))
 
                 conn.commit()
                 await asyncio.sleep(5)
@@ -739,8 +739,8 @@ async def main():
 
         bn = BnArber(
             data["currencies"],
-            data["public"],
-            data["secret"],
+            # data["public"],
+            # data["secret"],
             data["max_amount"]
         )
         await bn.run()

@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import websockets
 import asyncio
 import json
@@ -11,6 +13,7 @@ import time
 from binance.client import Client as BinanceClient
 # from BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
 
+load_dotenv()
 
 class Client(BinanceClient):
     """Handles Binance API requests with automatic time synchronization and exchange info loading."""
@@ -61,9 +64,9 @@ TOLERANCE_FACTOR = 0.1
 
 
 class BnArber:
-    def __init__(self, curs, public, secret, max_amount):
-        self.public = public
-        self.secret = secret
+    def __init__(self, curs, max_amount):
+        self.public = os.getenv("public") # public
+        self.secret = os.getenv("secret") # secret
         self.url = "wss://stream.binance.com:9443/stream?streams=btcusdt@depth5"
         self.curs = curs
         self.data = {}
@@ -72,7 +75,8 @@ class BnArber:
         self.max_amount = max_amount
         self.SMA_WINDOW = 20
         # Client(public, secret, tld='com', testnet=True)
-        self.client = self.get_client(public, secret, testnet=True)
+        # self.client = self.get_client(public, secret, testnet=True)
+        self.client = self.get_client(self.public, self.secret, testnet=True)
         self.precision = {}
 
         self.testnet = True
@@ -490,8 +494,8 @@ async def main():
 
         bn = BnArber(
             data["currencies"],
-            data["public"],
-            data["secret"],
+            # data["public"],
+            # data["secret"],
             data["max_amount"]
         )
         await bn.run()
