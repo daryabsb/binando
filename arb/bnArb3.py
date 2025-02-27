@@ -26,7 +26,7 @@ load_dotenv()
 
 
 def initialize_database():
-    conn = sqlite3.connect('testnet_account.db')
+    conn = sqlite3.connect('testnet_account2.db')
     c = conn.cursor()
 
     # Create my_account table

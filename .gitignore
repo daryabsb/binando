@@ -62,6 +62,7 @@ src/media/uploads/barcodes/*
 local_settings.py
 db.sqlite3
 testnet_account.db
+testnet_account2.db
 db.sqlite3-journal
 
 # Flask stuff:
