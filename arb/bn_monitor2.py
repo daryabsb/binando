@@ -42,7 +42,7 @@ class PriceMonitor:
 
 
 def get_symbols():
-    conn = sqlite3.connect('testnet_account.db')
+    conn = sqlite3.connect('testnet_account2.db')
     c = conn.cursor()
     c.execute("SELECT symbol FROM my_account WHERE symbol != 'USDT'")
     symbols = [row[0] for row in c.fetchall()]
