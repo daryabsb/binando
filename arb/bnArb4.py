@@ -26,7 +26,7 @@ load_dotenv()
 
 
 def initialize_database():
-    conn = sqlite3.connect('testnet_account2.db')
+    conn = sqlite3.connect('testnet_account3.db')
     c = conn.cursor()
 
     # Create my_account table
@@ -372,7 +372,7 @@ class BnArber:
         if not hasattr(self, 'positions'):
             self.positions = {}
 
-        conn = sqlite3.connect('testnet_account2.db')
+        conn = sqlite3.connect('testnet_account3.db')
         c = conn.cursor()
         for cur in self.curs:
             # cur = symbol.replace("USDT", "")
@@ -475,7 +475,7 @@ class BnArber:
                         print(
                             f"Insufficient USDT balance for BUY {trade_amount} {symbol}")
 
-                elif sell_signals >= 2:
+                elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
                         sell_amount = self.floor(
@@ -754,7 +754,7 @@ class BnArber:
 
     def get_balance(self, cur):
         try:
-            conn = sqlite3.connect('testnet_account2.db')
+            conn = sqlite3.connect('testnet_account3.db')
             c = conn.cursor()
             c.execute("SELECT balance FROM my_account WHERE symbol = ?", (cur,))
             result = c.fetchone()

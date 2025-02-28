@@ -26,24 +26,33 @@ load_dotenv()
 
 
 def initialize_database():
-    conn = sqlite3.connect('testnet_account2.db')
+    conn = sqlite3.connect('testnet_account5.db')
     c = conn.cursor()
 
-    # Create my_account table
+    # Existing tables
     c.execute('''CREATE TABLE IF NOT EXISTS my_account
                  (symbol TEXT PRIMARY KEY, balance REAL, pnl REAL, updated TEXT)''')
-
-    # Create account_pnl table
     c.execute('''CREATE TABLE IF NOT EXISTS account_pnl
                  (account_pnl REAL, updated TEXT)''')
 
-    # Insert initial USDT record if not exists
+    # New order_history table
+    c.execute('''CREATE TABLE IF NOT EXISTS order_history
+                 (order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  symbol TEXT,
+                  side TEXT,
+                  amount REAL,
+                  price REAL,
+                  value REAL,
+                  timestamp TEXT,
+                  pnl REAL)''')
+
+    # Initial USDT record
     c.execute("SELECT COUNT(*) FROM my_account WHERE symbol = 'USDT'")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO my_account (symbol, balance, pnl, updated) VALUES (?, ?, ?, ?)",
                   ('USDT', 150.0, 150.0, datetime.now().isoformat()))
 
-    # Insert initial account_pnl if not exists
+    # Initial account_pnl
     c.execute("SELECT COUNT(*) FROM account_pnl")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO account_pnl (account_pnl, updated) VALUES (?, ?)",
@@ -372,13 +381,13 @@ class BnArber:
         if not hasattr(self, 'positions'):
             self.positions = {}
 
-        conn = sqlite3.connect('testnet_account2.db')
+        conn = sqlite3.connect('testnet_account5.db')
         c = conn.cursor()
         for cur in self.curs:
             # cur = symbol.replace("USDT", "")
             symbol = cur + "USDT"
+
             try:
-                # symbol = cur + "USDT"
                 if symbol not in self.data:
                     print(
                         f"Skipping {symbol}: No market data available in self.data")
@@ -403,26 +412,8 @@ class BnArber:
                 trade_amount = self.get_trade_amount(symbol, current_price)
                 buy_signals, sell_signals = await self.get_signals(symbol, current_price)
 
-                # Check for low-value assets to sell
-                available_balance = self.get_balance(cur)
-                if available_balance > 0:
-                    asset_value = available_balance * current_price
-                    if SELL_THRESHOLD_RANGE[0] <= asset_value <= SELL_THRESHOLD_RANGE[1]:
-                        sell_amount = available_balance  # Sell all
-                        trade_value = sell_amount * current_price
-                        c.execute(
-                            "UPDATE my_account SET balance = 0, pnl = 0 WHERE symbol = ?", (cur,))
-                        c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
-                                  (trade_value, trade_value))
-                        self.last_trade_time[cur] = current_time
-                        if cur in self.positions:
-                            del self.positions[cur]
-                        print(
-                            f"LOW VALUE SELL {sell_amount} {symbol} at {current_price} (Value: {asset_value:.2f} USD)")
-                        print("USDT Balance:", self.get_balance("USDT"), "USDT")
-
-                # Take-profit or stop-loss
-                elif cur in self.positions:
+                # Take-profit or stop-loss (priority over signal trades)
+                if cur in self.positions:
                     pos = self.positions[cur]
                     if current_price > pos["buy_price"] * (1 + TAKE_PROFIT_PCT):
                         available_balance = self.get_balance(cur)
@@ -431,14 +422,18 @@ class BnArber:
                                 available_balance, self.precision.get(symbol, 8))
                             if sell_amount * current_price > self.min_amount:
                                 trade_value = sell_amount * current_price
+                                pnl = trade_value - \
+                                    (sell_amount * pos["buy_price"])
                                 c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
                                           (sell_amount, cur))
                                 c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
                                           (trade_value, trade_value))
+                                c.execute("INSERT INTO order_history (symbol, side, amount, price, value, timestamp, pnl) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                          (symbol, "SELL (TP)", sell_amount, current_price, trade_value, datetime.now().isoformat(), pnl))
                                 self.last_trade_time[cur] = current_time
                                 del self.positions[cur]
                                 print(
-                                    f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price}")
+                                    f"TAKE PROFIT SELL {sell_amount} {symbol} at {current_price} (PNL: {pnl:.2f})")
                                 print("USDT Balance:",
                                       self.get_balance("USDT"), "USDT")
                     elif self.check_stop_loss(pos, current_price, STOP_LOSS_PCT):
@@ -448,17 +443,22 @@ class BnArber:
                                 available_balance, self.precision.get(symbol, 8))
                             if sell_amount * current_price > self.min_amount:
                                 trade_value = sell_amount * current_price
+                                pnl = trade_value - \
+                                    (sell_amount * pos["buy_price"])
                                 c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
                                           (sell_amount, cur))
                                 c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
                                           (trade_value, trade_value))
+                                c.execute("INSERT INTO order_history (symbol, side, amount, price, value, timestamp, pnl) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                          (symbol, "SELL (SL)", sell_amount, current_price, trade_value, datetime.now().isoformat(), pnl))
                                 self.last_trade_time[cur] = current_time
                                 del self.positions[cur]
                                 print(
-                                    f"STOP LOSS SELL {sell_amount} {symbol} at {current_price}")
+                                    f"STOP LOSS SELL {sell_amount} {symbol} at {current_price} (PNL: {pnl:.2f})")
                                 print("USDT Balance:",
                                       self.get_balance("USDT"), "USDT")
-                # Execute new trades
+
+                # Execute new trades based on signals
                 elif buy_signals >= 2 and trade_amount > 0 and usdt_balance >= MIN_TRADE_USDT:
                     trade_value = trade_amount * current_price
                     if usdt_balance >= trade_value:
@@ -466,6 +466,8 @@ class BnArber:
                                   (cur, trade_amount, trade_value, datetime.now().isoformat()))
                         c.execute("UPDATE my_account SET balance = balance - ?, pnl = balance - ? WHERE symbol = 'USDT'",
                                   (trade_value, trade_value))
+                        c.execute("INSERT INTO order_history (symbol, side, amount, price, value, timestamp, pnl) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                  (symbol, "BUY", trade_amount, current_price, trade_value, datetime.now().isoformat(), 0.0))
                         self.last_trade_time[cur] = current_time
                         self.positions[cur] = {"buy_price": current_price}
                         print(
@@ -475,22 +477,30 @@ class BnArber:
                         print(
                             f"Insufficient USDT balance for BUY {trade_amount} {symbol}")
 
-                elif sell_signals >= 2:
+                elif sell_signals >= 3:
                     available_balance = self.get_balance(cur)
                     if available_balance > 0:
-                        sell_amount = self.floor(
+                        asset_value = available_balance * current_price
+                        sell_amount = available_balance if SELL_THRESHOLD_RANGE[0] <= asset_value <= SELL_THRESHOLD_RANGE[1] else self.floor(
                             available_balance, self.precision.get(symbol, 8))
                         if sell_amount * current_price > self.min_amount:
                             trade_value = sell_amount * current_price
+                            pnl = trade_value - \
+                                (sell_amount *
+                                 self.positions[cur]["buy_price"]) if cur in self.positions else 0
                             c.execute("UPDATE my_account SET balance = balance - ?, pnl = 0 WHERE symbol = ?",
                                       (sell_amount, cur))
                             c.execute("UPDATE my_account SET balance = balance + ?, pnl = balance + ? WHERE symbol = 'USDT'",
                                       (trade_value, trade_value))
+                            sell_type = "SELL (LOW VALUE)" if SELL_THRESHOLD_RANGE[
+                                0] <= asset_value <= SELL_THRESHOLD_RANGE[1] else "SELL"
+                            c.execute("INSERT INTO order_history (symbol, side, amount, price, value, timestamp, pnl) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                      (symbol, sell_type, sell_amount, current_price, trade_value, datetime.now().isoformat(), pnl))
                             self.last_trade_time[cur] = current_time
                             if cur in self.positions:
                                 del self.positions[cur]
                             print(
-                                f"SELL {sell_amount} {symbol} at {current_price}")
+                                f"{sell_type} {sell_amount} {symbol} at {current_price} (Value: {asset_value:.2f} USD, PNL: {pnl:.2f})")
                             print("USDT Balance:",
                                   self.get_balance("USDT"), "USDT")
 
@@ -704,7 +714,7 @@ class BnArber:
                                         "USDT"), "USDT")
 
                 # Execute new trades
-                elif buy_signals >= 3 and trade_amount > 0:
+                elif buy_signals >= 2 and trade_amount > 0:
                     order_success = self.order(symbol, "BUY", trade_amount)
                     if order_success:
                         self.last_trade_time[cur] = current_time
@@ -754,7 +764,7 @@ class BnArber:
 
     def get_balance(self, cur):
         try:
-            conn = sqlite3.connect('testnet_account2.db')
+            conn = sqlite3.connect('testnet_account5.db')
             c = conn.cursor()
             c.execute("SELECT balance FROM my_account WHERE symbol = ?", (cur,))
             result = c.fetchone()
