@@ -7,6 +7,7 @@ base_settings = [
     'components/db.py',
     'components/common.py',
     'components/secretes.py',
+    'components/redis.py',
 ]
 
 include(*base_settings)

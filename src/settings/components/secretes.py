@@ -1,6 +1,8 @@
 from src.settings.components.env import config
 # from src.settings.components.config_file import CONFIG_FILE
 
+SITE_ID = 1
+
 SECRET_KEY = config("SECRET_KEY", default=None)
 DEBUG = config('DJANGO_DEBUG', default=1)
 
