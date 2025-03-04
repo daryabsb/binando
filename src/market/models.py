@@ -1,5 +1,6 @@
 from django.db import models
 
+from timescale.db.models.models import TimescaleModel
 from timescale.db.models.fields import TimescaleDateTimeField
 from timescale.db.models.managers import TimescaleManager
 
@@ -19,3 +20,63 @@ class Company(models.Model):
         self.ticker = f"{self.ticker}".upper()
         super().save(*args, **kwargs)
         tasks.sync_company_stock_quotes.delay(self.pk)
+
+
+class CryptoCurency(models.Model):
+    name = models.CharField(max_length=120)
+    ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    description = models.TextField(blank=True, null=True)
+    # EXAMPLE =  0.25386236600000167
+    balance = models.DecimalField(max_digits=20, decimal_places=17)
+    pnl = models.DecimalField(max_digits=20, decimal_places=17, default=0)
+    active = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.ticker = f"{self.ticker}".upper()
+        super().save(*args, **kwargs)
+        # tasks.sync_crypto_currency_quotes.delay(self.pk)
+
+
+# class Symbol(models.Model):
+#     currency = models.OneToOneField(
+#         CryptoCurency, on_delete=models.CASCADE, related_name='symbol'
+#     )
+#     # EXAMPLE =  0.25386236600000167
+#     balance = models.DecimalField(max_digits=14, decimal_places=17)
+#     pnl = models.DecimalField(max_digits=14, decimal_places=17, default=0)
+#     active = models.BooleanField(default=True)
+#     timestamp = TimescaleDateTimeField(auto_now_add=True)
+#     updated = TimescaleDateTimeField(auto_now=True)
+
+class Symbol(models.Model):
+    ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    pair = models.CharField(max_length=20, unique=True, db_index=True)
+    active = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.pair
+
+
+class Kline(TimescaleModel):
+    symbol = models.CharField(max_length=20, db_index=True)
+    timestamp = TimescaleDateTimeField(interval="2 week")
+    open = models.DecimalField(max_digits=20, decimal_places=17)
+    high = models.DecimalField(max_digits=20, decimal_places=17)
+    low = models.DecimalField(max_digits=20, decimal_places=17)
+    close = models.DecimalField(max_digits=20, decimal_places=17)
+    volume = models.DecimalField(max_digits=20, decimal_places=17)
+
+    objects = models.Manager()
+    timescale = TimescaleManager()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['symbol', 'timestamp']),
+        ]

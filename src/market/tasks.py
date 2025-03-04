@@ -1,3 +1,9 @@
+import redis
+import json
+from celery.schedules import crontab
+from src.services.client import get_client
+from src.market.models import Kline
+from decimal import Decimal
 from celery import shared_task
 from datetime import timedelta
 
@@ -17,6 +23,80 @@ celery -A src beat
 '''
 
 interval = 30
+
+
+DAYS_AGO = 14  # For 14-day RSI, adjust as needed
+
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+
+def handle_data(self, message):
+    try:
+        message = json.loads(message)
+        market_id = message["stream"].split("@")[0].upper()
+        asks = [(float(a[0]), float(a[1]))
+                for a in message["data"]["asks"] if len(a) > 1]
+        if asks:
+            ask = min(asks, key=lambda t: t[0])
+            self.data[market_id] = {"ask": [ask[0], ask[1]]}
+            # Store price in Redis
+            redis_client.set(f"price:{market_id}", ask[0])
+    except Exception as e:
+        print(f"Error in handle_data: {e}")
+
+
+# @shared_task
+# def run_trading():
+#     bot = BnArber(...)  # Initialize your bot
+#     bot.get_rates()
+
+
+@shared_task
+def update_prices():
+    from src.market.models import Symbol
+    client = get_client()
+    symbols = Symbol.objects.filter(active=True).values_list('pair', flat=True)
+    for symbol in symbols:
+        ticker = client.get_ticker(symbol=symbol)
+        redis_client.set(f"price:{symbol}", ticker['lastPrice'])
+
+
+@shared_task
+def update_klines(symbols):
+    client = get_client()
+    for symbol in symbols:
+        try:
+            klines = client.get_klines(
+                symbol=symbol, interval="15m", limit=1)  # Latest 15m kline
+            kline = klines[0]
+            timestamp = timezone.from_timestamp(int(kline[0]) / 1000)
+            Kline.objects.update_or_create(
+                symbol=symbol,
+                timestamp=timestamp,
+                defaults={
+                    'open': Decimal(kline[1]),
+                    'high': Decimal(kline[2]),
+                    'low': Decimal(kline[3]),
+                    'close': Decimal(kline[4]),
+                    'volume': Decimal(kline[5]),
+                }
+            )
+            # Delete old data
+            cutoff = timezone.now() - timedelta(days=DAYS_AGO)
+            Kline.objects.filter(symbol=symbol, timestamp__lt=cutoff).delete()
+        except Exception as e:
+            print(f"Error updating kline for {symbol}: {e}")
+
+
+# Schedule in celery.py or beat
+CELERY_BEAT_SCHEDULE = {
+    'update-klines': {
+        'task': 'your_app.tasks.update_klines',
+        'schedule': crontab(minute='*/15'),  # Every 15 minutes
+        'args': (['DOGEUSDT', 'LTCUSDT', ...],),  # Your symbol list
+    },
+}
 
 
 @shared_task
