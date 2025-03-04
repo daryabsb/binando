@@ -4,9 +4,9 @@ import math
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
-from BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
+from XAI.BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
 from binance.enums import *
-from symbols import SYMBOLS, MEME_COINS, get_percentage_options, get_history_options
+from XAI.symbols import SYMBOLS, MEME_COINS, get_percentage_options, get_history_options
 
 API_KEY = api_key
 API_SECRET = secret_key

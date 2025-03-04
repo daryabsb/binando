@@ -1,7 +1,7 @@
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
-from utils import pr
+from XAI.utils import pr
 start = "2022-01-01"
 end = "2022-01-31"
 
@@ -19,5 +19,5 @@ close = df.Close.copy()
 # plt.show()
 # pr(close.describe())
 # close.BA.div(close.iloc[0,0]).mul(100)
-norm = close.dropna().div(close.iloc[0,0]).mul(100)
+norm = close.dropna().div(close.iloc[0, 0]).mul(100)
 pr(df)

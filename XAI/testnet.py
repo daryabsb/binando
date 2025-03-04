@@ -1,9 +1,9 @@
 from binance.client import Client
 from binance import ThreadedWebsocketManager
 import pandas as pd
-from BinanceKeys import test_api_key, test_secret_key
+from XAI.BinanceKeys import test_api_key, test_secret_key
 import time
-from utils import get_history, pr, stream_data, stream_candles
+from XAI.utils import get_history, pr, stream_data, stream_candles
 from time import sleep
 from datetime import datetime, timedelta
 # client = Client(api_key, secret_key, tld='com')

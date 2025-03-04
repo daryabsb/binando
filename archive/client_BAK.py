@@ -1,6 +1,6 @@
 import time
 from binance.client import Client
-from BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
+from XAI.BinanceKeys import test_api_key, test_secret_key, api_key, secret_key
 
 
 def get_client(testnet=False):

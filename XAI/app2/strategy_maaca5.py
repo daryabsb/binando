@@ -2,8 +2,8 @@ from binance.client import Client
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
-from BinanceKeys import test_api_key, test_secret_key
-from symbols import SYMBOLS
+from XAI.BinanceKeys import test_api_key, test_secret_key
+from XAI.symbols import SYMBOLS
 
 API_KEY = test_api_key
 API_SECRET = test_secret_key

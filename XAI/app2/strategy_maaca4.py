@@ -2,12 +2,20 @@ from binance.client import Client
 import pandas as pd
 import time
 import ta  # Technical Analysis Library
-from BinanceKeys import test_api_key, test_secret_key
-
+from XAI.BinanceKeys import test_api_key, test_secret_key
 
 API_KEY = test_api_key
 API_SECRET = test_secret_key
-client = Client(API_KEY, API_SECRET)
+# client = Client(API_KEY, API_SECRET)
+client = Client(API_KEY, API_SECRET, tld='com', testnet=True)
+
+# Get Binance server time and adjust
+server_time = client.get_server_time()['serverTime']
+system_time = int(time.time() * 1000)
+time_offset = server_time - system_time
+
+# Set the timestamp offset manually
+client.timestamp_offset = time_offset
 
 # -------------------------------
 # GLOBAL PARAMETERS & SETTINGS
@@ -21,7 +29,7 @@ SYMBOLS = [
     "XRPUSDT",
     "ETHUSDT",
     "SOLUSDT",
-    "BERAUSDT",
+    # "BERAUSDT",
     "BNBUSDT",
     "TRUMPUSDT",
     "BTCUSDT",
@@ -43,6 +51,10 @@ MACD_CONFIRMATION = True
 # Run duration in hours (set to 6 hours here)
 DURATION_HOURS = 6
 
+RISK_PER_TRADE = 0.01  # Risk 1% of account balance per trade
+account_balance = float(client.get_asset_balance(asset='USDT')['free'])
+TRADE_USDT_AMOUNT = account_balance * RISK_PER_TRADE
+
 # -------------------------------
 # HELPER FUNCTIONS
 # -------------------------------
@@ -51,8 +63,8 @@ DURATION_HOURS = 6
 def get_weekly_support_resistance(symbol):
     """
     Fetch one week of 1-hour klines and calculate:
-      - Average support (mean of lows)
-      - Average resistance (mean of highs)
+        - Average support (mean of lows)
+        - Average resistance (mean of highs)
     """
     try:
         klines = client.get_historical_klines(
@@ -72,11 +84,17 @@ def get_weekly_support_resistance(symbol):
 
 
 def calculate_grid_levels(avg_support, avg_resistance, levels=GRID_LEVELS):
+    grid_spacing = (avg_resistance - avg_support) / (levels + 1)
+    grid_levels = [avg_support + grid_spacing * (i + 1) for i in range(levels)]
+    return grid_levels, grid_spacing
+
+
+def calculate_grid_levels_OLD(avg_support, avg_resistance, levels=GRID_LEVELS):
     """
     Divide the range between average support and resistance into grid levels.
     Returns:
-      - grid_levels: a list of levels (from lower to higher)
-      - grid_spacing: the difference between adjacent levels
+        - grid_levels: a list of levels (from lower to higher)
+        - grid_spacing: the difference between adjacent levels
     """
     grid_spacing = (avg_resistance - avg_support) / (levels + 1)
     grid_levels = [avg_support + grid_spacing * (i + 1) for i in range(levels)]
@@ -86,8 +104,8 @@ def calculate_grid_levels(avg_support, avg_resistance, levels=GRID_LEVELS):
 def get_technical_indicators(symbol, interval="15m", lookback="1 day ago UTC"):
     """
     Retrieve recent klines and compute technical indicators:
-      - RSI (using a 14-period window)
-      - MACD and its signal line
+        - RSI (using a 14-period window)
+        - MACD and its signal line
     """
     try:
         klines = client.get_historical_klines(symbol, interval, lookback)
@@ -129,16 +147,38 @@ def is_near_level(price, level, tolerance):
 # -------------------------------
 
 
+def is_trending(symbol, interval="1h", threshold=25, lookback="2 days ago UTC"):
+    try:
+        klines = client.get_historical_klines(
+            symbol, interval, lookback)  # Fetch 2 days of data
+        df = pd.DataFrame(klines, columns=[
+            'timestamp', 'open', 'high', 'low', 'close', 'volume',
+            'close_time', 'qav', 'num_trades', 'taker_base_vol', 'taker_quote_vol', 'ignore'
+        ])
+        df['close'] = df['close'].astype(float)
+        df['high'] = df['high'].astype(float)
+        df['low'] = df['low'].astype(float)
+        adx = ta.trend.ADXIndicator(
+            df['high'], df['low'], df['close'], window=14).adx()
+        if len(adx) == 0:
+            return False
+        return adx.iloc[-1] > threshold
+    except Exception as e:
+        print(f"Error checking trend for {symbol}: {e}")
+        return False
+
+
 def run_trading_bot(duration_hours=DURATION_HOURS):
     """
     Run the trading bot for a fixed duration (in hours). For each symbol:
-      1. Calculate weekly average support/resistance and build grid levels.
-      2. In a loop until the duration expires, check the current price and technical indicators.
-      3. If the price is near a grid level (and that grid level has not already been triggered) and the 
-         conditions are met (RSI below threshold and MACD bullish), place a BUY (simulate buying TRADE_USDT_AMOUNT).
-      4. For any open position, if the current price reaches the target sell level (the next grid level or resistance)
-         and the sell conditions are met (RSI above threshold and MACD bearish), SELL that position.
-      5. At the end of the session, report the total profit from all closed trades.
+        1. Calculate weekly average support/resistance and build grid levels.
+        2. Check if the market is trending. If it is, skip trading for that symbol.
+        3. In a loop until the duration expires, check the current price and technical indicators.
+        4. If the price is near a grid level (and that grid level has not already been triggered) and the 
+            conditions are met (RSI below threshold and MACD bullish), place a BUY (simulate buying TRADE_USDT_AMOUNT).
+        5. For any open position, if the current price reaches the target sell level (the next grid level or resistance)
+            and the sell conditions are met (RSI above threshold and MACD bearish), SELL that position.
+        6. At the end of the session, report the total profit from all closed trades.
     """
     start_time = time.time()
     end_time = start_time + duration_hours * 3600
@@ -173,6 +213,12 @@ def run_trading_bot(duration_hours=DURATION_HOURS):
             try:
                 if symbol not in symbol_grids:
                     continue
+
+                # Check if the market is trending
+                if is_trending(symbol):
+                    print(f"{symbol} >> Market is trending. Skipping grid trading.")
+                    continue
+
                 grid_info = symbol_grids[symbol]
                 current_price = get_current_price(symbol)
                 if current_price is None:

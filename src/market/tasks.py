@@ -11,8 +11,8 @@ from .utils import batch_insert_stock_data
 '''
 COMMANDS:
 
-celery -A cfehome worker -l info --pool=solo
-celery -A cfehome beat 
+celery -A src worker -l info --pool=solo
+celery -A src beat 
 
 '''
 
@@ -23,15 +23,17 @@ interval = 30
 def sync_company_stock_quotes(company_id, days_ago=32, date_format="%Y-%m-%d", verbose=False):
     global interval
     interval += 1
-    print(f"sync_company_stock_quotes for {company_id}")
+    Company = apps.get_model("market", "Company")
+    try:
+        company_obj = Company.objects.get(id=company_id)
+    except:
+        company_obj = None
+    if company_obj is None:
+        raise Exception(f"Company Id {company_id} invalid")
+
+    print(
+        f"sync_company_stock_quotes for {company_obj.name} || {company_obj.ticker}!")
     return interval
-    # Company = apps.get_model("market", "Company")
-    # try:
-    #     company_obj = Company.objects.get(id=company_id)
-    # except:
-    #     company_obj = None
-    # if company_obj is None:
-    #     raise Exception(f"Company Id {company_id} invalid")
     # company_ticker = company_obj.ticker
     # if company_ticker is None:
     #     raise Exception(f"{company_ticker} invalid")
