@@ -64,19 +64,30 @@ class Symbol(models.Model):
         return self.pair
 
 
-class Kline(TimescaleModel):
+class Kline(models.Model):
     symbol = models.CharField(max_length=20, db_index=True)
+    time = TimescaleDateTimeField(interval="2 week")
     timestamp = TimescaleDateTimeField(interval="2 week")
-    open = models.DecimalField(max_digits=20, decimal_places=17)
-    high = models.DecimalField(max_digits=20, decimal_places=17)
-    low = models.DecimalField(max_digits=20, decimal_places=17)
-    close = models.DecimalField(max_digits=20, decimal_places=17)
-    volume = models.DecimalField(max_digits=20, decimal_places=17)
+    open = models.DecimalField(max_digits=30, decimal_places=17)
+    high = models.DecimalField(max_digits=30, decimal_places=17)
+    low = models.DecimalField(max_digits=30, decimal_places=17)
+    close = models.DecimalField(max_digits=30, decimal_places=17)
+    volume = models.DecimalField(max_digits=30, decimal_places=17)
+    # time = TimescaleDateTimeField(interval="1 week")
 
     objects = models.Manager()
     timescale = TimescaleManager()
 
     class Meta:
         indexes = [
-            models.Index(fields=['symbol', 'timestamp']),
+            models.Index(fields=['symbol', 'time']),
         ]
+        unique_together = ['symbol', 'time']
+    def __str__(self):
+        return f"{self.symbol}||{self.timestamp}: {self.close}|{self.volume}"
+# timestamp: 2025-03-05 10:45:00+00:00
+# open: 0.23080000
+# high: 0.23310000
+# low: 0.22880000
+# close: 0.23180000
+# volume: 183015.00000000

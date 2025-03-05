@@ -47,7 +47,7 @@ class Client(BinanceClient):
             return None
 
 
-def get_client(PUBLIC, SECRET, testnet=False):
+def get_client(testnet=False):
     from src.settings.components.env import config
     PUBLIC = config('test_api_key') if testnet else config('api_key')
     SECRET = config('test_secret_key') if testnet else config('secret_key')

@@ -52,7 +52,7 @@ class BnArber:
         self.max_amount = max_amount
         self.SMA_WINDOW = 20
         # Client(public, secret, tld='com', testnet=True)
-        self.client = get_client(self.public, self.secret, testnet=True)
+        self.client = get_client(testnet=True)
         self.precision = {}
 
         self.testnet = True

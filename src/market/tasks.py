@@ -2,11 +2,14 @@ import redis
 import json
 from celery.schedules import crontab
 from src.services.client import get_client
-from src.market.models import Kline
+# from src.market.models import Kline
 from decimal import Decimal
 from celery import shared_task
 from datetime import timedelta
-
+import pytz
+from datetime import datetime
+timestamp_format = '%Y-%m-%d %H:%M:%S' 
+eastern = pytz.timezone("US/Eastern")
 from django.apps import apps
 from django.utils import timezone
 
@@ -21,14 +24,67 @@ celery -A src worker -l info --pool=solo
 celery -A src beat 
 
 '''
-
 interval = 30
-
-
 DAYS_AGO = 14  # For 14-day RSI, adjust as needed
-
-
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+from django.utils import timezone
+from datetime import datetime, timedelta
+from decimal import Decimal
+import pytz
+from celery import shared_task
+from django.apps import apps
+
+@shared_task
+def update_klines(symbols=None):
+    from src.services.config import data
+    if symbols is None:
+        symbols = data["currencies"]
+
+    client = get_client()
+    
+    for symbol in symbols:
+        symbol_full = symbol + "USDT"
+        try:
+            Kline = apps.get_model("market", "Kline")
+            klines = client.get_klines(symbol=symbol_full, interval="15m", limit=10)  # Fetch last 10 klines
+            
+            if not klines:
+                continue
+
+            # Convert timestamps and filter out existing ones
+            timestamps = [
+                datetime.fromtimestamp(int(kline[0]) / 1000, tz=pytz.utc) for kline in klines
+            ]
+            existing_timestamps = set(
+                Kline.objects.filter(symbol=symbol_full, timestamp__in=timestamps)
+                .values_list("timestamp", flat=True)
+            )
+
+            # Create new Kline objects for non-duplicate timestamps
+            kline_objects = [
+                Kline(
+                    symbol=symbol_full,
+                    timestamp=timestamps[i],
+                    open=Decimal(klines[i][1]),
+                    high=Decimal(klines[i][2]),
+                    low=Decimal(klines[i][3]),
+                    close=Decimal(klines[i][4]),
+                    volume=Decimal(klines[i][5]),
+                )
+                for i in range(len(klines))
+                if timestamps[i] not in existing_timestamps
+            ]
+
+            if kline_objects:
+                Kline.objects.bulk_create(kline_objects, ignore_conflicts=True)  # Bulk insert while ignoring conflicts
+
+            # Delete old data
+            cutoff = timezone.now() - timedelta(days=DAYS_AGO)
+            Kline.objects.filter(symbol=symbol_full, timestamp__lt=cutoff).delete()
+
+        except Exception as e:
+            print(f"Error updating kline for {symbol_full}: {e}")
 
 
 def handle_data(self, message):
@@ -52,41 +108,15 @@ def handle_data(self, message):
 #     bot.get_rates()
 
 
-@shared_task
-def update_prices():
-    from src.market.models import Symbol
-    client = get_client()
-    symbols = Symbol.objects.filter(active=True).values_list('pair', flat=True)
-    for symbol in symbols:
-        ticker = client.get_ticker(symbol=symbol)
-        redis_client.set(f"price:{symbol}", ticker['lastPrice'])
+# @shared_task
+# def update_prices():
+#     from src.market.models import Symbol
+#     client = get_client()
+#     symbols = Symbol.objects.filter(active=True).values_list('pair', flat=True)
+#     for symbol in symbols:
+#         ticker = client.get_ticker(symbol=symbol)
+#         redis_client.set(f"price:{symbol}", ticker['lastPrice'])
 
-
-@shared_task
-def update_klines(symbols):
-    client = get_client()
-    for symbol in symbols:
-        try:
-            klines = client.get_klines(
-                symbol=symbol, interval="15m", limit=1)  # Latest 15m kline
-            kline = klines[0]
-            timestamp = timezone.from_timestamp(int(kline[0]) / 1000)
-            Kline.objects.update_or_create(
-                symbol=symbol,
-                timestamp=timestamp,
-                defaults={
-                    'open': Decimal(kline[1]),
-                    'high': Decimal(kline[2]),
-                    'low': Decimal(kline[3]),
-                    'close': Decimal(kline[4]),
-                    'volume': Decimal(kline[5]),
-                }
-            )
-            # Delete old data
-            cutoff = timezone.now() - timedelta(days=DAYS_AGO)
-            Kline.objects.filter(symbol=symbol, timestamp__lt=cutoff).delete()
-        except Exception as e:
-            print(f"Error updating kline for {symbol}: {e}")
 
 
 # Schedule in celery.py or beat

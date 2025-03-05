@@ -57,7 +57,6 @@ data = {
         "CETUS",
         "OGN",
         "BB",
-        "ANIIME",
         "PROM",
         "CVC",
         "SLP",
