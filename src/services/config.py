@@ -1,4 +1,5 @@
 data = {
+    "days_ago": 14,
     "max_amount": 15,
     "currencies": [
         "BURGER",

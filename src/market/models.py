@@ -73,6 +73,7 @@ class Kline(models.Model):
     low = models.DecimalField(max_digits=30, decimal_places=17)
     close = models.DecimalField(max_digits=30, decimal_places=17)
     volume = models.DecimalField(max_digits=30, decimal_places=17)
+    num_of_trades = models.BigIntegerField(default=0)
     # time = TimescaleDateTimeField(interval="1 week")
 
     objects = models.Manager()
@@ -83,6 +84,7 @@ class Kline(models.Model):
             models.Index(fields=['symbol', 'time']),
         ]
         unique_together = ['symbol', 'time']
+
     def __str__(self):
         return f"{self.symbol}||{self.timestamp}: {self.close}|{self.volume}"
 # timestamp: 2025-03-05 10:45:00+00:00

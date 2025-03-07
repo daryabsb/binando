@@ -1,75 +1,86 @@
-from src.services.bnArb import BnArber
-from src.services.config import data
-import asyncio
+
+from datetime import datetime, timedelta, timezone as dt_timezone
 from src.services.client import get_client
 from django.apps import apps
-from datetime import datetime
+from src.services.bnArb import BnArber
+from django.utils import timezone
 from decimal import Decimal
-from django.forms import model_to_dict
+from celery import shared_task
+from datetime import timedelta
+import pytz
 import pandas as pd
-def update_klines2(symbols=None):
-    from src.services.config import data
-    if symbols is None:
-        symbols = data["currencies"]
 
-    client = get_client()
+
+@shared_task
+def update_klines(symbols=None):
+    """Update Kline data for the last 15 minutes."""
+
+    Symbol = apps.get_model("market", "Symbol")
+
+    if symbols is None:
+        symbols = Symbol.objects.filter(
+            active=True).values_list("ticker", flat=True)
+
+    client = get_client(testnet=True)
     for symbol in symbols:
         symbol_full = symbol + "USDT"
         try:
             Kline = apps.get_model("market", "Kline")
-            klines = client.get_klines(symbol=symbol_full, interval="15m", limit=1)
-            dataset = pd.DataFrame(klines)
-            if not klines:
-                continue
-            kline = klines[0]
+            end_time = timezone.now()
+            from_time = end_time - timedelta(minutes=15)
+            to_date_ms = int(end_time.timestamp() * 1000)
+            from_date_ms = int(from_time.timestamp() * 1000)
 
-            # Convert the timestamp from milliseconds to a UTC datetime
-            timestamp_ms = int(kline[0])
-            timestamp = datetime.fromtimestamp(timestamp_ms / 1000, tz=pytz.utc)
+            print(f"{symbol_full} - {from_time} - {end_time}")
+            print(
+                f"Fetching last 15min klines for {symbol_full} from {from_time} to {end_time}")
 
-            # print(f'timestamp: {timestamp}|open: {Decimal(kline[1])}|high: {Decimal(kline[2])}|low: {Decimal(kline[3])}|close: {Decimal(kline[4])}|volume: {Decimal(kline[5])}')
-
-            # Optionally, if you want to view this timestamp in Asia/Baghdad time:
-            # baghdad_tz = pytz.timezone("Asia/Baghdad")
-            # timestamp = timestamp.astimezone(baghdad_tz)
-            
-            kline_obj = Kline(
+            klines = client.get_klines(
                 symbol=symbol_full,
-                timestamp=timestamp,
-                time=timestamp,
-                open=kline[1],
-                high=kline[2],
-                low=kline[3],
-                close=kline[4],
-                volume=kline[5],
+                interval="5m",
+                startTime=from_date_ms,
+                endTime=to_date_ms
             )
-            kline_obj.save()
-            # timestamp: 2025-03-05 10:45:00+00:00
-            # open: 0.20541000
-            # high: 0.20568000
-            # low: 0.20378000
-            # close: 0.20478000
-            # volume: 20244605.00000000
-            print(kline_obj)
-            # print(model_to_dict(kline_obj))
-        except Exception as e:
-            print(f"Error updating kline for {symbol}: {e}")
 
-import pytz
-timestamp_format = '%Y-%m-%d %H:%M:%S' 
+            if not klines:
+                print(f"No klines returned for {symbol_full}")
+                continue
+
+            batch = []
+            for kline in klines:
+                # Create UTC-aware datetime objects directly using Python's datetime timezone.
+                open_time = datetime.fromtimestamp(
+                    int(kline[0]) / 1000, tz=dt_timezone.utc)
+                close_time = datetime.fromtimestamp(
+                    int(kline[6]) / 1000, tz=dt_timezone.utc)
+                obj = Kline(
+                    symbol=symbol,
+                    timestamp=open_time,  # Opening time
+                    time=close_time,      # Closing time
+                    open=Decimal(kline[1]),
+                    high=Decimal(kline[2]),
+                    low=Decimal(kline[3]),
+                    close=Decimal(kline[4]),
+                    volume=Decimal(kline[5])
+                )
+                batch.append(obj)
+
+            Kline.objects.bulk_create(batch, ignore_conflicts=True)
+            print(
+                f"Inserted {len(batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
+
+        except Exception as e:
+            print(f"Error updating kline for {symbol_full}: {e}")
+
+
+timestamp_format = '%Y-%m-%d %H:%M:%S'
 eastern = pytz.timezone("US/Eastern")
 timestamp_str = "2025-03-05 12:06:00"
 
 
 def run():
 
-    update_klines2()
-    # Use this approach for Python 3.7+
-    # while True:
-    #     asyncio.run(main())
-
-
-
+    update_klines()
 
 
 async def main():
