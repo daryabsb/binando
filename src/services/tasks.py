@@ -34,17 +34,21 @@ def update_klines(symbols=None):
         symbols = Symbol.objects.filter(active=True).values_list(
             "ticker", flat=True)
 
-    client = get_client(testnet=True)
-    end_time = timezone.now()  # Current UTC time
-    from_time = end_time - timedelta(minutes=15)  # 15 minutes prior
-    to_date_ms = int(end_time.timestamp() * 1000)
+    client = get_client()
+
+    now = timezone.now()
+    start_date = now - timedelta(minutes=150)
+    to_date = start_date + timedelta(minutes=150 + 1)
+    from_time = to_date - timedelta(minutes=150)  # 15 minutes prior
+
+    to_date_ms = int(to_date.timestamp() * 1000)
     from_date_ms = int(from_time.timestamp() * 1000)
 
     for symbol in symbols:
         symbol_full = symbol + "USDT"
         try:
             print(
-                f"Fetching last 15min klines for {symbol_full} from {from_time} to {end_time}")
+                f"Fetching last 15min klines for {symbol_full} from {from_time} to {to_date}")
 
             klines = client.get_klines(
                 symbol=symbol_full,
@@ -60,20 +64,19 @@ def update_klines(symbols=None):
             Kline = apps.get_model("market", "Kline")
             batch = []
             for kline in klines:
-                open_time = timezone.make_aware(datetime.fromtimestamp(
-                    int(kline[0]) / 1000), dt_timezone.utc)
-                close_time = timezone.make_aware(
-                    datetime.fromtimestamp(int(kline[6]) / 1000), dt_timezone.utc)
+                open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
+                close_time = datetime.fromtimestamp(int(kline[6]) / 1000, tz=dt_timezone.utc)
+
 
                 # Skip future klines
-                if close_time > end_time:
-                    print(
-                        f"Skipping future kline for {symbol_full}: close_time {close_time} > end_time {end_time}")
-                    continue
+                # if close_time > to_date:
+                #     print(
+                #         f"Skipping future kline for {symbol_full}: close_time {close_time} > end_time {end_time}")
+                #     continue
 
                 # Ensure kline is within the requested window
-                if open_time < from_time or close_time > end_time:
-                    continue
+                # if open_time < from_time or close_time > to_date:
+                #     continue
 
                 obj = Kline(
                     # Store full symbol (e.g., 'BURGERUSDT')
@@ -89,9 +92,9 @@ def update_klines(symbols=None):
                 batch.append(obj)
 
             if batch:
-                Kline.objects.bulk_create(batch, ignore_conflicts=True)
+                created_batch = Kline.objects.bulk_create(batch, ignore_conflicts=True)
                 print(
-                    f"Inserted {len(batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
+                    f"Inserted {len(created_batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
 
                 # Verify insertion
                 latest = Kline.objects.filter(

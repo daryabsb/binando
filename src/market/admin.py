@@ -28,7 +28,8 @@ class SymbolAdmin(admin.ModelAdmin):
             symbol=obj.pair,
             time__gte=last_24_hours
         ).last()
-        return f"{kline.volume:.4f}"
+
+        return f"{kline.volume:.4f}" if kline else "0.0000"
     get_24_hour_volume.short_description = "(24h) Volume"
 
     def get_queryset(self, request):
@@ -37,7 +38,7 @@ class SymbolAdmin(admin.ModelAdmin):
         kline_subquery = Kline.objects.filter(
             symbol=OuterRef('pair'),
             time__gte=last_24_hours
-        ).order_by('-time').values('volume')[:1]
+        ).order_by('time').values('volume')[:1]
         return qs.annotate(last_24_volume=Subquery(kline_subquery))
 
 
@@ -58,7 +59,7 @@ class KlineAdmin(admin.ModelAdmin):
         # Then convert from UTC to your system's local timezone.
         tz_name = str(get_localzone())
         user_tz = zoneinfo.ZoneInfo(tz_name)
-        local_time = utc_time.astimezone(user_tz)
+        local_time = utc_time.astimezone(timezone.utc)
         return local_time.strftime("%b %d, %Y, %I:%M %p (%Z)")
 
     def get_queryset(self, request):
@@ -66,7 +67,7 @@ class KlineAdmin(admin.ModelAdmin):
         # tz_name = "UTC"
         user_tz = zoneinfo.ZoneInfo(tz_name)
         timezone.activate(user_tz)
-        return super().get_queryset(request)
+        return super().get_queryset(request).order_by('-time')
 
 
 admin.site.register(Kline, KlineAdmin)

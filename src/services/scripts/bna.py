@@ -77,10 +77,59 @@ timestamp_format = '%Y-%m-%d %H:%M:%S'
 eastern = pytz.timezone("US/Eastern")
 timestamp_str = "2025-03-05 12:06:00"
 
-
+# from src.services.config import data
+# from src.market.models import Symbol
+# tickers = data["currencies"]
+# symbols = [Symbol(ticker=currency, pair=f"{currency}USDT") for currency in tickers]
+# Symbol.objects.bulk_create(symbols, ignore_conflicts=True)
+# print("Symbols created successfully!")
+# from src.services.client import get_client
+currencies =  [
+        "BURGER",
+        "1MBABYDOGE",
+        "DOGE",
+        "PEPE",
+        "TFUEL",
+        "TRUMP",
+        "SHIB",
+        "XRP",
+]
 def run():
+    from src.market.models import Symbol
+    symbols = Symbol.objects.all()
+    for symbol in symbols:
+        symbol.active = False if symbol.ticker not in currencies else True
+        symbol.save()
+    print("Symbols updated successfully!")
+    # from django.utils import timezone
+    # from datetime import datetime, timedelta, timezone as dt_timezone
+    # end_time = timezone.now()  # Current UTC time
+    # end_time = datetime.now()  # Current UTC time
+    # from_time = end_time - timedelta(minutes=150)  # 15 minutes prior
+    # to_date_ms = int(end_time.timestamp())
+    # from_date_ms = int(from_time.timestamp())
 
-    update_klines()
+    # print(f"Datetime now: {datetime.now()}")
+    # print(f"End time: {end_time}")
+    # # print(f"From time: {from_time}")
+
+    # client = get_client(testnet=True)
+    # symbol_full = "DOGEUSDT"
+    # print(
+    #     f"Fetching last 15min klines for {symbol_full} from {from_time} to {end_time}")
+
+    # klines = client.get_klines(
+    #     symbol=symbol_full,
+    #     interval="5m",
+    #     # startTime=from_date_ms,
+    #     # endTime=to_date_ms
+    # )
+
+    # print(f"Klines: {len(klines)}")
+
+
+
+    # update_klines()
 
 
 async def main():
