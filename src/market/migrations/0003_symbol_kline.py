@@ -22,22 +22,4 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
         ),
-        migrations.CreateModel(
-            name='Kline',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('symbol', models.CharField(db_index=True, max_length=20)),
-                ('time', timescale.db.models.fields.TimescaleDateTimeField(interval='2 week')),
-                ('timestamp', timescale.db.models.fields.TimescaleDateTimeField(interval='2 week')),
-                ('open', models.DecimalField(decimal_places=17, max_digits=30)),
-                ('high', models.DecimalField(decimal_places=17, max_digits=30)),
-                ('low', models.DecimalField(decimal_places=17, max_digits=30)),
-                ('close', models.DecimalField(decimal_places=17, max_digits=30)),
-                ('volume', models.DecimalField(decimal_places=17, max_digits=30)),
-            ],
-            options={
-                'indexes': [models.Index(fields=['symbol', 'time'], name='market_klin_symbol_670e88_idx')],
-                'unique_together': {('symbol', 'time')},
-            },
-        ),
     ]

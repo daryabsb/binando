@@ -9,6 +9,13 @@ from celery import shared_task
 from datetime import timedelta
 
 
+'''
+[2025-03-08 16:02:10,377: WARNING/MainProcess] All klines are fresh, starting trading...
+[2025-03-08 16:02:10,421: WARNING/MainProcess] Error calculating trade amount for XRPUSDT: CryptoCurency matching query does not exist.
+[2025-03-08 16:02:15,481: WARNING/MainProcess] Error calculating trade amount for PEPEUSDT: CryptoCurency matching query does not exist.
+[2025-03-08 16:02:20,496: WARNING/MainProcess] Error calculating trade amount for TRUMPUSDT: CryptoCurency matching query does not exist.
+'''
+
 @shared_task
 def run_trading(symbols=None):
     """Run the BnArber bot periodically."""
@@ -53,8 +60,8 @@ def update_klines(symbols=None):
             klines = client.get_klines(
                 symbol=symbol_full,
                 interval="5m",
-                # startTime=from_date_ms,
-                # endTime=to_date_ms
+                startTime=from_date_ms,
+                endTime=to_date_ms
             )
 
             if not klines:
@@ -64,7 +71,7 @@ def update_klines(symbols=None):
             Kline = apps.get_model("market", "Kline")
             batch = []
             for kline in klines:
-                open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
+                # open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
                 close_time = datetime.fromtimestamp(int(kline[6]) / 1000, tz=dt_timezone.utc)
 
 
@@ -81,7 +88,7 @@ def update_klines(symbols=None):
                 obj = Kline(
                     # Store full symbol (e.g., 'BURGERUSDT')
                     symbol=symbol_full,
-                    timestamp=open_time,  # Opening time
+                    # timestamp=open_time,  # Opening time
                     time=close_time,      # Closing time
                     open=Decimal(kline[1]),
                     high=Decimal(kline[2]),

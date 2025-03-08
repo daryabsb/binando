@@ -67,7 +67,7 @@ class Symbol(models.Model):
 class Kline(models.Model):
     symbol = models.CharField(max_length=20, db_index=True)
     time = TimescaleDateTimeField(interval="2 week")
-    timestamp = TimescaleDateTimeField(interval="2 week")
+    # timestamp = TimescaleDateTimeField(interval="2 week")
     open = models.DecimalField(max_digits=30, decimal_places=17)
     high = models.DecimalField(max_digits=30, decimal_places=17)
     low = models.DecimalField(max_digits=30, decimal_places=17)
