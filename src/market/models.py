@@ -27,14 +27,14 @@ class CryptoCurency(models.Model):
     ticker = models.CharField(max_length=20, unique=True, db_index=True)
     description = models.TextField(blank=True, null=True)
     # EXAMPLE =  0.25386236600000167
-    balance = models.DecimalField(max_digits=20, decimal_places=17)
-    pnl = models.DecimalField(max_digits=20, decimal_places=17, default=0)
+    balance = models.DecimalField(max_digits=30, decimal_places=17)
+    pnl = models.DecimalField(max_digits=30, decimal_places=17, default=0)
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
 
     def save(self, *args, **kwargs):
         self.ticker = f"{self.ticker}".upper()
@@ -56,6 +56,7 @@ class CryptoCurency(models.Model):
 class Symbol(models.Model):
     ticker = models.CharField(max_length=20, unique=True, db_index=True)
     pair = models.CharField(max_length=20, unique=True, db_index=True)
+    precision = models.IntegerField(default=8)  # Add this
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

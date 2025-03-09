@@ -16,6 +16,7 @@ from datetime import timedelta
 [2025-03-08 16:02:20,496: WARNING/MainProcess] Error calculating trade amount for TRUMPUSDT: CryptoCurency matching query does not exist.
 '''
 
+# @shared_task
 @shared_task
 def run_trading(symbols=None):
     """Run the BnArber bot periodically."""
@@ -36,6 +37,10 @@ def run_trading(symbols=None):
 @shared_task
 def update_klines(symbols=None):
     """Update Kline data for the last 15 minutes."""
+    import zoneinfo
+    from tzlocal import get_localzone
+    from datetime import timezone as dt_timezone
+
     Symbol = apps.get_model("market", "Symbol")
     if symbols is None:
         symbols = Symbol.objects.filter(active=True).values_list(
@@ -43,19 +48,29 @@ def update_klines(symbols=None):
 
     client = get_client()
 
+
+
     now = timezone.now()
     start_date = now - timedelta(minutes=150)
-    to_date = start_date + timedelta(minutes=150 + 1)
-    from_time = to_date - timedelta(minutes=150)  # 15 minutes prior
 
-    to_date_ms = int(to_date.timestamp() * 1000)
-    from_date_ms = int(from_time.timestamp() * 1000)
+    now_utc = now.astimezone(dt_timezone.utc)
+    start_utc = start_date.astimezone(dt_timezone.utc)
+    
+    tz_name = str(get_localzone())
+    user_tz = zoneinfo.ZoneInfo(tz_name)
+    
+    local_now = now_utc.astimezone(dt_timezone.utc)
+    local_start = start_utc.astimezone(dt_timezone.utc)
+
+    to_date_ms = int(local_now.timestamp() * 1000)
+    from_date_ms = int(local_start.timestamp() * 1000)
+
 
     for symbol in symbols:
         symbol_full = symbol + "USDT"
         try:
             print(
-                f"Fetching last 15min klines for {symbol_full} from {from_time} to {to_date}")
+                f"Fetching last 15min klines for {symbol_full} from {local_now} to {local_start}")
 
             klines = client.get_klines(
                 symbol=symbol_full,
@@ -73,17 +88,6 @@ def update_klines(symbols=None):
             for kline in klines:
                 # open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
                 close_time = datetime.fromtimestamp(int(kline[6]) / 1000, tz=dt_timezone.utc)
-
-
-                # Skip future klines
-                # if close_time > to_date:
-                #     print(
-                #         f"Skipping future kline for {symbol_full}: close_time {close_time} > end_time {end_time}")
-                #     continue
-
-                # Ensure kline is within the requested window
-                # if open_time < from_time or close_time > to_date:
-                #     continue
 
                 obj = Kline(
                     # Store full symbol (e.g., 'BURGERUSDT')
@@ -119,20 +123,3 @@ def update_klines(symbols=None):
             print(f"Error updating kline for {symbol_full}: {e}")
 
     return 'Done'
-
-
-# Celery Tasks
-
-
-# Celery Beat Configuration (in celery.py)
-# CELERY_BEAT_SCHEDULE = {
-#     'update-klines': {
-#         'task': 'your_app.tasks.update_klines',
-#         'schedule': crontab(minute='*/15'),  # Every 15 minutes
-#     },
-#     'run-trading': {
-#         'task': 'your_app.tasks.run_trading',
-#         # Every 5 minutes (adjust as needed)
-#         'schedule': crontab(minute='*/5'),
-#     },
-# }

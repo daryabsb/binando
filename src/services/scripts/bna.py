@@ -93,8 +93,35 @@ currencies =  [
         "TRUMP",
         "SHIB",
         "XRP",
+        "ENS",
+        "MANTA",
+        "TURBO",
+        "SUI",
+        "LTC",
+        "BNX",
+        "TRX",
+        "DOT",
+        "CAKE",
+        "STPT",
+        "SCR",
+        "NEAR",
+        "AUDIO",
+        "WLD",
+        "ETHFI",
+        "DGB",
+        "WING",
+        "AI",
+        "BTTC",
+        "JTO",
+        "SFP",
+        "DIA",
+        "JUP",
+        "BEL",
+        "JUV",
+        "WOO",
+        "BLUR",
 ]
-def run():
+def update_symbols():
     from src.market.models import Symbol
     symbols = Symbol.objects.all()
     for symbol in symbols:
@@ -130,6 +157,16 @@ def run():
 
 
     # update_klines()
+def run():
+    from src.services.tasks import run_trading
+    from src.market.models import CryptoCurency
+
+    # usdt_obj = CryptoCurency.objects.get(ticker="USDT")
+    # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
+    # run_trading()
+
+
+    update_symbols()
 
 
 async def main():

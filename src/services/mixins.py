@@ -8,13 +8,13 @@ import time
 
 class TechnicalAnalysisMixin:
     def get_signals(self, symbol, current_price):
-        """Calculate buy/sell signals using Kline data."""
-        klines = Kline.objects.filter(symbol=symbol).order_by(
-            '-time')[:14]  # Last 14 klines (70 minutes)
+        klines = Kline.objects.filter(symbol=symbol).order_by('-time')[:14]
         if len(klines) < 14:
-            print(
-                f"Skipping {symbol}: Insufficient kline data ({len(klines)} klines)")
+            print(f"Skipping {symbol}: Insufficient kline data ({len(klines)} klines)")
             return 0, 0
+
+        import pandas as pd
+        import ta
 
         closes = [float(kline.close) for kline in klines]
         sma = sum(closes) / len(closes)
@@ -42,8 +42,6 @@ class TechnicalAnalysisMixin:
         return buy_signals, sell_signals
 
 # Subclass for Order Handling
-
-
 class OrderHandler:
     def order(self, market, side, amount):
         """Place a market order (stub for external API integration)."""
