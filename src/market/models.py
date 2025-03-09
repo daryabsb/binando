@@ -86,7 +86,7 @@ class Kline(models.Model):
         unique_together = ['symbol', 'time']
 
     def __str__(self):
-        return f"{self.symbol}||{self.timestamp}: {self.close}|{self.volume}"
+        return f"{self.symbol}||{self.time}: {self.close}|{self.volume}"
 # timestamp: 2025-03-05 10:45:00+00:00
 # open: 0.23080000
 # high: 0.23310000
