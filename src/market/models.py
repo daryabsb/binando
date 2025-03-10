@@ -1,8 +1,13 @@
+import json
 from django.db import models
+from django.utils import timezone
 
-from timescale.db.models.models import TimescaleModel
 from timescale.db.models.fields import TimescaleDateTimeField
 from timescale.db.models.managers import TimescaleManager
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from . import tasks
 # Create your models here.
@@ -40,6 +45,22 @@ class CryptoCurency(models.Model):
         self.ticker = f"{self.ticker}".upper()
         super().save(*args, **kwargs)
         # tasks.sync_crypto_currency_quotes.delay(self.pk)
+
+class Order(models.Model):
+    ORDER_TYPES = (
+        ('BUY', 'Buy'),
+        ('SELL', 'Sell'),
+    )
+    crypto = models.ForeignKey(CryptoCurency, on_delete=models.CASCADE, related_name='orders')
+    ticker = models.CharField(max_length=10)
+    order_type = models.CharField(max_length=4, choices=ORDER_TYPES)
+    quantity = models.DecimalField(max_digits=30, decimal_places=8)
+    price = models.DecimalField(max_digits=30, decimal_places=8)  # Price at execution
+    value = models.DecimalField(max_digits=30, decimal_places=4)  # quantity * price
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.order_type} {self.quantity:.4f} {self.ticker} at {self.price:.8f} on {self.timestamp}"
 
 
 # class Symbol(models.Model):
@@ -94,3 +115,38 @@ class Kline(models.Model):
 # low: 0.22880000
 # close: 0.23180000
 # volume: 183015.00000000
+
+
+# Signal to send WebSocket updates
+@receiver(post_save, sender=CryptoCurency)
+@receiver(post_save, sender=Order)
+def send_update(sender, instance, created, **kwargs):
+    channel_layer = get_channel_layer()
+    if sender == CryptoCurency:
+        group_name = 'crypto_updates'
+        message_type = 'balance_update'
+        data = {
+            'ticker': instance.ticker,
+            'balance': str(instance.balance),
+            'pnl': str(instance.pnl),
+            'updated': instance.updated.isoformat(),
+        }
+    elif sender == Order:
+        group_name = 'trade_notifications'
+        message_type = 'trade_update'
+        data = {
+            'ticker': instance.ticker,
+            'order_type': instance.order_type,
+            'quantity': str(instance.quantity),
+            'price': str(instance.price),
+            'value': str(instance.value),
+            'timestamp': instance.timestamp.isoformat(),
+        }
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': message_type,
+            'data': data
+        }
+    )

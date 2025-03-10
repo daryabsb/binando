@@ -33,6 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Application definition
 
 DJANGO_APPS = [
+    'daphne',
     'admin_interface',
     'colorfield',
     'django.contrib.admin',
@@ -45,6 +46,7 @@ DJANGO_APPS = [
     "django_extensions",
     "django_htmx",
     'django.contrib.staticfiles',
+    'channels',
 ]
 THIRD_PARTY_APPS = [
     'django_celery_beat',
@@ -57,6 +59,7 @@ LOCAL_APPS = [
     'src.market',
     'src.core',
     'src.services',
+    'src.app',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -92,7 +95,9 @@ ROOT_URLCONF = 'src.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            PROJECT_PATH + "\\templates",
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -106,6 +111,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'src.wsgi.application'
+ASGI_APPLICATION = 'src.asgi.application'
+
+# REDIS_URL = config("REDIS_URL", default='redis://localhost:6379')
+# 172.16.10.8:6379
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('172.16.10.8', 6379)],  # Redis server
+        },
+    },
+}
 
 
 # Database

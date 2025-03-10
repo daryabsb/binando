@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.apps import apps
 from src.services.config import data
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
 
 def prepare_binance_time(end_time=None, days_ago=14, date_format="%Y-%m-%d %H:%M:%S"):
     if end_time is None:
@@ -101,3 +103,28 @@ def batch_insert_stock_data(
         if verbose:
             print("finished chunk", i)
     return len(dataset)
+
+
+def send_websocket_message(group_name, message_type, data):
+    """
+    Manually send a WebSocket message to a specified group.
+    
+    Args:
+        group_name (str): The group to send the message to (e.g., 'crypto_updates', 'trade_notifications').
+        message_type (str): The type of message (e.g., 'balance_update', 'trade_update').
+        data (dict): The data payload to send (e.g., {'ticker': 'TURBO', 'balance': '5268.8467'}).
+    """
+    channel_layer = get_channel_layer()
+    if channel_layer is None:
+        print("Error: Channel layer not available. Ensure Channels is configured.")
+        return
+
+    message = {
+        'type': message_type,
+        'data': data
+    }
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        message
+    )
+    print(f"Sent WebSocket message to {group_name}: {json.dumps(message, indent=2)}")

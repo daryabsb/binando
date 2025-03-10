@@ -6,10 +6,11 @@ from rangefilter.filters import (
     DateTimeRangeFilterBuilder,
 )
 from django.db.models import OuterRef, Subquery
-from .models import Company, CryptoCurency, Kline, Symbol
+from .models import Company, CryptoCurency, Kline, Symbol, Order
 
 admin.site.register(Company)
 admin.site.register(CryptoCurency)
+admin.site.register(Order)
 
 
 class SymbolAdmin(admin.ModelAdmin):
