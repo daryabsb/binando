@@ -9,9 +9,10 @@ import pandas_ta
 
 class TechnicalAnalysisMixin:
 
-    def get_sma(self, symbol, closes, period=20):
+    def get_sma(self, symbol, closes, period=8):
         """Fetch historical prices and calculate SMA."""
         try:
+            # return 0
             if len(closes) < period:
                 print(f"⚠️ Not enough data for SMA {period}.")
                 return None

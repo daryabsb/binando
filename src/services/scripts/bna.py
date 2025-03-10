@@ -11,7 +11,6 @@ import pytz
 import pandas as pd
 
 
-@shared_task
 def update_klines(symbols=None):
     """Update Kline data for the last 15 minutes."""
 
@@ -84,42 +83,8 @@ timestamp_str = "2025-03-05 12:06:00"
 # Symbol.objects.bulk_create(symbols, ignore_conflicts=True)
 # print("Symbols created successfully!")
 # from src.services.client import get_client
-currencies = [
-    "BURGER",
-    "1MBABYDOGE",
-    "DOGE",
-    "PEPE",
-    "TFUEL",
-    "TRUMP",
-    "SHIB",
-    "XRP",
-    "ENS",
-    "MANTA",
-    "TURBO",
-    "SUI",
-    "LTC",
-    "BNX",
-    "TRX",
-    "DOT",
-    "CAKE",
-    "STPT",
-    "SCR",
-    "NEAR",
-    "AUDIO",
-    "WLD",
-    "ETHFI",
-    "DGB",
-    "WING",
-    "AI",
-    "BTTC",
-    "JTO",
-    "SFP",
-    "DIA",
-    "JUP",
-    "BEL",
-    "JUV",
-    "WOO",
-    "BLUR",
+currencies = ["BURGER","1MBABYDOGE","DOGE","PEPE","TFUEL","TRUMP","SHIB","XRP","ENS","MANTA","TURBO",
+    "SUI","LTC","BNX","TRX","DOT","CAKE","STPT","SCR","NEAR","AUDIO","WLD","ETHFI","DGB","WING","AI","BTTC","JTO","SFP","DIA","JUP","BEL","JUV","WOO","BLUR",
 ]
 
 
