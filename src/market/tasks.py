@@ -33,7 +33,7 @@ redis_client = redis.Redis(host='localhost', port=6379, db=0)
 df = "%Y-%m-%d %H:%M:%S"
 
 
-@shared_task
+# @shared_task
 def update_klines2(symbols=None):
     from src.services.config import data
     if symbols is None:
@@ -182,7 +182,7 @@ def handle_data(self, message):
 # }
 
 
-@shared_task
+# @shared_task
 def sync_company_stock_quotes(company_id, days_ago=32, date_format="%Y-%m-%d", verbose=False):
     global interval
     interval += 1
@@ -216,7 +216,7 @@ def sync_company_stock_quotes(company_id, days_ago=32, date_format="%Y-%m-%d", v
     # batch_insert_stock_data(dataset=dataset, company_obj=company_obj, verbose=verbose)
 
 
-@shared_task
+# @shared_task
 def sync_stock_data(days_ago=2):
     print("sync_stock_data works")
     pass
@@ -226,7 +226,7 @@ def sync_stock_data(days_ago=2):
     #     sync_company_stock_quotes.delay(company_id, days_ago=days_ago)
 
 
-@shared_task
+# @shared_task
 def sync_historical_stock_data(years_ago=5, company_ids=[], use_celery=True, verbose=False):
     print("sync_historical_stock_data works")
     pass

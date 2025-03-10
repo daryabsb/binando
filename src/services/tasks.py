@@ -17,6 +17,8 @@ from datetime import timedelta
 '''
 
 # @shared_task
+
+
 @shared_task
 def run_trading(symbols=None):
     """Run the BnArber bot periodically."""
@@ -32,6 +34,7 @@ def run_trading(symbols=None):
         bot.get_rates()
     else:
         print("Kline data issues detected, skipping trading until resolved.")
+    return 'Done running the bot'
 
 
 @shared_task
@@ -48,29 +51,26 @@ def update_klines(symbols=None):
 
     client = get_client()
 
-
-
     now = timezone.now()
     start_date = now - timedelta(minutes=150)
 
     now_utc = now.astimezone(dt_timezone.utc)
     start_utc = start_date.astimezone(dt_timezone.utc)
-    
+
     tz_name = str(get_localzone())
     user_tz = zoneinfo.ZoneInfo(tz_name)
-    
+
     local_now = now_utc.astimezone(dt_timezone.utc)
     local_start = start_utc.astimezone(dt_timezone.utc)
 
     to_date_ms = int(local_now.timestamp() * 1000)
     from_date_ms = int(local_start.timestamp() * 1000)
 
-
     for symbol in symbols:
         symbol_full = symbol + "USDT"
         try:
-            print(
-                f"Fetching last 15min klines for {symbol_full} from {local_now} to {local_start}")
+            # print(
+            #     f"Fetching last 15min klines for {symbol_full} from {local_now} to {local_start}")
 
             klines = client.get_klines(
                 symbol=symbol_full,
@@ -87,7 +87,8 @@ def update_klines(symbols=None):
             batch = []
             for kline in klines:
                 # open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
-                close_time = datetime.fromtimestamp(int(kline[6]) / 1000, tz=dt_timezone.utc)
+                close_time = datetime.fromtimestamp(
+                    int(kline[6]) / 1000, tz=dt_timezone.utc)
 
                 obj = Kline(
                     # Store full symbol (e.g., 'BURGERUSDT')
@@ -103,23 +104,24 @@ def update_klines(symbols=None):
                 batch.append(obj)
 
             if batch:
-                created_batch = Kline.objects.bulk_create(batch, ignore_conflicts=True)
+                created_batch = Kline.objects.bulk_create(
+                    batch, ignore_conflicts=True)
                 print(
                     f"Inserted {len(created_batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
 
                 # Verify insertion
-                latest = Kline.objects.filter(
-                    symbol=symbol_full).order_by('-time').first()
-                if latest:
-                    print(
-                        f"DB verification for {symbol_full}: latest close {latest.time}")
-                else:
-                    print(
-                        f"WARNING: No klines found in DB for {symbol_full} after insert")
+                # latest = Kline.objects.filter(
+                #     symbol=symbol_full).order_by('-time').first()
+                # if latest:
+                #     print(
+                #         f"DB verification for {symbol_full}: latest close {latest.time}")
+                # else:
+                #     print(
+                #         f"WARNING: No klines found in DB for {symbol_full} after insert")
             else:
                 print(f"No valid klines to insert for {symbol_full}")
 
         except Exception as e:
             print(f"Error updating kline for {symbol_full}: {e}")
 
-    return 'Done'
+    return 'Done updating klines'

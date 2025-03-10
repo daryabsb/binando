@@ -2,26 +2,45 @@ from src.market.models import Kline
 import pandas as pd
 import ta
 import time
+import pandas_ta
 
 # Mixin for Technical Analysis
 
 
 class TechnicalAnalysisMixin:
+
+    def get_sma(self, symbol, closes, period=20):
+        """Fetch historical prices and calculate SMA."""
+        try:
+            if len(closes) < period:
+                print(f"⚠️ Not enough data for SMA {period}.")
+                return None
+
+            df = pd.DataFrame(closes, columns=["close"])
+            df["sma"] = pandas_ta.sma(df["close"], length=period)
+
+            return df["sma"].iloc[-1]  # Latest SMA value
+
+        except Exception as e:
+            print(f"⚠️ Error calculating SMA for {symbol}: {e}")
+            return None
+
     def get_signals(self, symbol, current_price):
         klines = Kline.objects.filter(symbol=symbol).order_by('-time')[:14]
         if len(klines) < 14:
-            print(f"Skipping {symbol}: Insufficient kline data ({len(klines)} klines)")
+            print(
+                f"Skipping {symbol}: Insufficient kline data ({len(klines)} klines)")
             return 0, 0
 
-        import pandas as pd
-        import ta
-
         closes = [float(kline.close) for kline in klines]
-        sma = sum(closes) / len(closes)
+        sma = self.get_sma(symbol, closes)  # sum(closes) / len(closes)
+
         rsi = ta.momentum.RSIIndicator(pd.Series(closes)).rsi().iloc[-1]
+
         macd_indicator = ta.trend.MACD(pd.Series(closes))
         macd = macd_indicator.macd().iloc[-1]
         macd_signal = macd_indicator.macd_signal().iloc[-1]
+
         bb = ta.volatility.BollingerBands(pd.Series(closes))
         bb_lower = bb.bollinger_lband().iloc[-1]
         bb_upper = bb.bollinger_hband().iloc[-1]
@@ -42,6 +61,8 @@ class TechnicalAnalysisMixin:
         return buy_signals, sell_signals
 
 # Subclass for Order Handling
+
+
 class OrderHandler:
     def order(self, market, side, amount):
         """Place a market order (stub for external API integration)."""

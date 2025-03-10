@@ -84,43 +84,45 @@ timestamp_str = "2025-03-05 12:06:00"
 # Symbol.objects.bulk_create(symbols, ignore_conflicts=True)
 # print("Symbols created successfully!")
 # from src.services.client import get_client
-currencies =  [
-        "BURGER",
-        "1MBABYDOGE",
-        "DOGE",
-        "PEPE",
-        "TFUEL",
-        "TRUMP",
-        "SHIB",
-        "XRP",
-        "ENS",
-        "MANTA",
-        "TURBO",
-        "SUI",
-        "LTC",
-        "BNX",
-        "TRX",
-        "DOT",
-        "CAKE",
-        "STPT",
-        "SCR",
-        "NEAR",
-        "AUDIO",
-        "WLD",
-        "ETHFI",
-        "DGB",
-        "WING",
-        "AI",
-        "BTTC",
-        "JTO",
-        "SFP",
-        "DIA",
-        "JUP",
-        "BEL",
-        "JUV",
-        "WOO",
-        "BLUR",
+currencies = [
+    "BURGER",
+    "1MBABYDOGE",
+    "DOGE",
+    "PEPE",
+    "TFUEL",
+    "TRUMP",
+    "SHIB",
+    "XRP",
+    "ENS",
+    "MANTA",
+    "TURBO",
+    "SUI",
+    "LTC",
+    "BNX",
+    "TRX",
+    "DOT",
+    "CAKE",
+    "STPT",
+    "SCR",
+    "NEAR",
+    "AUDIO",
+    "WLD",
+    "ETHFI",
+    "DGB",
+    "WING",
+    "AI",
+    "BTTC",
+    "JTO",
+    "SFP",
+    "DIA",
+    "JUP",
+    "BEL",
+    "JUV",
+    "WOO",
+    "BLUR",
 ]
+
+
 def update_symbols():
     from src.market.models import Symbol
     symbols = Symbol.objects.all()
@@ -154,19 +156,18 @@ def update_symbols():
 
     # print(f"Klines: {len(klines)}")
 
-
-
     # update_klines()
+
+
 def run():
     from src.services.tasks import run_trading
     from src.market.models import CryptoCurency
 
     # usdt_obj = CryptoCurency.objects.get(ticker="USDT")
     # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
-    # run_trading()
+    run_trading()
 
-
-    update_symbols()
+    # update_symbols()
 
 
 async def main():
