@@ -24,13 +24,14 @@
         .notification { padding: 5px; border-bottom: 1px solid #eee; }
     </style> {% endcomment %}
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+
 
     <!-- Hyperscript -->
     <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+    <script src="https://unpkg.com/htmx-ext-ws@2.0.2" integrity="sha384-vuKxTKv5TX/b3lLzDKP2U363sOAoRo5wSvzzc3LJsbaQRSBSS+3rKKHcOx5J8doU" crossorigin="anonymous"></script>
 </head>
-<body>
+<body  hx-ext="ws" ws-connect="/ws/crypto/">
     <div id="cryptoon-layout" class="theme-orange">
         {% include 'partials/sidebar.html' %}
         <div class="main px-lg-4 px-md-4">

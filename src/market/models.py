@@ -46,17 +46,21 @@ class CryptoCurency(models.Model):
         super().save(*args, **kwargs)
         # tasks.sync_crypto_currency_quotes.delay(self.pk)
 
+
 class Order(models.Model):
     ORDER_TYPES = (
         ('BUY', 'Buy'),
         ('SELL', 'Sell'),
     )
-    crypto = models.ForeignKey(CryptoCurency, on_delete=models.CASCADE, related_name='orders')
+    crypto = models.ForeignKey(
+        CryptoCurency, on_delete=models.CASCADE, related_name='orders')
     ticker = models.CharField(max_length=10)
     order_type = models.CharField(max_length=4, choices=ORDER_TYPES)
     quantity = models.DecimalField(max_digits=30, decimal_places=8)
-    price = models.DecimalField(max_digits=30, decimal_places=8)  # Price at execution
-    value = models.DecimalField(max_digits=30, decimal_places=4)  # quantity * price
+    price = models.DecimalField(
+        max_digits=30, decimal_places=8)  # Price at execution
+    value = models.DecimalField(
+        max_digits=30, decimal_places=4)  # quantity * price
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

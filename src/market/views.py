@@ -50,7 +50,6 @@ def balances(request):
 
 def total_usd(request):
     total = 0.0
-    print(f'called: {request}')
     for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
         latest_price = float(Kline.objects.filter(
             symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
