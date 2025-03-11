@@ -3,8 +3,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from src.market.utils import send_websocket_message
 
+
 def index(request):
     return render(request, 'index.html')
+
 
 def test_websocket(request):
     # Example: Send a balance update
@@ -18,7 +20,7 @@ def test_websocket(request):
             'updated': '2025-03-10T12:00:00Z'
         }
     )
-    
+
     # Example: Send a trade notification
     send_websocket_message(
         group_name='trade_notifications',
@@ -33,6 +35,7 @@ def test_websocket(request):
         }
     )
     return HttpResponse("Test messages sent to WebSocket.")
+
 
 urlpatterns = [
     path('', index, name='index'),

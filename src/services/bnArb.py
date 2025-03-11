@@ -145,7 +145,6 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
         return all_fresh
 
-
     def get_rates(self):
         BUY_COOLDOWN_SECONDS = 86400  # 24 hours
         STOP_LOSS_PCT = 0.05
@@ -158,12 +157,14 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
         initial_usdt = float(usdt_crypto.balance)
         max_spend = initial_usdt * MAX_SPEND_PCT
         spent_this_run = 0.0
-        print(f"Starting USDT Balance (DB): {usdt_crypto.balance}, Max Spend This Run: {max_spend}")
+        print(
+            f"Starting USDT Balance (DB): {usdt_crypto.balance}, Max Spend This Run: {max_spend}")
 
         for symbol in self.sorted_symbols:
             ticker = symbol.replace("USDT", "")
             try:
-                latest_kline = Kline.objects.filter(symbol=symbol).order_by('-time').first()
+                latest_kline = Kline.objects.filter(
+                    symbol=symbol).order_by('-time').first()
                 if not latest_kline:
                     print(f"Skipping {symbol}: No kline data")
                     continue
@@ -177,8 +178,10 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                 usdt_balance = self.get_balance("USDT")
                 trade_amount = self.get_trade_amount(symbol, current_price)
                 trade_value = trade_amount * current_price
-                buy_signals, sell_signals = self.get_signals(symbol, current_price)
-                print(f"{symbol} ||| current_price: {current_price} || buy_signals: {buy_signals} | sell_signals: {sell_signals}")
+                buy_signals, sell_signals = self.get_signals(
+                    symbol, current_price)
+                print(
+                    f"{symbol} ||| current_price: {current_price} || buy_signals: {buy_signals} | sell_signals: {sell_signals}")
 
                 if trade_amount <= 0:
                     print(f"Skipping {symbol}: Invalid trade amount")
@@ -188,25 +191,31 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                     # Only check/create crypto object when buying or selling
                     if buy_signals >= 2 and trade_amount > 0 and usdt_balance >= MIN_TRADE_USDT:
                         # Check last buy
-                        last_buy = Order.objects.filter(ticker=ticker, order_type='BUY').order_by('-timestamp').first()
+                        last_buy = Order.objects.filter(
+                            ticker=ticker, order_type='BUY').order_by('-timestamp').first()
                         if last_buy:
                             try:
-                                crypto = CryptoCurency.objects.get(ticker=ticker)
-                                time_since_last_buy = (timezone.now() - last_buy.timestamp).total_seconds()
+                                crypto = CryptoCurency.objects.get(
+                                    ticker=ticker)
+                                time_since_last_buy = (
+                                    timezone.now() - last_buy.timestamp).total_seconds()
                                 if float(crypto.balance) > 0 and time_since_last_buy < BUY_COOLDOWN_SECONDS:
-                                    print(f"Skipping BUY {symbol}: Holding {crypto.balance}, last buy {time_since_last_buy:.2f}s ago")
+                                    print(
+                                        f"Skipping BUY {symbol}: Holding {crypto.balance}, last buy {time_since_last_buy:.2f}s ago")
                                     continue
                             except CryptoCurency.DoesNotExist:
                                 pass  # Shouldn’t happen with last_buy, but safe check
 
                         if spent_this_run + trade_value > max_spend:
-                            print(f"Skipping BUY {symbol}: Exceeds max spend ({spent_this_run + trade_value:.2f} > {max_spend})")
+                            print(
+                                f"Skipping BUY {symbol}: Exceeds max spend ({spent_this_run + trade_value:.2f} > {max_spend})")
                             continue
 
                         if usdt_balance >= trade_value:
                             crypto, created = CryptoCurency.objects.get_or_create(
                                 ticker=ticker,
-                                defaults={'name': ticker, 'balance': Decimal('0'), 'pnl': Decimal('0'), 'updated': timezone.now()}
+                                defaults={'name': ticker, 'balance': Decimal(
+                                    '0'), 'pnl': Decimal('0'), 'updated': timezone.now()}
                             )
                             crypto.balance += Decimal(str(trade_amount))
                             crypto.updated = timezone.now()
@@ -227,8 +236,10 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
                             spent_this_run += trade_value
                             self.order(symbol, "BUY", trade_amount)
-                            print(f"BUY {trade_amount} {symbol} at {current_price} (Value: {trade_value:.2f}, Total Balance: {crypto.balance})")
-                            print(f"USDT Balance: {self.get_balance('USDT')}, Spent This Run: {spent_this_run:.2f}")
+                            print(
+                                f"BUY {trade_amount} {symbol} at {current_price} (Value: {trade_value:.2f}, Total Balance: {crypto.balance})")
+                            print(
+                                f"USDT Balance: {self.get_balance('USDT')}, Spent This Run: {spent_this_run:.2f}")
 
                     elif sell_signals >= 3:
                         try:
@@ -250,18 +261,21 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                                     crypto=crypto
                                 )
 
-                                usdt_crypto.balance += Decimal(str(trade_value))
+                                usdt_crypto.balance += Decimal(
+                                    str(trade_value))
                                 usdt_crypto.updated = timezone.now()
                                 usdt_crypto.save()
 
                                 self.order(symbol, "SELL", sell_amount)
-                                print(f"SELL {sell_amount} {symbol} at {current_price} (Value: {trade_value:.2f})")
+                                print(
+                                    f"SELL {sell_amount} {symbol} at {current_price} (Value: {trade_value:.2f})")
                                 print("USDT Balance:", self.get_balance("USDT"))
                         except CryptoCurency.DoesNotExist:
                             print(f"No position to sell for {symbol}")
 
                     # Delete zero-balance objects (except USDT)
-                    CryptoCurency.objects.filter(balance__lte=0).exclude(ticker='USDT').delete()
+                    CryptoCurency.objects.filter(
+                        balance__lte=0).exclude(ticker='USDT').delete()
 
                 time.sleep(2)
 
@@ -280,7 +294,8 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
             sells = orders.filter(order_type='SELL')
             total_bought = sum(float(o.value) for o in buys)
             total_sold = sum(float(o.value) for o in sells)
-            current_value = float(crypto.balance) * float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close) if float(crypto.balance) > 0 else 0
+            current_value = float(crypto.balance) * float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close) if float(crypto.balance) > 0 else 0
             total_pnl += (total_sold + current_value) - total_bought
         return Decimal(str(total_pnl))
 

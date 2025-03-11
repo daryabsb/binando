@@ -110,21 +110,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'src.wsgi.application'
-ASGI_APPLICATION = 'src.asgi.application'
-
-# REDIS_URL = config("REDIS_URL", default='redis://localhost:6379')
-# 172.16.10.8:6379
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('172.16.10.8', 6379)],  # Redis server
-        },
-    },
-}
-
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
