@@ -46,30 +46,16 @@
                             </div>
                             <div class="tab-content card-body">
                                 <div class="tab-pane fade show active">
-                                    <ul class="list-unstyled list mb-0"
-                                    hx-ext="ws" 
-                                    ws-connect="/ws/crypto/" 
-                                    hx-swap="beforeend" 
-                                    _="on ws:trade_update 
-                                    put '<li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src='{% static "assets/images/coin/BTC.png" %}' alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Chloe Walkerr</span>
-                                                        <small>2MIN</small>
-                                                    </p>
-                                                    <span class="">${event.detail.data} <span
-                                                            class="badge bg-success">Add</span></span>
-                                                </div>
-                                            </a>
-                                        </li>' at the start of me 
-                                    then scrollTo(0, 0)
-                                    end
-                                    "
-                                    >
-                                    {% comment %} put '<li class=notification>${event.detail.data}</li>' at the start of me  {% endcomment %}
+                                    <ul id="notification-list" 
+                                        hx-ext="ws" 
+                                        ws-connect="/ws/crypto/" 
+                                        hx-get="/notifications/" 
+                                        hx-trigger="load" 
+                                        _="on ws:trade_update 
+                                            put '<li class=notification>${event.detail.data}</li>' at the start of me then scrollTo(0, 0)"
+                                            >
+                                        
+                                    
                                         <li class="py-2 mb-1 border-bottom">
                                             <a href="javascript:void(0);" class="d-flex">
                                                 <img class="avatar rounded-circle"

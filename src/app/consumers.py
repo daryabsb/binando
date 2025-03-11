@@ -5,12 +5,12 @@ from src.market.models import CryptoCurency, Kline
 from asgiref.sync import sync_to_async
 from django.template.loader import render_to_string
 
+
 class CryptoConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.channel_layer.group_add('crypto_updates', self.channel_name)
         await self.channel_layer.group_add('trade_notifications', self.channel_name)
         await self.accept()
-        # Send initial data on connect
         await self.send_initial_data()
 
     async def disconnect(self, close_code):
@@ -35,7 +35,8 @@ class CryptoConsumer(AsyncWebsocketConsumer):
     def get_balances(self):
         balances = []
         for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            latest_price = float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
             usd_value = float(crypto.balance) * latest_price
             balances.append({
                 'ticker': crypto.ticker,
@@ -56,19 +57,21 @@ class CryptoConsumer(AsyncWebsocketConsumer):
     def get_total_usd(self):
         total = 0.0
         for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            latest_price = float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
             total += float(crypto.balance) * latest_price
         total += float(CryptoCurency.objects.get(ticker='USDT').balance)
         return total
 
     async def send_initial_data(self):
-        # Send initial balances
+        # Initial balances
         balances = await self.get_balances()
         balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
         await self.send(text_data=balances_html)
-        # Send initial total USD
+        # Initial total USD
         total = await self.get_total_usd()
         await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
+
 
 class CryptoConsumer2(AsyncWebsocketConsumer):
     async def connect(self):
@@ -112,10 +115,12 @@ class CryptoConsumer2(AsyncWebsocketConsumer):
 
         cryptos = CryptoCurency.objects.exclude(ticker='USDT')
         for crypto in cryptos:
-            latest_price = Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first()
+            latest_price = Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first()
             latest_price = float(latest_price.close) if latest_price else 0.0
             usd_value = float(crypto.balance) * latest_price
-            total_usd += usd_value if crypto.ticker != 'USDT' else float(crypto.balance)
+            total_usd += usd_value if crypto.ticker != 'USDT' else float(
+                crypto.balance)
 
             balances.append({
                 'ticker': crypto.ticker,

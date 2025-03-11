@@ -5,8 +5,10 @@ from django.template.loader import render_to_string
 from src.market.models import CryptoCurency, Kline
 from .utils import send_websocket_message
 
+
 def index(request):
     return render(request, 'index2.html')
+
 
 def test_websocket(request):
     send_websocket_message(
@@ -23,10 +25,12 @@ def test_websocket(request):
     )
     return HttpResponse("Test message sent.")
 
+
 def balances(request):
     balances = []
     for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-        latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        latest_price = float(Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
         usd_value = float(crypto.balance) * latest_price
         balances.append({
             'ticker': crypto.ticker,
@@ -43,14 +47,17 @@ def balances(request):
     })
     return HttpResponse(render_to_string('partials/balances.html', {'balances': balances}))
 
+
 def total_usd(request):
     total = 0.0
     print(f'called: {request}')
     for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-        latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        latest_price = float(Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
         total += float(crypto.balance) * latest_price
     total += float(CryptoCurency.objects.get(ticker='USDT').balance)
     return HttpResponse(f"{total:.2f}")
+
 
 def notifications(request):
     # Initial empty list; updates come via WebSocket

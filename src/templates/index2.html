@@ -31,7 +31,7 @@
                     <div class="card-body basic-custome-color">
                         <div class="table-responsive">
                             
-                    <table class="table table-nowrap mb-0" hx-ext="ws" ws-connect="/ws/crypto/" hx-trigger="load">
+                    <table class="table table-nowrap mb-0"  hx-ext="ws" ws-connect="/ws/crypto/" hx-trigger="load">
                         <thead>
                             <tr>
                                 <th><i class="fa fa-square chart-text-color1"></i></th>
@@ -41,7 +41,8 @@
                                 <th>PNL</th>
                             </tr>
                         </thead>
-                        <tbody id="balances" hx-swap="innerHTML" hx-trigger="ws:balance_update from:body">
+                        <tbody id="balances" hx-get="/balances/" hx-trigger="load, ws:balance_update from:body">
+                            <tr><td colspan="4">Loading balances...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -53,9 +54,8 @@
                     <div class="card-body">
                         <div class="p-4">
                             
-                            <div class="fs-3 text-uppercase">WALLET: 0.00 USD</div>
+                            <div class="fs-3 text-uppercase">WALLET:  <span id="total-usd" hx-get="/total-usd/" hx-trigger="load, every 5s">USD</div>
                             <span>subscribe to our newsletter &amp; receive a coupon</span>
-                            <span id="total-usd" hx-swap="innerHTML" hx-trigger="ws:total_usd_update from:body">0.00</span>
                         </div>
                         <div class="form-group mb-3 p-4 d-grid gap-2">
                             <input class="form-control" type="text" placeholder="ENTER YOUR EMAIL" name="email">
@@ -68,30 +68,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-                    
-        <!-- Notifications -->
-        <div id="notifications">
-            <h3>Notifications</h3>
-            {% comment %} <ul id="notification-list" 
-            hx-ext="ws" 
-            ws-connect="/ws/crypto/" 
-            hx-get="/notifications/" 
-            hx-trigger="load" 
-            _="on ws:trade_update 
-                put '<li class=notification>${event.detail.data}</li>' at the start of me 
-                then scrollTo(0, 0)
-                end
-                "
-                >
-        </ul> {% endcomment %}
-        </div>
+        </div>  
 
         <!-- Test Button -->
-        <button 
-            hx-get="/test-websocket/" 
-            hx-target="#notification-list" 
-            hx-swap="beforebegin">Test WebSocket</button>
+        <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
     </div>
 </div>
 {% endblock content %}
