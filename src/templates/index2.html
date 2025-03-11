@@ -1,0 +1,97 @@
+{% extends 'base.html'  %}
+{% block content %}
+            <!-- Body: Body -->
+<div class="body-header border-bottom d-flex py-3">
+    <div class="container-xxl">
+        <div class="row align-items-center">
+            <div class="col">
+                <!-- Pretitle -->
+                <h1 class="h4 mt-1">Trading Dashboard</h1>
+            </div>
+            <div class="col-auto">
+                <a href="cryptoloan.html" title="Download" target="_blank" class="btn btn-dark lift">Apply Crypto Loan</a> 
+            </div>
+        </div> <!-- Row end  -->
+    </div>
+</div>
+<div class="body d-flex py-3">
+    <div class="container-xxl">
+        
+        <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4">
+            <div class="col-lg-8">
+                <div class="card mb-3">
+                    <div class="card-header py-3 d-flex justify-content-between bg-transparent align-items-center flex-wrap border-bottom">
+                        <h6 class="mb-0 fw-bold">Total USD Worth: </h6>
+                        <ul class="nav nav-tabs tab-body-header rounded d-inline-flex mt-2 mt-md-0" role="tablist">
+                            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#Pay" role="tab">Pay</a></li>
+                            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Receive" role="tab">Receive</a></li>
+                        </ul>
+                    </div>
+                    <!-- Balances Table -->
+                    <div class="card-body basic-custome-color">
+                        <div class="table-responsive">
+                            
+                    <table class="table table-nowrap mb-0" hx-ext="ws" ws-connect="/ws/crypto/" hx-trigger="load">
+                        <thead>
+                            <tr>
+                                <th><i class="fa fa-square chart-text-color1"></i></th>
+                                <th>Ticker</th>
+                                <th>Balance</th>
+                                <th>USD Value</th>
+                                <th>PNL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="balances" hx-swap="innerHTML" hx-trigger="ws:balance_update from:body">
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-lg-6 col-md-12">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="p-4">
+                            
+                            <div class="fs-3 text-uppercase">WALLET: 0.00 USD</div>
+                            <span>subscribe to our newsletter &amp; receive a coupon</span>
+                            <span id="total-usd" hx-swap="innerHTML" hx-trigger="ws:total_usd_update from:body">0.00</span>
+                        </div>
+                        <div class="form-group mb-3 p-4 d-grid gap-2">
+                            <input class="form-control" type="text" placeholder="ENTER YOUR EMAIL" name="email">
+                            <button class="btn btn-light-primary btn-block" type="button">GET IT NOW!</button>
+                        </div>
+                        <div class="mt-3">
+                            <a href="#" title="">no thanks</a>
+                            <p class="mt-2">* $50 minimum purchase</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                    
+        <!-- Notifications -->
+        <div id="notifications">
+            <h3>Notifications</h3>
+            {% comment %} <ul id="notification-list" 
+            hx-ext="ws" 
+            ws-connect="/ws/crypto/" 
+            hx-get="/notifications/" 
+            hx-trigger="load" 
+            _="on ws:trade_update 
+                put '<li class=notification>${event.detail.data}</li>' at the start of me 
+                then scrollTo(0, 0)
+                end
+                "
+                >
+        </ul> {% endcomment %}
+        </div>
+
+        <!-- Test Button -->
+        <button 
+            hx-get="/test-websocket/" 
+            hx-target="#notification-list" 
+            hx-swap="beforebegin">Test WebSocket</button>
+    </div>
+</div>
+{% endblock content %}

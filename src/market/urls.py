@@ -2,13 +2,14 @@ from django.urls import path
 from django.shortcuts import render
 from django.http import HttpResponse
 from src.market.utils import send_websocket_message
+from src.market import views
 
 
-def index(request):
-    return render(request, 'index.html')
+def index2(request):
+    return render(request, 'index2.html')
 
 
-def test_websocket(request):
+def test_websocket2(request):
     # Example: Send a balance update
     send_websocket_message(
         group_name='crypto_updates',
@@ -38,6 +39,9 @@ def test_websocket(request):
 
 
 urlpatterns = [
-    path('', index, name='index'),
-    path('test-websocket/', test_websocket, name='test_websocket'),
+    path('', views.index, name='index'),
+    path('test-websocket/', views.test_websocket, name='test_websocket'),
+    path('balances/', views.balances, name='balances'),
+    path('total-usd/', views.total_usd, name='total_usd'),
+    path('notifications/', views.notifications, name='notifications'),
 ]

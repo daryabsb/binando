@@ -117,7 +117,7 @@ class Kline(models.Model):
 # volume: 183015.00000000
 
 
-# Signal to send WebSocket updates
+# trading/models.py (signal part only)
 @receiver(post_save, sender=CryptoCurency)
 @receiver(post_save, sender=Order)
 def send_update(sender, instance, created, **kwargs):
@@ -125,23 +125,25 @@ def send_update(sender, instance, created, **kwargs):
     if sender == CryptoCurency:
         group_name = 'crypto_updates'
         message_type = 'balance_update'
-        data = {
-            'ticker': instance.ticker,
-            'balance': str(instance.balance),
-            'pnl': str(instance.pnl),
-            'updated': instance.updated.isoformat(),
-        }
+        data = {}  # HTMX fetches full table
+        # Trigger total USD update too
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'total_usd_update', 'data': ''}  # Data computed in consumer
+        )
     elif sender == Order:
         group_name = 'trade_notifications'
         message_type = 'trade_update'
-        data = {
-            'ticker': instance.ticker,
-            'order_type': instance.order_type,
-            'quantity': str(instance.quantity),
-            'price': str(instance.price),
-            'value': str(instance.value),
-            'timestamp': instance.timestamp.isoformat(),
-        }
+        data = f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+        # Trigger balance and total USD updates on trade
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'balance_update', 'data': ''}
+        )
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'total_usd_update', 'data': ''}
+        )
 
     async_to_sync(channel_layer.group_send)(
         group_name,
@@ -150,3 +152,38 @@ def send_update(sender, instance, created, **kwargs):
             'data': data
         }
     )
+
+
+# Signal to send WebSocket updates
+# @receiver(post_save, sender=CryptoCurency)
+# @receiver(post_save, sender=Order)
+# def send_update(sender, instance, created, **kwargs):
+#     channel_layer = get_channel_layer()
+#     if sender == CryptoCurency:
+#         group_name = 'crypto_updates'
+#         message_type = 'balance_update'
+#         data = {
+#             'ticker': instance.ticker,
+#             'balance': str(instance.balance),
+#             'pnl': str(instance.pnl),
+#             'updated': instance.updated.isoformat(),
+#         }
+#     elif sender == Order:
+#         group_name = 'trade_notifications'
+#         message_type = 'trade_update'
+#         data = {
+#             'ticker': instance.ticker,
+#             'order_type': instance.order_type,
+#             'quantity': str(instance.quantity),
+#             'price': str(instance.price),
+#             'value': str(instance.value),
+#             'timestamp': instance.timestamp.isoformat(),
+#         }
+
+#     async_to_sync(channel_layer.group_send)(
+#         group_name,
+#         {
+#             'type': message_type,
+#             'data': data
+#         }
+#     )
