@@ -21,7 +21,8 @@
                     </a>
                 </div>
                 <div class="dropdown notifications zindex-popover">
-                    <a class="nav-link dropdown-toggle pulse" href="#" role="button"
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                    id="notification-button"
                         data-bs-toggle="dropdown">
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="25px" height="25px"
                             viewBox="0 0 38 38">
@@ -47,10 +48,7 @@
                             <div class="tab-content card-body">
                                 <div class="tab-pane fade show active">
                                     <ul id="notification-list" 
-                                        hx-get="/notifications/" 
-            hx-trigger="load" 
-            _="on ws:trade_update put <li class=notification>${event.detail.data}</li> at the start of me then scrollTo(0, 0)"
-                                            >
+                                    >
                                         
                                     
                                         <li class="py-2 mb-1 border-bottom">
@@ -64,70 +62,6 @@
                                                     </p>
                                                     <span class="">Added New Ico Coin 2021-08-25 <span
                                                             class="badge bg-success">Add</span></span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <div class="avatar rounded-circle no-thumbnail">AH</div>
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Alan Hill</span>
-                                                        <small>13MIN</small>
-                                                    </p>
-                                                    <span class="">Invoice generator </span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{% static 'assets/images/xs/avatar3.svg' %}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Melanie Oliver</span>
-                                                        <small>1HR</small>
-                                                    </p>
-                                                    <span class="">User Document Verified</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{% static 'assets/images/xs/avatar5.svg' %}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Boris Hart</span>
-                                                        <small>13MIN</small>
-                                                    </p>
-                                                    <span class="">New Coin Listing</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2 mb-1 border-bottom">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{% static 'assets/images/xs/avatar6.svg' %}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Alan Lambert</span>
-                                                        <small>1HR</small>
-                                                    </p>
-                                                    <span class="">15 More Customer Supprot</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="py-2">
-                                            <a href="javascript:void(0);" class="d-flex">
-                                                <img class="avatar rounded-circle"
-                                                    src="{% static 'assets/images/xs/avatar7.svg' %}" alt="">
-                                                <div class="flex-fill ms-2">
-                                                    <p class="d-flex justify-content-between mb-0 "><span
-                                                            class="font-weight-bold">Zoe Wright</span>
-                                                        <small class="">1DAY</small>
-                                                    </p>
-                                                    <span class="">Coin List Entry Updated</span>
                                                 </div>
                                             </a>
                                         </li>

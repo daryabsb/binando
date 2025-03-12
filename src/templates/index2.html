@@ -55,12 +55,12 @@
                     <div class="card-body">
                         <div class="p-4">
                             
-                            <div class="fs-3 text-uppercase"
-                            >WALLET: <span 
-                            id="total-usd" 
-                            hx-get="/total-usd/" 
-                            hx-trigger="load, every 10s"
-                            >0.00</span>USD</div>
+                            <div class="fs-3 text-uppercase">WALLET: <span 
+                                id="total-usd" 
+                                hx-get="/total-usd/" 
+                                hx-trigger="load"
+                                hx-swap="innerHTML"
+                                >0.00</span>USD</div>
                             <span>subscribe to our newsletter &amp; receive a coupon</span>
                         </div>
                         <div class="form-group mb-3 p-4 d-grid gap-2">
@@ -71,6 +71,7 @@
                             <a href="#" title="">no thanks</a>
                             <p class="mt-2">* $50 minimum purchase</p>
                         </div>
+                    
                     </div>
                 </div>
             </div>

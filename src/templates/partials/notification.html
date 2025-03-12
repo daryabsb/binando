@@ -1,0 +1,17 @@
+{% load static%}
+<ul id="notification-list"  hx-swap-oob="afterbegin">
+    <li class="py-2 mb-1 border-bottom">
+        <a href="javascript:void(0);" class="d-flex">
+            <img class="avatar rounded-circle"
+                src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+            <div class="flex-fill ms-2">
+                <p class="d-flex justify-content-between mb-0 "><span
+                        class="font-weight-bold">Chloe Walkerr</span>
+                    <small>2MIN</small>
+                </p>
+                <span class="">You bought {{ notification.quantity }} of {{ notification.ticker }} <span
+                        class="badge bg-success">Add</span></span>
+            </div>
+        </a>
+    </li>
+</ul>

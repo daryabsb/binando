@@ -119,8 +119,15 @@ class Kline(models.Model):
 # low: 0.22880000
 # close: 0.23180000
 # volume: 183015.00000000
-
-
+from decimal import Decimal
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        # Convert Decimal to string or float
+        if isinstance(obj, Decimal):
+            return str(obj)  # or float(obj) if you prefer
+        # Let the base class handle other types
+        return super().default(obj)
+    
 # trading/models.py (signal part only)
 @receiver(post_save, sender=CryptoCurency)
 @receiver(post_save, sender=Order)
@@ -138,7 +145,17 @@ def send_update(sender, instance, created, **kwargs):
     elif sender == Order:
         group_name = 'trade_notifications'
         message_type = 'trade_update'
-        data = f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+        data_dict = {
+            "order_type": str(instance.order_type),
+            "quantity": str(instance.quantity),
+            "ticker": str(instance.ticker),
+            "price": str(instance.price),
+            "value": str(instance.value),
+            "timestamp": str(instance.timestamp.isoformat())
+        }
+        data_json = json.dumps(data_dict)
+
+        data = data_json # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
         # Trigger balance and total USD updates on trade
         async_to_sync(channel_layer.group_send)(
             'crypto_updates',

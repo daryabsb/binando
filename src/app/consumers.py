@@ -4,12 +4,17 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from src.market.models import CryptoCurency, Kline
 from asgiref.sync import sync_to_async
 from django.template.loader import render_to_string
+from django.template.loader import get_template
 
+class NotificationsConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        return await super().connect()
 
 class CryptoConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.channel_layer.group_add('crypto_updates', self.channel_name)
         await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.channel_layer.group_add('trade_update', self.channel_name)
         await self.accept()
         await self.send_initial_data()
 
@@ -23,9 +28,13 @@ class CryptoConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=html)
 
     async def trade_update(self, event):
-        data = event['data']
-        html = f"<li class='notification'>{data}</li>"
-        await self.send(text_data=json.dumps({'data': html}))
+        data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+        received_data = json.loads(data)
+
+        notification_html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': received_data})
+        await self.send(text_data=notification_html)
+
+        return data
 
     async def total_usd_update(self, event):
         total = await self.get_total_usd()
@@ -64,13 +73,39 @@ class CryptoConsumer(AsyncWebsocketConsumer):
         return total
 
     async def send_initial_data(self):
-        # Initial balances
+        data_dict = {
+            "type": "notifications",
+        "data": {
+                "order_type": 'instance.order_type',
+                "quantity": 'instance.quantity',
+                "ticker": 'instance.ticker',
+                "price": 'instance.price',
+                "value": 'instance.value',
+                "timestamp": 'instance.timestamp.isoformat()'
+            }
+        }
+        data_json = json.dumps(data_dict)
+        event = {'data': 'First notification'}
         balances = await self.get_balances()
         balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
         await self.send(text_data=balances_html)
-        # Initial total USD
+        # notification = await self.trade_update(data_json)
+        # notification_html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': notification})
+        # await self.send(text_data=notification_html)
         total = await self.get_total_usd()
         await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
+
+data =  {
+    'order_type': 'BUY', 
+    'quantity': 
+    '28.54967643', 
+    'ticker': 'JUP', 
+    'price': '0.5254', 
+    'value': '14.999999996322', 
+    'timestamp': '2025-03-12T12:27:36.555170+00:00'
+    }
+
+
 
 
 class CryptoConsumer2(AsyncWebsocketConsumer):
