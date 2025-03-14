@@ -6,21 +6,23 @@ from asgiref.sync import sync_to_async
 from django.template.loader import render_to_string
 from django.template.loader import get_template
 
+
 class NotificationsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         return await super().connect()
 
+
 class CryptoConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.channel_layer.group_add('crypto_updates', self.channel_name)
-        await self.channel_layer.group_add('trade_notifications', self.channel_name)
-        await self.channel_layer.group_add('trade_update', self.channel_name)
+        # await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        # await self.channel_layer.group_add('trade_update', self.channel_name)
         await self.accept()
         await self.send_initial_data()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard('crypto_updates', self.channel_name)
-        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+        # await self.channel_layer.group_discard('trade_notifications', self.channel_name)
 
     async def balance_update(self, event):
         balances = await self.get_balances()
@@ -28,11 +30,25 @@ class CryptoConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=html)
 
     async def trade_update(self, event):
-        data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+        # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+        data = event['data']
         received_data = json.loads(data)
 
-        notification_html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': received_data})
-        await self.send(text_data=notification_html)
+        balances = await self.get_balances()
+        total = await self.get_total_usd()
+
+        notification_html = await sync_to_async(render_to_string)('partials/notification.html',
+                                                                  {
+                                                                      'notification': received_data,
+                                                                      'balances': balances,
+                                                                      'total': total,
+
+                                                                  }
+
+                                                                  )
+        balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+
+        await self.send(text_data=balances_html)
 
         return data
 
@@ -75,7 +91,7 @@ class CryptoConsumer(AsyncWebsocketConsumer):
     async def send_initial_data(self):
         data_dict = {
             "type": "notifications",
-        "data": {
+            "data": {
                 "order_type": 'instance.order_type',
                 "quantity": 'instance.quantity',
                 "ticker": 'instance.ticker',
@@ -95,17 +111,52 @@ class CryptoConsumer(AsyncWebsocketConsumer):
         total = await self.get_total_usd()
         await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
 
-data =  {
-    'order_type': 'BUY', 
-    'quantity': 
-    '28.54967643', 
-    'ticker': 'JUP', 
-    'price': '0.5254', 
-    'value': '14.999999996322', 
+
+class BalancesConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('balances_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('balances_notifications', self.channel_name)
+
+    async def balances_update(self, event):
+        data = event['data']
+        received_data = json.loads(data)  # Dict with 'content', etc.
+
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': received_data})
+        await self.send(text_data=html)
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = event['data']
+        received_data = json.loads(data)  # Dict with 'content', etc.
+
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': received_data})
+        await self.send(text_data=html)
+        # await self.send(text_data=json.dumps({
+        #     'type': 'trade_update',
+        #     'data': html
+        # }))
+
+
+data = {
+    'order_type': 'BUY',
+    'quantity':
+    '28.54967643',
+    'ticker': 'JUP',
+    'price': '0.5254',
+    'value': '14.999999996322',
     'timestamp': '2025-03-12T12:27:36.555170+00:00'
-    }
-
-
+}
 
 
 class CryptoConsumer2(AsyncWebsocketConsumer):

@@ -128,6 +128,7 @@ def update_klines(symbols=None):
     return 'Done updating klines'
 
 
+@shared_task
 def flush_stagnant_positions():
     from src.services.bnArb import BnArber
     HOLD_TIME_SECONDS = 48 * 3600  # 48 hours
@@ -135,6 +136,7 @@ def flush_stagnant_positions():
     CryptoCurency = apps.get_model("market", "CryptoCurency")
     Order = apps.get_model("market", "Order")
     Kline = apps.get_model("market", "Kline")
+    Symbol = apps.get_model("market", "Symbol")
 
     usdt_crypto = CryptoCurency.objects.get(ticker='USDT')
     for crypto in CryptoCurency.objects.exclude(ticker='USDT').filter(balance__gt=0):
@@ -177,5 +179,9 @@ def flush_stagnant_positions():
                     f"FLUSHED {sell_amount} {crypto.ticker} at {current_price} after {time_held/3600:.1f}h (Value: {trade_value:.2f}, Price Change: {price_change*100:.2f}%)")
                 print("USDT Balance:", usdt_crypto.balance)
 
-    usdt_crypto.pnl = BnArber().calculate_total_pnl()
+    symbols = Symbol.objects.filter(active=True).values_list(
+        "ticker", flat=True)
+
+    usdt_crypto.pnl = BnArber(
+        curs=symbols, max_amount=15).calculate_total_pnl()
     usdt_crypto.save()

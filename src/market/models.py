@@ -1,10 +1,16 @@
+from decimal import Decimal
 import json
 from django.db import models
 from django.utils import timezone
 
+from src.market.mixins import WorkflowMixin
+
+from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
+
 from timescale.db.models.fields import TimescaleDateTimeField
 from timescale.db.models.managers import TimescaleManager
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -27,7 +33,7 @@ class Company(models.Model):
         tasks.sync_company_stock_quotes.delay(self.pk)
 
 
-class CryptoCurency(models.Model):
+class CryptoCurency(models.Model, WorkflowMixin):
     name = models.CharField(max_length=120)
     ticker = models.CharField(max_length=20, unique=True, db_index=True)
     description = models.TextField(blank=True, null=True)
@@ -47,7 +53,7 @@ class CryptoCurency(models.Model):
         # tasks.sync_crypto_currency_quotes.delay(self.pk)
 
 
-class Order(models.Model):
+class Order(models.Model, WorkflowMixin):
     ORDER_TYPES = (
         ('BUY', 'Buy'),
         ('SELL', 'Sell'),
@@ -66,17 +72,16 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.order_type} {self.quantity:.4f} {self.ticker} at {self.price:.8f} on {self.timestamp}"
 
+    def to_dict(self):
+        return {
+            'order_type': str(self.order_type),
+            'quantity': str(self.quantity),
+            'ticker': str(self.ticker),
+            'price': str(self.price),
+            'value': str(self.value),
+            'timestamp': str(self.timestamp.isoformat())
+        }
 
-# class Symbol(models.Model):
-#     currency = models.OneToOneField(
-#         CryptoCurency, on_delete=models.CASCADE, related_name='symbol'
-#     )
-#     # EXAMPLE =  0.25386236600000167
-#     balance = models.DecimalField(max_digits=14, decimal_places=17)
-#     pnl = models.DecimalField(max_digits=14, decimal_places=17, default=0)
-#     active = models.BooleanField(default=True)
-#     timestamp = TimescaleDateTimeField(auto_now_add=True)
-#     updated = TimescaleDateTimeField(auto_now=True)
 
 class Symbol(models.Model):
     ticker = models.CharField(max_length=20, unique=True, db_index=True)
@@ -113,22 +118,80 @@ class Kline(models.Model):
 
     def __str__(self):
         return f"{self.symbol}||{self.time}: {self.close}|{self.volume}"
-# timestamp: 2025-03-05 10:45:00+00:00
-# open: 0.23080000
-# high: 0.23310000
-# low: 0.22880000
-# close: 0.23180000
-# volume: 183015.00000000
-from decimal import Decimal
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, obj):
-        # Convert Decimal to string or float
-        if isinstance(obj, Decimal):
-            return str(obj)  # or float(obj) if you prefer
-        # Let the base class handle other types
-        return super().default(obj)
-    
-# trading/models.py (signal part only)
+
+
+class Notification(models.Model):
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        verbose_name=_('content type'),
+        null=True,
+        blank=True
+    )
+    object_id = models.PositiveIntegerField(
+        verbose_name=_('object id'),
+        null=True,
+        blank=True
+    )
+    content = models.CharField(
+        _('content'),
+        max_length=999,
+        null=True,
+        blank=True
+    )
+    is_sent = models.BooleanField(
+        _('is sent'),
+        default=False
+    )
+    event = models.SmallIntegerField(
+        _('event'),
+        choices=[
+            (1, 'Created'),
+            (2, 'Updated'),
+            (3, 'Deleted'),
+            (4, 'Trade Executed'),
+            (5, 'Error Occurred'),
+        ],
+        null=True,
+        blank=True
+    )
+    commit_time = models.DateTimeField(
+        _('commit time'),
+        auto_now_add=True
+    )
+    send_time = models.DateTimeField(
+        _('send time'),
+        null=True,
+        blank=True
+    )
+    exception_id = models.CharField(
+        _('exception id'),
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        ordering = ['-commit_time']
+        verbose_name = _('notification')
+        verbose_name_plural = _('notifications')
+
+    class WorkflowEvents:
+        CREATED = 1
+        UPDATED = 2
+        DELETED = 3
+        TRADE_EXECUTED = 4
+        ERROR_OCCURRED = 5
+
+    def save(self, *args, **kwargs):
+        if self.is_sent and not self.send_time:
+            self.send_time = timezone.now()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.get_event_display()} - {self.content} ({self.commit_time})"
+
+
 @receiver(post_save, sender=CryptoCurency)
 @receiver(post_save, sender=Order)
 def send_update(sender, instance, created, **kwargs):
@@ -148,6 +211,7 @@ def send_update(sender, instance, created, **kwargs):
         data_dict = {
             "order_type": str(instance.order_type),
             "quantity": str(instance.quantity),
+            "name": str(instance.crypto.name),
             "ticker": str(instance.ticker),
             "price": str(instance.price),
             "value": str(instance.value),
@@ -155,7 +219,8 @@ def send_update(sender, instance, created, **kwargs):
         }
         data_json = json.dumps(data_dict)
 
-        data = data_json # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+        # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+        data = data_json
         # Trigger balance and total USD updates on trade
         async_to_sync(channel_layer.group_send)(
             'crypto_updates',
@@ -173,6 +238,19 @@ def send_update(sender, instance, created, **kwargs):
             'data': data
         }
     )
+
+
+@receiver(post_save, sender=CryptoCurency)
+@receiver(post_save, sender=Order)
+def notify_on_save(sender, instance, created, **kwargs):
+    event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
+    instance.notify(event)
+
+
+@receiver(post_delete, sender=CryptoCurency)
+@receiver(post_delete, sender=Order)
+def notify_on_delete(sender, instance, **kwargs):
+    instance.notify(Notification.WorkflowEvents.DELETED)
 
 
 # Signal to send WebSocket updates

@@ -83,7 +83,6 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
             trade_amount = self.floor(
                 trade_amount, self.precision.get(symbol, 8))
 
-            # print(f'{symbol} ||| max_trade_usdt: {max_trade_usdt} | euro_available: {euro_available} | trade_amount: {trade_amount}')
             return trade_amount
         except Exception as e:
             print(f"Error calculating trade amount for {symbol}: {e}")
@@ -276,7 +275,6 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                     # Delete zero-balance objects (except USDT)
                     CryptoCurency.objects.filter(
                         balance__lte=0).exclude(ticker='USDT').delete()
-
                 time.sleep(2)
 
             except Exception as e:

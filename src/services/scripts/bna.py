@@ -1,4 +1,5 @@
 
+from src.services.tasks import run_trading
 from datetime import datetime, timedelta, timezone as dt_timezone
 from src.services.client import get_client
 from django.apps import apps
@@ -89,12 +90,16 @@ currencies = ["BURGER", "1MBABYDOGE", "DOGE", "PEPE", "TFUEL", "TRUMP", "SHIB", 
 
 
 def update_symbols():
-    from src.market.models import Symbol
-    symbols = Symbol.objects.all()
-    for symbol in symbols:
-        symbol.active = False if symbol.ticker not in currencies else True
-        symbol.save()
-    print("Symbols updated successfully!")
+    from src.services.tasks import run_trading
+    from src.market.models import CryptoCurency
+
+    run_trading()
+    # from src.market.models import Symbol
+    # symbols = Symbol.objects.all()
+    # for symbol in symbols:
+    #     symbol.active = False if symbol.ticker not in currencies else True
+    #     symbol.save()
+    # print("Symbols updated successfully!")
     # from django.utils import timezone
     # from datetime import datetime, timedelta, timezone as dt_timezone
     # end_time = timezone.now()  # Current UTC time
@@ -124,12 +129,23 @@ def update_symbols():
     # update_klines()
 
 
-def run():
-    from src.services.tasks import run_trading
+def reset_cryptos():
     from src.market.models import CryptoCurency
+    symbols = CryptoCurency.objects.all()
+    for symbol in symbols:
+        if symbol.ticker == 'USDT':
+            symbol.balance = 150.0
+            symbol.pnl = 0.0
+            symbol.save()
+        else:
+            symbol.delete()
+
+
+def run():
 
     # usdt_obj = CryptoCurency.objects.get(ticker="USDT")
     # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
+    # reset_cryptos()
     run_trading()
 
     # update_symbols()

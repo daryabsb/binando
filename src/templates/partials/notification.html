@@ -1,15 +1,17 @@
 {% load static%}
+{% comment %} <span id="total-usd"  hx-swap-oob="innerHTML">{{ total }}</span> {% endcomment %}
+                                
 <ul id="notification-list"  hx-swap-oob="afterbegin">
     <li class="py-2 mb-1 border-bottom">
         <a href="javascript:void(0);" class="d-flex">
             <img class="avatar rounded-circle"
-                src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+                src="/static/assets/images/coin/{{ notification.ticker }}.png" alt="">
             <div class="flex-fill ms-2">
                 <p class="d-flex justify-content-between mb-0 "><span
-                        class="font-weight-bold">Chloe Walkerr</span>
-                    <small>2MIN</small>
+                        class="font-weight-bold">{{ notification.ticker }}</span>
+                    <small>2MIN ago</small>
                 </p>
-                <span class="">You bought {{ notification.quantity }} of {{ notification.ticker }} <span
+                <span class="">{{ notification.content }}<span
                         class="badge bg-success">Add</span></span>
             </div>
         </a>
