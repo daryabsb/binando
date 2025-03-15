@@ -1,64 +1,84 @@
-
-import json
-from decimal import Decimal, ROUND_HALF_UP
-from django.forms import model_to_dict
-
-
 # trading/models.py
-
+import json
+from django.utils import timezone
+from decimal import Decimal, ROUND_HALF_UP
+from django.contrib.contenttypes.models import ContentType
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import logging
+from .models import Notification, CryptoCurency, Kline  # Ensure Kline is imported
 
 class WorkflowMixin:
     def notify(self, event, content=None, exception_id=None):
-        from django.contrib.contenttypes.models import ContentType
-        from src.market.models import Notification
-        from channels.layers import get_channel_layer
-        from asgiref.sync import async_to_sync
-        import logging
-
         logger = logging.getLogger(__name__)
         content_type = ContentType.objects.get_for_model(self.__class__)
         obj_id = self.pk
-        order_data = {}
-        crypto_data = {}
-
-        # Generate descriptive content
         channel_layer = get_channel_layer()
 
-        if content is None:
-            if content_type.model == 'order':
-                action = 'bought' if self.order_type == 'BUY' else 'sold'
-                amount = 'USD' if self.ticker != 'USDT' else self.ticker
-                content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
+        # Generate descriptive content and prepare data
+        if content_type.model == 'order':
+            # Order-specific logic
+            action = 'bought' if self.order_type == 'BUY' else 'sold'
+            amount = 'USD' if self.ticker != 'USDT' else self.ticker
+            content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
+            
+            data = {
+                'order_type': self.order_type,
+                'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'ticker': self.ticker,
+                'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'timestamp': self.timestamp,  # Keep as datetime
+            }
+            group_name = 'trade_notifications'
+            message_type = 'trade_update'
 
-                order_data = {
-                    'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
-                    'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
-                    'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
-
-                }
-
-            elif content_type.model == 'cryptocurency':
-                # group_name = 'crypto_updates'
-                # message_type = 'balance_update'
-
-                if event == Notification.WorkflowEvents.CREATED:
-                    content = f"New currency {self.ticker} added with balance {self.balance}"
-                elif event == Notification.WorkflowEvents.UPDATED:
-                    content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
-                elif event == Notification.WorkflowEvents.DELETED:
-                    content = f"Currency {self.ticker} removed"
-                else:
-                    content = f"{self.ticker} event {event} occurred"
-                crypto_data = {
-                    'name': self.name,
-                    'ticker': self.ticker,
-                    'balance': self.balance,
-                    'pnl': self.pnl
-
-                }
+        elif content_type.model == 'cryptocurency':
+            # CryptoCurency-specific logic
+            if event == Notification.WorkflowEvents.CREATED:
+                content = f"New currency {self.ticker} added with balance {self.balance}"
+            elif event == Notification.WorkflowEvents.UPDATED:
+                content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+            elif event == Notification.WorkflowEvents.DELETED:
+                content = f"Currency {self.ticker} removed"
             else:
-                content = f"{self.__class__.__name__} {obj_id} - Event {event}"
+                content = f"{self.ticker} event {event} occurred"
 
+            # Calculate latest USD value for this coin
+            latest_price = float(Kline.objects.filter(symbol=f"{self.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(self.balance) * latest_price
+
+            # Calculate total USD value of all coins
+            total_usd = 0.0
+            for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+                price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+                total_usd += float(crypto.balance) * price
+            total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+
+            data = {
+                'ticker': self.ticker,
+                'balance': f'{self.balance.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'pnl': f'{self.pnl.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'usd_value': f'{usd_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
+                'total_usd': f'{total_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
+                'event': event,
+                'timestamp': self.updated_at if hasattr(self, 'updated_at') else self.created_at,  # Assuming timestamp fields
+            }
+            group_name = 'balances_notifications'
+            message_type = 'balances_update'
+
+        else:
+            # Fallback for other models
+            content = content or f"{self.__class__.__name__} {obj_id} - Event {event}"
+            data = {
+                'content': content,
+                'event': event,
+                'timestamp': timezone.now(),
+            }
+            group_name = 'crypto_updates'
+            message_type = 'balance_update'
+
+        # Create and save notification
         notification = Notification(
             content_type=content_type,
             object_id=obj_id,
@@ -69,54 +89,12 @@ class WorkflowMixin:
         notification.save()
         logger.info(f"Notification created: {notification}")
 
-        data = {
-            **crypto_data,
-            'id': notification.id,
-            'ticker': f'{self.ticker}',
-            'content': notification.content,
-            'event': notification.event,
-            'timestamp': notification.commit_time,  # Keep as datetime object
-        }
-        # if event == Notification.WorkflowEvents.TRADE_EXECUTED and hasattr(self, 'to_dict'):
-        #     trade_data = self.to_dict()
-        #     trade_data['timestamp'] = self.timestamp  # Keep as datetime
-        #     data = trade_data
-
-        order_group_name = 'trade_notifications'
-        order_message_type = 'trade_update'
-        crypto_group_name = 'balances_notifications'
-        crypto_message_type = 'balances_update'
-
+        # Send WebSocket message
         async_to_sync(channel_layer.group_send)(
-            crypto_group_name,
+            group_name,
             {
-                'type': crypto_message_type,
-                # Convert datetime to string only when sending
-                'data': json.dumps(
-                    {
-                        **crypto_data,
-                        'id': notification.id,
-                        'ticker': f'{self.ticker}',
-                        'content': notification.content,
-                        'event': notification.event,
-                        'timestamp': notification.commit_time,
-                    }, default=str),
-            }
-        )
-        async_to_sync(channel_layer.group_send)(
-            order_group_name,
-            {
-                'type': order_message_type,
-                # Convert datetime to string only when sending
-                'data': json.dumps(
-                    {
-                        **order_data,
-                        'id': notification.id,
-                        'ticker': f'{self.ticker}',
-                        'content': notification.content,
-                        'event': notification.event,
-                        'timestamp': notification.commit_time,
-                    }, default=str),
+                'type': message_type,
+                'data': json.dumps(data, default=str),  # Convert datetime to string only when sending
             }
         )
 
