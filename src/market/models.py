@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import timezone
 
 from src.market.mixins import WorkflowMixin
+from src.market.utils import upload_image_file_path
 
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
@@ -14,7 +15,8 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from . import tasks
 # Create your models here.
 
@@ -83,16 +85,53 @@ class Order(models.Model, WorkflowMixin):
         }
 
 
+class CryptoCategory(models.Model):
+    name = models.CharField(_('name'), max_length=100, unique=True)
+    slug = models.SlugField(_('slug'), max_length=100, unique=True)
+    rank = models.PositiveIntegerField(
+        _('rank'), default=0, help_text="Order of importance")
+
+    class Meta:
+        verbose_name = _('crypto category')
+        verbose_name_plural = _('crypto categories')
+        ordering = ['rank', 'name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
 class Symbol(models.Model):
+    coin = models.CharField(max_length=100, null=True,
+                            blank=True, unique=True)  # e.g., "BTCBitcoin"
     ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    rank = models.PositiveIntegerField(null=True, blank=True, unique=True)
+    categories = models.ManyToManyField(CryptoCategory, blank=True)
     pair = models.CharField(max_length=20, unique=True, db_index=True)
+    price = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    change_24h = models.CharField(max_length=10, blank=True)  # e.g., "+2.35%"
+    market_cap = models.CharField(
+        max_length=20, blank=True)  # e.g., "1.67T USD"
+    volume_24h = models.CharField(
+        max_length=20, blank=True)  # e.g., "28.37B USD"
+    circ_supply = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0.00)
     precision = models.IntegerField(default=8)  # Add this
     active = models.BooleanField(default=True)
+    logo = models.ImageField(null=True, blank=True, default='coins/USDT.png',
+                             upload_to=upload_image_file_path)  # e.g., "coins\XTVCBTC.svg"
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.pair
+
+    class Meta:
+        ordering = ['rank', 'ticker']
 
 
 class Kline(models.Model):

@@ -2388,7 +2388,7 @@
         "ticker": "ANKR"
     },
     {
-        "coin": "RREDRedStone",
+        "coin": "REDRedStone",
         "rank": 200,
         "price": 0.62313,
         "change_24h": "+21.18%",
@@ -2396,8 +2396,8 @@
         "volume24h": "60.63M USD",
         "circ_supply": 280,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\RED.png",
+        "ticker": "RED"
     },
     {
         "coin": "STETHLido Staked ETH",
@@ -2408,7 +2408,7 @@
         "volume24h": "21.25M USD",
         "circ_supply": 9.35,
         "category": "Derivatives, DeFi",
-        "logo": "coins\\XTVCSTETH.svg",
+        "logo": "coins\\TEXTVCSTH.svg",
         "ticker": "STETH"
     },
     {
@@ -2792,8 +2792,8 @@
         "volume24h": "1.93M USD",
         "circ_supply": 100,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCLIONK.svg",
+        "ticker": "LION"
     },
     {
         "coin": "HUGEHugeWin",
@@ -4676,8 +4676,8 @@
         "volume24h": "1.73M USD",
         "circ_supply": 103,
         "category": "Stablecoins",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCAIN.svg",
+        "ticker": "AI"
     },
     {
         "coin": "IGTInfinitar",
@@ -5660,8 +5660,8 @@
         "volume24h": "80.58 K USD",
         "circ_supply": 132.82,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCDCB.svg",
+        "ticker": "DCA"
     },
     {
         "coin": "BMXBitMart Token",
@@ -6044,8 +6044,8 @@
         "volume24h": "49.61M USD",
         "circ_supply": 159.66,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "ELXE"
     },
     {
         "coin": "HEARTHumans.ai",
@@ -6488,8 +6488,8 @@
         "volume24h": "266.23 K USD",
         "circ_supply": 7.84,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "PUNDI"
     },
     {
         "coin": "OLASAutonolas",
@@ -6800,8 +6800,8 @@
         "volume24h": "6.27M USD",
         "circ_supply": 555.54,
         "category": "Memes, Made in America",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "PONKE"
     },
     {
         "coin": "BANComedian",
@@ -7412,8 +7412,8 @@
         "volume24h": "27.15M USD",
         "circ_supply": 999.92,
         "category": "Memes",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "PWEASE"
     },
     {
         "coin": "RADRadworks",
@@ -8732,8 +8732,8 @@
         "volume24h": "322.31 K USD",
         "circ_supply": 310.26,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "REACT"
     },
     {
         "coin": "GTCGitcoin",
@@ -9200,8 +9200,8 @@
         "volume24h": "29.39M USD",
         "circ_supply": 258.87,
         "category": "Data management & AI, Web3",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "BMT"
     },
     {
         "coin": "UUSDAUSDA",
@@ -9212,8 +9212,8 @@
         "volume24h": "—",
         "circ_supply": 30.03,
         "category": "Stablecoins",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDAA.svg",
+        "ticker": "USDA"
     },
     {
         "coin": "LLCATLion Cat",
@@ -9224,8 +9224,8 @@
         "volume24h": "704.7 K USD",
         "circ_supply": 331.5,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "LCAT"
     },
     {
         "coin": "GEARGearbox Protocol",
@@ -11840,8 +11840,8 @@
         "volume24h": "31.76M USD",
         "circ_supply": 120,
         "category": "DePIN",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "ROAM"
     },
     {
         "coin": "NPTNeopin",
@@ -12176,8 +12176,8 @@
         "volume24h": "5.92M USD",
         "circ_supply": 999.96,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "COLLAT"
     },
     {
         "coin": "OORTOORT",
@@ -15392,8 +15392,8 @@
         "volume24h": "10.84M USD",
         "circ_supply": 10,
         "category": "DeFi",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "LF"
     },
     {
         "coin": "ZERCzkRace",
@@ -15920,8 +15920,8 @@
         "volume24h": "3.92M USD",
         "circ_supply": 999.99,
         "category": "—",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "SSE"
     },
     {
         "coin": "BNCBifrost",
@@ -16785,7 +16785,7 @@
         "circ_supply": 4.47,
         "category": "—",
         "logo": "coins\\XTVCSSE.svg",
-        "ticker": "SSE"
+        "ticker": "SES"
     },
     {
         "coin": "G7Game7",
@@ -20288,8 +20288,8 @@
         "volume24h": "1.23M USD",
         "circ_supply": 999.96,
         "category": "Memes",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "IMG"
     },
     {
         "coin": "SGSocialGood",
@@ -20912,8 +20912,8 @@
         "volume24h": "42.84 K USD",
         "circ_supply": 1,
         "category": "Memes",
-        "logo": null,
-        "ticker": null
+        "logo": "coins\\XTVCUSDT.svg",
+        "ticker": "BROC"
     },
     {
         "coin": "AIMONICAAimonica Brands",

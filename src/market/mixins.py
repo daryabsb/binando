@@ -47,17 +47,20 @@ class WorkflowMixin:
                 content = f"{self.ticker} event {event} occurred"
 
             # Calculate latest USD value for this coin
-            latest_price = float(Kline.objects.filter(
-                symbol=f"{self.ticker}USDT").order_by('-time').first().close)
-            usd_value = float(self.balance) * latest_price
+            first_kline = Kline.objects.filter(
+                symbol=f"{self.ticker}USDT").order_by('-time').first()
+
+            latest_price = first_kline.close if first_kline else Decimal(
+                "0.00")
+            usd_value = self.balance * latest_price
 
             # Calculate total USD value of all coins
-            total_usd = 0.0
+            total_usd = Decimal("0.0")
             for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-                price = float(Kline.objects.filter(
-                    symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
-                total_usd += float(crypto.balance) * price
-            total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+                price = Kline.objects.filter(
+                    symbol=f"{crypto.ticker}USDT").order_by('-time').first().close
+                total_usd += crypto.balance * price
+            total_usd += CryptoCurency.objects.get(ticker='USDT').balance
 
             data = {
                 'ticker': self.ticker,
@@ -67,7 +70,7 @@ class WorkflowMixin:
                 'total_usd': f'{total_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
                 'event': event,
                 # Assuming timestamp fields
-                'timestamp': self.updated_at if hasattr(self, 'updated_at') else self.created_at,
+                'timestamp': self.updated if hasattr(self, 'updated_at') else self.timestamp,
             }
             group_name = 'balances_notifications'
             message_type = 'balances_update'

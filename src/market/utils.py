@@ -6,6 +6,17 @@ from src.services.config import data
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
+import os
+
+
+def upload_image_file_path(instance, filename):
+    # Generate file path for new recipe image
+    model = instance._meta.model.__name__.lower()
+    # ext = filename.split('.')[-1]
+    # filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join(f'uploads/{model}/', filename)
+
 
 def prepare_binance_time(end_time=None, days_ago=14, date_format="%Y-%m-%d %H:%M:%S"):
     if end_time is None:
@@ -108,7 +119,7 @@ def batch_insert_stock_data(
 def send_websocket_message(group_name, message_type, data):
     """
     Manually send a WebSocket message to a specified group.
-    
+
     Args:
         group_name (str): The group to send the message to (e.g., 'crypto_updates', 'trade_notifications').
         message_type (str): The type of message (e.g., 'balance_update', 'trade_update').
@@ -127,4 +138,5 @@ def send_websocket_message(group_name, message_type, data):
         group_name,
         message
     )
-    print(f"Sent WebSocket message to {group_name}: {json.dumps(message, indent=2)}")
+    print(
+        f"Sent WebSocket message to {group_name}: {json.dumps(message, indent=2)}")
