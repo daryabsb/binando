@@ -1,4 +1,5 @@
 
+from time import sleep
 from src.services.tasks import run_trading
 from datetime import datetime, timedelta, timezone as dt_timezone
 from src.services.client import get_client
@@ -146,8 +147,9 @@ def run():
     # usdt_obj = CryptoCurency.objects.get(ticker="USDT")
     # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
     # reset_cryptos()
-    run_trading()
-
+    while True:
+        run_trading()
+        sleep(2)
     # update_symbols()
 
 

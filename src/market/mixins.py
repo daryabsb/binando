@@ -24,16 +24,39 @@ class WorkflowMixin:
             amount = 'USD' if self.ticker != 'USDT' else self.ticker
             content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
 
+            group_name = 'trade_notifications'
+            message_type = 'trade_update'
+
+            notification = Notification(
+                content_type=content_type,
+                object_id=obj_id,
+                content=content,
+                event=event,
+                exception_id=exception_id,
+            )
             data = {
                 'order_type': self.order_type,
                 'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
                 'ticker': self.ticker,
                 'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
                 'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'content': content,
+                'content_type': content_type,
+                'object_id': obj_id,
+                'event': event,
+                'exception_id': exception_id,
                 'timestamp': self.timestamp,  # Keep as datetime
             }
-            group_name = 'trade_notifications'
-            message_type = 'trade_update'
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    'type': message_type,
+                    'data': json.dumps(data, default=str),
+                }
+            )
+            notification.is_sent = True
+            notification.save()
+            logger.info(f"Notification created: {notification}")
 
         elif content_type.model == 'cryptocurency':
             # CryptoCurency-specific logic
@@ -50,9 +73,8 @@ class WorkflowMixin:
             first_kline = Kline.objects.filter(
                 symbol=f"{self.ticker}USDT").order_by('-time').first()
 
-            latest_price = first_kline.close if first_kline else Decimal(
-                "0.00")
-            usd_value = self.balance * latest_price
+            latest_price = first_kline.close if first_kline else Decimal("0.00")
+            usd_value = Decimal(self.balance) * latest_price
 
             # Calculate total USD value of all coins
             total_usd = Decimal("0.0")
@@ -64,8 +86,8 @@ class WorkflowMixin:
 
             data = {
                 'ticker': self.ticker,
-                'balance': f'{self.balance.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
-                'pnl': f'{self.pnl.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'balance': f'{Decimal(self.balance).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'pnl': f'{Decimal(self.pnl).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
                 'usd_value': f'{usd_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
                 'total_usd': f'{total_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
                 'event': event,
@@ -74,6 +96,14 @@ class WorkflowMixin:
             }
             group_name = 'balances_notifications'
             message_type = 'balances_update'
+            
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    'type': message_type,
+                    'data': json.dumps(data, default=str),
+                }
+            )
 
         else:
             # Fallback for other models
@@ -86,48 +116,10 @@ class WorkflowMixin:
             group_name = 'crypto_updates'
             message_type = 'balance_update'
 
-        # Create and save notification
-        notification = Notification(
-            content_type=content_type,
-            object_id=obj_id,
-            content=content,
-            event=event,
-            exception_id=exception_id,
-        )
-        notification.save()
-        logger.info(f"Notification created: {notification}")
-
-        # Send WebSocket message
-        async_to_sync(channel_layer.group_send)(
-            group_name,
-            {
-                'type': message_type,
-                # Convert datetime to string only when sending
-                'data': json.dumps(data, default=str),
-            }
-        )
-
-        notification.is_sent = True
-        notification.save()
-
-
-data = {
-    "order_type": "BUY",
-    "quantity": "3.59023456",
-    "name": "DOT", "ticker": "DOT",
-    "price": "4.178", "value": "14.99999999168",
-    "timestamp": "2025-03-14T11:10:30.161921+00:00"
-}
-received_data = {
-    'order_type': 'BUY',
-    'quantity': '3.59023456',
-    'name': 'DOT',
-    'ticker': 'DOT',
-    'price': '4.178',
-    'value': '14.99999999168',
-    'timestamp': '2025-03-14T11:10:30.161921+00:00'
-}
-data = {"order_type": "BUY", "quantity": "3.59023456", "name": "DOT", "ticker": "DOT",
-        "price": "4.178", "value": "14.99999999168", "timestamp": "2025-03-14T11:10:30.161921+00:00"}
-received_data = {'order_type': 'BUY', 'quantity': '3.59023456', 'name': 'DOT', 'ticker': 'DOT',
-                 'price': '4.178', 'value': '14.99999999168', 'timestamp': '2025-03-14T11:10:30.161921+00:00'}
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    'type': message_type,
+                    'data': json.dumps(data, default=str),
+                }
+            )

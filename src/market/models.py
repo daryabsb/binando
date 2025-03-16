@@ -231,52 +231,52 @@ class Notification(models.Model):
         return f"{self.get_event_display()} - {self.content} ({self.commit_time})"
 
 
-@receiver(post_save, sender=CryptoCurency)
-@receiver(post_save, sender=Order)
-def send_update(sender, instance, created, **kwargs):
-    channel_layer = get_channel_layer()
-    if sender == CryptoCurency:
-        group_name = 'crypto_updates'
-        message_type = 'balance_update'
-        data = {}  # HTMX fetches full table
-        # Trigger total USD update too
-        async_to_sync(channel_layer.group_send)(
-            'crypto_updates',
-            {'type': 'total_usd_update', 'data': ''}  # Data computed in consumer
-        )
-    elif sender == Order:
-        group_name = 'trade_notifications'
-        message_type = 'trade_update'
-        data_dict = {
-            "order_type": str(instance.order_type),
-            "quantity": str(instance.quantity),
-            "name": str(instance.crypto.name),
-            "ticker": str(instance.ticker),
-            "price": str(instance.price),
-            "value": str(instance.value),
-            "timestamp": str(instance.timestamp.isoformat())
-        }
-        data_json = json.dumps(data_dict)
+# @receiver(post_save, sender=CryptoCurency)
+# @receiver(post_save, sender=Order)
+# def send_update(sender, instance, created, **kwargs):
+#     channel_layer = get_channel_layer()
+#     if sender == CryptoCurency:
+#         group_name = 'crypto_updates'
+#         message_type = 'balance_update'
+#         data = {}  # HTMX fetches full table
+#         # Trigger total USD update too
+#         async_to_sync(channel_layer.group_send)(
+#             'crypto_updates',
+#             {'type': 'total_usd_update', 'data': ''}  # Data computed in consumer
+#         )
+#     elif sender == Order:
+#         group_name = 'trade_notifications'
+#         message_type = 'trade_update'
+#         data_dict = {
+#             "order_type": str(instance.order_type),
+#             "quantity": str(instance.quantity),
+#             "name": str(instance.crypto.name),
+#             "ticker": str(instance.ticker),
+#             "price": str(instance.price),
+#             "value": str(instance.value),
+#             "timestamp": str(instance.timestamp.isoformat())
+#         }
+#         data_json = json.dumps(data_dict)
 
-        # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
-        data = data_json
-        # Trigger balance and total USD updates on trade
-        async_to_sync(channel_layer.group_send)(
-            'crypto_updates',
-            {'type': 'balance_update', 'data': ''}
-        )
-        async_to_sync(channel_layer.group_send)(
-            'crypto_updates',
-            {'type': 'total_usd_update', 'data': ''}
-        )
+#         # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+#         data = data_json
+#         # Trigger balance and total USD updates on trade
+#         async_to_sync(channel_layer.group_send)(
+#             'crypto_updates',
+#             {'type': 'balance_update', 'data': ''}
+#         )
+#         async_to_sync(channel_layer.group_send)(
+#             'crypto_updates',
+#             {'type': 'total_usd_update', 'data': ''}
+#         )
 
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': message_type,
-            'data': data
-        }
-    )
+#     async_to_sync(channel_layer.group_send)(
+#         group_name,
+#         {
+#             'type': message_type,
+#             'data': data
+#         }
+#     )
 
 
 @receiver(post_save, sender=CryptoCurency)
