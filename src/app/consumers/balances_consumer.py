@@ -16,6 +16,7 @@ class BalancesConsumer(AsyncWebsocketConsumer):
         data = event['data']
         received_data = json.loads(data)  # Dict with 'content', etc.
 
-        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': received_data})
-        await self.send(text_data=html)
+        print('received: ', received_data)
 
+        html = await sync_to_async(render_to_string)('partials/balance.html', {'balance': received_data})
+        await self.send(text_data=html)

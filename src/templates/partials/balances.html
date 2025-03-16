@@ -1,4 +1,4 @@
-{% comment %} {% for balance in balances %}
+{% for balance in balances %}
 <tr>
     <td><i class="fa fa-square chart-text-color1"></i></td>
     <td>{{ balance.ticker }}</td>
@@ -6,16 +6,8 @@
     <td>{{ balance.usd_value|floatformat:2 }}</td>
     <td>{{ balance.pnl|floatformat:2 }}</td>
 </tr>
-{% endfor %} {% endcomment %}
+{% empty %}
+<tr><td colspan="4">Loading balances...</td></tr>
+{% endfor %}
 
-<tbody id="balances" hx-swap-oob="innerHTML">
-    {% for balance in balances %}
-    <tr>
-        <td><i class="fa fa-square chart-text-color1"></i></td>
-        <td>{{ balance.ticker }}</td>
-        <td>{{ balance.balance|floatformat:4 }}</td>
-        <td>{{ balance.usd_value|floatformat:2 }}</td>
-        <td>{{ balance.pnl|floatformat:2 }}</td>
-    </tr>
-    {% endfor %}
-<tbody>
+

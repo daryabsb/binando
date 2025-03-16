@@ -19,10 +19,12 @@ class WorkflowMixin:
 
         # Generate descriptive content and prepare data
         if content_type.model == 'order':
+            print('Order triggered')
             # Order-specific logic
             action = 'bought' if self.order_type == 'BUY' else 'sold'
             amount = 'USD' if self.ticker != 'USDT' else self.ticker
-            content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
+            # per unit on {self.timestamp}
+            content = f"You {action} {self.quantity:.2f} {self.ticker} for {self.value:.4f} {amount} at {self.price}"
 
             group_name = 'trade_notifications'
             message_type = 'trade_update'
@@ -59,6 +61,7 @@ class WorkflowMixin:
             logger.info(f"Notification created: {notification}")
 
         elif content_type.model == 'cryptocurency':
+            print('Crypto triggered')
             # CryptoCurency-specific logic
             if event == Notification.WorkflowEvents.CREATED:
                 content = f"New currency {self.ticker} added with balance {self.balance}"
@@ -73,7 +76,8 @@ class WorkflowMixin:
             first_kline = Kline.objects.filter(
                 symbol=f"{self.ticker}USDT").order_by('-time').first()
 
-            latest_price = first_kline.close if first_kline else Decimal("0.00")
+            latest_price = first_kline.close if first_kline else Decimal(
+                "0.00")
             usd_value = Decimal(self.balance) * latest_price
 
             # Calculate total USD value of all coins
@@ -96,11 +100,14 @@ class WorkflowMixin:
             }
             group_name = 'balances_notifications'
             message_type = 'balances_update'
-            
+
+            channel_layer = get_channel_layer()
+
             async_to_sync(channel_layer.group_send)(
                 group_name,
                 {
                     'type': message_type,
+                    # 'data': json.dumps(data, default=str),
                     'data': json.dumps(data, default=str),
                 }
             )

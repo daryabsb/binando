@@ -1,5 +1,6 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 import json
+from time import sleep
 from django.db import models
 from django.utils import timezone
 
@@ -50,8 +51,13 @@ class CryptoCurency(models.Model, WorkflowMixin):
         return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
 
     def save(self, *args, **kwargs):
+        created = False
+        if self.pk is None:
+            created = True
         self.ticker = f"{self.ticker}".upper()
         super().save(*args, **kwargs)
+        if created:
+            print('created crypto: ', self.balance)
         # tasks.sync_crypto_currency_quotes.delay(self.pk)
 
 
@@ -123,7 +129,7 @@ class Symbol(models.Model):
     precision = models.IntegerField(default=8)  # Add this
     active = models.BooleanField(default=True)
     logo = models.ImageField(null=True, blank=True, default='coins/XTVCUSDT.svg',
-                            upload_to=upload_image_file_path)  # e.g., "coins\XTVCBTC.svg"
+                             upload_to=upload_image_file_path)  # e.g., "coins\XTVCBTC.svg"
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -279,11 +285,38 @@ class Notification(models.Model):
 #     )
 
 
-@receiver(post_save, sender=CryptoCurency)
-@receiver(post_save, sender=Order)
-def notify_on_save(sender, instance, created, **kwargs):
+@receiver(post_save, sender=CryptoCategory)
+def notify_crypto_on_save(sender, instance, created, **kwargs):
     event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
     instance.notify(event)
+
+
+@receiver(post_save, sender=Order)
+def notify_order_on_save(sender, instance, created, **kwargs):
+    event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
+    instance.notify(event)
+
+
+# @receiver(post_save, sender=CryptoCurency)
+def add_crypto_to_dom(sender, instance, created, **kwargs):
+    content = f"New currency {instance.ticker} added with balance {instance.balance:.4f}"
+    # Calculate latest USD value for this coin
+    first_kline = Kline.objects.filter(
+        symbol=f"{instance.ticker}USDT").order_by('-time').first()
+
+    latest_price = first_kline.close if first_kline else Decimal(
+        "0.00")
+    usd_value = Decimal(instance.balance) * latest_price
+
+    # Calculate total USD value of all coins
+
+    data = {
+        'ticker': instance.ticker,
+        'balance': float(instance.balance),
+        'usd_value': usd_value,
+        'content': content,
+        'pnl': float(instance.pnl),
+    }
 
 
 @receiver(post_delete, sender=CryptoCurency)
