@@ -28,22 +28,29 @@ def initial_data():
                 continue
 
         if not symbol:
+            try:
+                symbol = Symbol.objects.filter(coin=coin_data['coin']).first()
+
             # Create new symbol
-            symbol = Symbol(
-                coin=coin_data['coin'],
-                ticker=coin_data['ticker'],
-                pair=f'{coin_data["ticker"]}USDT',
-                rank=coin_data['rank'],
-                price=coin_data['price'],
-                change_24h=coin_data['change_24h'],
-                market_cap=coin_data['market_cap'],
-                volume_24h=coin_data['volume24h'],
-                circ_supply=coin_data['circ_supply'],
-                logo=coin_data['logo'],
-            )
-            symbol.save(force_insert=True)
-            count += 1
-            print(count)
+                symbol = Symbol(
+                    coin=coin_data['coin'],
+                    ticker=coin_data['ticker'],
+                    pair=f'{coin_data["ticker"]}USDT',
+                    rank=coin_data['rank'],
+                    price=coin_data['price'],
+                    change_24h=coin_data['change_24h'],
+                    market_cap=coin_data['market_cap'],
+                    volume_24h=coin_data['volume24h'],
+                    circ_supply=coin_data['circ_supply'],
+                    logo=coin_data['logo'],
+                )
+                symbol.save(force_insert=True)
+                count += 1
+                print(count)
+            except Exception as e:
+                print("Coin exists: ", e)
+                continue
+        
         else:
             # Update existing symbol
             symbol.coin = coin_data['coin']

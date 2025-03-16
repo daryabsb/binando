@@ -86,8 +86,8 @@ class Order(models.Model, WorkflowMixin):
 
 
 class CryptoCategory(models.Model):
-    name = models.CharField(_('name'), max_length=100, unique=True)
-    slug = models.SlugField(_('slug'), max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
     rank = models.PositiveIntegerField(
         _('rank'), default=0, help_text="Order of importance")
 
@@ -108,10 +108,10 @@ class CryptoCategory(models.Model):
 class Symbol(models.Model):
     coin = models.CharField(max_length=100, null=True,
                             blank=True, unique=True)  # e.g., "BTCBitcoin"
-    ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    ticker = models.CharField(max_length=50, unique=True, db_index=True)
     rank = models.PositiveIntegerField(null=True, blank=True, unique=True)
     categories = models.ManyToManyField(CryptoCategory, blank=True)
-    pair = models.CharField(max_length=20, unique=True, db_index=True)
+    pair = models.CharField(max_length=50, unique=True, db_index=True)
     price = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     change_24h = models.CharField(max_length=10, blank=True)  # e.g., "+2.35%"
     market_cap = models.CharField(
@@ -122,8 +122,8 @@ class Symbol(models.Model):
         max_digits=15, decimal_places=2, default=0.00)
     precision = models.IntegerField(default=8)  # Add this
     active = models.BooleanField(default=True)
-    logo = models.ImageField(null=True, blank=True, default='coins/USDT.png',
-                             upload_to=upload_image_file_path)  # e.g., "coins\XTVCBTC.svg"
+    logo = models.ImageField(null=True, blank=True, default='coins/XTVCUSDT.svg',
+                            upload_to=upload_image_file_path)  # e.g., "coins\XTVCBTC.svg"
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

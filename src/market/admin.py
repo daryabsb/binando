@@ -26,37 +26,45 @@ class CryptoCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'rank')
     ordering = ('rank', 'name')
 
-
+count = 0
 class SymbolAdmin(admin.ModelAdmin):
     list_display = ['ticker', 'pair', 'get_24_hour_volume',
                     'active', 'timestamp', 'updated']
     list_filter = [
         'ticker',
         ('timestamp', DateTimeRangeFilterBuilder()),
-        'timestamp'
+        'timestamp',
+        'active',
     ]
 
     @staticmethod
     def initial_data():
         print('Initial called')
+        global count
+        print('Initial called')
 
         json_path = os.path.join(
-            settings.BASE_DIR, 'src', 'market', 'coins.json')
-        print('path = ', json_path)
+            settings.BASE_DIR, 'market', 'coins.json')
 
         if not os.path.exists(json_path):
             return
 
-        with open(json_path, 'r') as f:
+        with open(json_path, 'r', encoding='utf-8') as f:
             coins = json.load(f)
 
         for coin_data in coins:
             symbol = Symbol.objects.filter(ticker=coin_data['ticker']).first()
+
+            if symbol:
+                if symbol.coin == coin_data['coin'] or symbol.rank == coin_data['rank']:
+                    continue
+
             if not symbol:
                 # Create new symbol
                 symbol = Symbol(
                     coin=coin_data['coin'],
                     ticker=coin_data['ticker'],
+                    pair=f'{coin_data["ticker"]}USDT',
                     rank=coin_data['rank'],
                     price=coin_data['price'],
                     change_24h=coin_data['change_24h'],
@@ -66,6 +74,8 @@ class SymbolAdmin(admin.ModelAdmin):
                     logo=coin_data['logo'],
                 )
                 symbol.save(force_insert=True)
+                count += 1
+                print(count)
             else:
                 # Update existing symbol
                 symbol.coin = coin_data['coin']
