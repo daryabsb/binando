@@ -182,5 +182,8 @@ def update_system_data():
     klines_updated = update_klines()
     if klines_updated:
         symbols_updated = update_symbols()
-        if total_usd:
+        if symbols_updated:
             total_usd = update_usd_value()
+
+            if total_usd:
+                print('System updated successfully with the latest data!')
