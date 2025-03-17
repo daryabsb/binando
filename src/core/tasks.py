@@ -12,7 +12,7 @@ from django.apps import apps  # .models import Symbol, CryptoCategory
 from django.utils.text import slugify
 
 
-@shared_task
+# @shared_task
 def test_tasks():
     print('test_works')
     return 'Bravo!!'
@@ -34,6 +34,8 @@ def update_usd_value():
             'data': str(total_usd),  # Convert datetime to string
         }
     )
+    print('Total usd updated!')
+    return True
 
 
 # @shared_task
@@ -52,6 +54,7 @@ def update_symbols():
             symbol.save()
         except Exception as e:
             print(f"{symbol.ticker}: {e}")
+    print('Symbols updated!')
     return True
 
     # json_path = os.path.join(settings.BASE_DIR, 'trading', 'data', 'coins.json')
@@ -170,7 +173,7 @@ def update_klines(symbols=None):
 
         except Exception as e:
             print(f"Error updating kline for {symbol_full}: {e}")
-
+    print('Symbols updated!')
     return True
 
 
