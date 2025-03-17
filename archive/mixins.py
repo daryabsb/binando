@@ -56,29 +56,15 @@ class WorkflowMixin:
                     'data': json.dumps(data, default=str),
                 }
             )
-            notification.is_sent = True
-            notification.save()
-            logger.info(f"Notification created: {notification}")
 
-        elif content_type.model == 'cryptocurency':
-            print('Crypto triggered')
-            # CryptoCurency-specific logic
-            if event == Notification.WorkflowEvents.CREATED:
-                content = f"New currency {self.ticker} added with balance {self.balance}"
-            elif event == Notification.WorkflowEvents.UPDATED:
-                content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
-            elif event == Notification.WorkflowEvents.DELETED:
-                content = f"Currency {self.ticker} removed"
-            else:
-                content = f"{self.ticker} event {event} occurred"
+            crypto = self.crypto
 
-            # Calculate latest USD value for this coin
             first_kline = Kline.objects.filter(
-                symbol=f"{self.ticker}USDT").order_by('-time').first()
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first()
 
             latest_price = first_kline.close if first_kline else Decimal(
                 "0.00")
-            usd_value = Decimal(self.balance) * latest_price
+            usd_value = Decimal(crypto.balance) * latest_price
 
             # Calculate total USD value of all coins
             total_usd = Decimal("0.0")
@@ -88,29 +74,86 @@ class WorkflowMixin:
                 total_usd += crypto.balance * price
             total_usd += CryptoCurency.objects.get(ticker='USDT').balance
 
-            data = {
-                'ticker': self.ticker,
-                'balance': f'{Decimal(self.balance).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
-                'pnl': f'{Decimal(self.pnl).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            crypto_data = {
+                'ticker': crypto.ticker,
+                'balance': f'{Decimal(crypto.balance).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'pnl': f'{Decimal(crypto.pnl).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
                 'usd_value': f'{usd_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
                 'total_usd': f'{total_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
                 'event': event,
                 # Assuming timestamp fields
-                'timestamp': self.updated if hasattr(self, 'updated_at') else self.timestamp,
+                'timestamp': crypto.updated if hasattr(crypto, 'updated_at') else crypto.timestamp,
             }
-            group_name = 'balances_notifications'
-            message_type = 'balances_update'
+
+            # group_name = 'balances_notifications'
+            # message_type = 'balances_update'
 
             channel_layer = get_channel_layer()
 
-            async_to_sync(channel_layer.group_send)(
-                group_name,
-                {
-                    'type': message_type,
-                    # 'data': json.dumps(data, default=str),
-                    'data': json.dumps(data, default=str),
-                }
-            )
+            # async_to_sync(channel_layer.group_send)(
+            #     group_name,
+            #     {
+            #         'type': message_type,
+            #         # 'data': json.dumps(data, default=str),
+            #         'data': json.dumps(crypto_data, default=str),
+            #     }
+            # )
+
+            notification.is_sent = True
+            notification.save()
+            logger.info(f"Notification created: {notification}")
+
+        # elif content_type.model == 'cryptocurency':
+        #     print('Crypto triggered')
+        #     # CryptoCurency-specific logic
+        #     if event == Notification.WorkflowEvents.CREATED:
+        #         content = f"New currency {self.ticker} added with balance {self.balance}"
+        #     elif event == Notification.WorkflowEvents.UPDATED:
+        #         content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+        #     elif event == Notification.WorkflowEvents.DELETED:
+        #         content = f"Currency {self.ticker} removed"
+        #     else:
+        #         content = f"{self.ticker} event {event} occurred"
+
+        #     # Calculate latest USD value for this coin
+        #     first_kline = Kline.objects.filter(
+        #         symbol=f"{self.ticker}USDT").order_by('-time').first()
+
+            # latest_price = first_kline.close if first_kline else Decimal(
+            #     "0.00")
+            # usd_value = Decimal(self.balance) * latest_price
+
+            # # Calculate total USD value of all coins
+            # total_usd = Decimal("0.0")
+            # for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            #     price = Kline.objects.filter(
+            #         symbol=f"{crypto.ticker}USDT").order_by('-time').first().close
+            #     total_usd += crypto.balance * price
+            # total_usd += CryptoCurency.objects.get(ticker='USDT').balance
+
+            # data = {
+            #     'ticker': self.ticker,
+            #     'balance': f'{Decimal(self.balance).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            #     'pnl': f'{Decimal(self.pnl).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            #     'usd_value': f'{usd_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
+            #     'total_usd': f'{total_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
+            #     'event': event,
+            #     # Assuming timestamp fields
+            #     'timestamp': self.updated if hasattr(self, 'updated_at') else self.timestamp,
+            # }
+            # group_name = 'balances_notifications'
+            # message_type = 'balances_update'
+
+            # channel_layer = get_channel_layer()
+
+            # async_to_sync(channel_layer.group_send)(
+            #     group_name,
+            #     {
+            #         'type': message_type,
+            #         # 'data': json.dumps(data, default=str),
+            #         'data': json.dumps(data, default=str),
+            #     }
+            # )
 
         else:
             # Fallback for other models

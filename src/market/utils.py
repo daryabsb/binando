@@ -9,6 +9,25 @@ import json
 import os
 
 
+def get_total_usd():
+    CryptoCurency = apps.get_model('market', 'CryptoCurency')
+    Symbol = apps.get_model('market', 'Symbol')
+    # Calculate total USD
+    total_usd = 0.0
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        try:
+            symbol = Symbol.objects.get(ticker=crypto.ticker)
+            total_usd += float(crypto.balance) * float(symbol.price)
+        except Symbol.DoesNotExist:
+            continue
+    try:
+        total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+    except CryptoCurency.DoesNotExist:
+        pass
+
+    return total_usd
+
+
 def upload_image_file_path(instance, filename):
     # Generate file path for new recipe image
     model = instance._meta.model.__name__.lower()

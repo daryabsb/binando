@@ -19,7 +19,6 @@ timestamp_format = '%Y-%m-%d %H:%M:%S'
 eastern = pytz.timezone("US/Eastern")
 # import helpers.clients as helper_clients
 
-
 '''
 COMMANDS:
 
@@ -154,6 +153,8 @@ def handle_data(self, message):
             redis_client.set(f"price:{market_id}", ask[0])
     except Exception as e:
         print(f"Error in handle_data: {e}")
+
+
 
 
 # @shared_task

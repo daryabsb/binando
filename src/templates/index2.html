@@ -21,8 +21,9 @@
         <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4">
             <div class="col-lg-8">
                 <div class="card mb-3">
-                    <div class="card-header py-3 d-flex justify-content-between bg-transparent align-items-center flex-wrap border-bottom">
-                        <h6 class="mb-0 fw-bold">Total USD Worth: </h6>
+                    <div class="card-header py-3 d-flex justify-content-between bg-transparent align-items-center flex-wrap border-bottom"
+                    hx-ext="ws" ws-connect="/ws/total-usd/">
+                        <h6 class="mb-0 fw-bold">Total USD Worth: <span id="total-usd" hx-get="/total_usd/" hx-trigger="load">0.00</span></h6>
                         <ul class="nav nav-tabs tab-body-header rounded d-inline-flex mt-2 mt-md-0" role="tablist">
                             <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#Pay" role="tab">Pay</a></li>
                             <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Receive" role="tab">Receive</a></li>

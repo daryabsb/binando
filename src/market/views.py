@@ -49,13 +49,11 @@ def balances(request):
 
 
 def total_usd(request):
-    total = 0.0
-    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-        latest_price = float(Kline.objects.filter(
-            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
-        total += float(crypto.balance) * latest_price
-    total += float(CryptoCurency.objects.get(ticker='USDT').balance)
-    return HttpResponse(f"{total:.2f}")
+    from src.market.utils import get_total_usd
+    total_usd = get_total_usd()
+    data = {'total_usd': total_usd}
+    return render(request, 'partials/total-usd.html', data)
+    # return HttpResponse(f"{total:.2f}")
 
 
 def notifications(request):

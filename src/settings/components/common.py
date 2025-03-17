@@ -60,6 +60,7 @@ LOCAL_APPS = [
     'src.core',
     'src.services',
     'src.app',
+    'src.workflow',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

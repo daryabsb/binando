@@ -4,7 +4,7 @@ from time import sleep
 from django.db import models
 from django.utils import timezone
 
-from src.market.mixins import WorkflowMixin
+from src.workflow.models import WorkflowInstance, WorkflowMixin
 from src.market.utils import upload_image_file_path
 
 from django.contrib.contenttypes.models import ContentType
@@ -18,6 +18,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+# trading/models.py
 from . import tasks
 # Create your models here.
 
@@ -36,7 +37,7 @@ class Company(models.Model):
         tasks.sync_company_stock_quotes.delay(self.pk)
 
 
-class CryptoCurency(models.Model, WorkflowMixin):
+class CryptoCurency(WorkflowInstance, WorkflowMixin):
     name = models.CharField(max_length=120)
     ticker = models.CharField(max_length=20, unique=True, db_index=True)
     description = models.TextField(blank=True, null=True)
@@ -51,17 +52,71 @@ class CryptoCurency(models.Model, WorkflowMixin):
         return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
 
     def save(self, *args, **kwargs):
-        created = False
-        if self.pk is None:
-            created = True
-        self.ticker = f"{self.ticker}".upper()
+        created = self.pk is None
+        self.ticker = self.ticker.upper()
         super().save(*args, **kwargs)
-        if created:
-            print('created crypto: ', self.balance)
-        # tasks.sync_crypto_currency_quotes.delay(self.pk)
+        # if created:
+        #     print('created crypto: ', self.balance)
+        #     self.send_event()  # Call send_event only on creation here
+        # elif 'update_fields' not in kwargs or kwargs['update_fields']:  # Only if fields changed
+        #     self.send_event()
+
+    # def get_content(self, event):
+    #     if event == Notification.WorkflowEvents.CREATED:
+    #         return f"New currency {self.ticker} added with balance {self.balance}"
+    #     elif event == Notification.WorkflowEvents.UPDATED:
+    #         return f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+    #     elif event == Notification.WorkflowEvents.DELETED:
+    #         return f"Currency {self.ticker} removed"
+    #     return f"{self.ticker} event {event} occurred"
+
+    def to_payload(self):
+        """Generate payload with USD value based on Symbol price."""
+        try:
+            symbol = Symbol.objects.get(ticker=self.ticker)
+            usd_value = float(self.balance) * float(symbol.price)
+        except Symbol.DoesNotExist:
+            usd_value = 0.0
+
+        print('balance: ', f'{self.balance}')
+
+        return {
+            'ticker': self.ticker,
+            'balance': f'{self.balance}',
+            'usd_value': f'{usd_value}',
+            'pnl': f'{self.pnl}',
+            'timestamp': self.updated,
+        }
+
+    def send_event(self):
+        """Send event with total USD calculated from all CryptoCurency instances."""
+        global called
+        # event = Notification.WorkflowEvents.CREATED if not self.pk else Notification.WorkflowEvents.UPDATED
+        total_usd = 0.0
+        # Calculate total USD
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            try:
+                symbol = Symbol.objects.get(ticker=crypto.ticker)
+                total_usd += float(crypto.balance) * float(symbol.price)
+            except Symbol.DoesNotExist:
+                continue
+        try:
+            total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+        except CryptoCurency.DoesNotExist:
+            pass
+
+        data = self.to_payload()
+        # data['total_usd'] = f"{total_usd:.2f}"
+
+        self.update(
+            # event=event,
+            group_name='balances_notifications',
+            message_type='balances_update',
+            data=data
+        )
 
 
-class Order(models.Model, WorkflowMixin):
+class Order(WorkflowInstance, WorkflowMixin):
     ORDER_TYPES = (
         ('BUY', 'Buy'),
         ('SELL', 'Sell'),
@@ -80,15 +135,38 @@ class Order(models.Model, WorkflowMixin):
     def __str__(self):
         return f"{self.order_type} {self.quantity:.4f} {self.ticker} at {self.price:.8f} on {self.timestamp}"
 
-    def to_dict(self):
+    def get_content(self, event):
+        """Generate descriptive content matching the old notify logic."""
+        action = 'bought' if self.order_type == 'BUY' else 'sold'
+        amount = 'USD' if self.ticker != 'USDT' else self.ticker
+        return f"You {action} {self.quantity:.2f} {self.ticker} for {self.value:.4f} {amount} at {self.price}"
+
+    def to_payload(self):
+        """Override to_payload to match the old detailed data structure."""
         return {
-            'order_type': str(self.order_type),
-            'quantity': str(self.quantity),
-            'ticker': str(self.ticker),
-            'price': str(self.price),
-            'value': str(self.value),
-            'timestamp': str(self.timestamp.isoformat())
+            'order_type': self.order_type,
+            'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'ticker': self.ticker,
+            'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'content': self.get_content(Notification.WorkflowEvents.TRADE_EXECUTED),
+            'content_type': str(ContentType.objects.get_for_model(self.__class__)),
+            'object_id': self.pk,
+            'event': Notification.WorkflowEvents.TRADE_EXECUTED,
+            'exception_id': None,  # Adjust if you use this
+            'timestamp': self.timestamp,  # Keep as datetime
         }
+
+    def send_event(self):
+        """Send trade event with detailed notification payload."""
+        from .models import Notification
+        event = Notification.WorkflowEvents.TRADE_EXECUTED
+        self.notify(
+            event=event,
+            group_name='trade_notifications',
+            message_type='trade_update',
+            data=self.to_payload()
+        )
 
 
 class CryptoCategory(models.Model):
@@ -238,123 +316,13 @@ class Notification(models.Model):
 
 
 # @receiver(post_save, sender=CryptoCurency)
-# @receiver(post_save, sender=Order)
-# def send_update(sender, instance, created, **kwargs):
-#     channel_layer = get_channel_layer()
-#     if sender == CryptoCurency:
-#         group_name = 'crypto_updates'
-#         message_type = 'balance_update'
-#         data = {}  # HTMX fetches full table
-#         # Trigger total USD update too
-#         async_to_sync(channel_layer.group_send)(
-#             'crypto_updates',
-#             {'type': 'total_usd_update', 'data': ''}  # Data computed in consumer
-#         )
-#     elif sender == Order:
-#         group_name = 'trade_notifications'
-#         message_type = 'trade_update'
-#         data_dict = {
-#             "order_type": str(instance.order_type),
-#             "quantity": str(instance.quantity),
-#             "name": str(instance.crypto.name),
-#             "ticker": str(instance.ticker),
-#             "price": str(instance.price),
-#             "value": str(instance.value),
-#             "timestamp": str(instance.timestamp.isoformat())
-#         }
-#         data_json = json.dumps(data_dict)
-
-#         # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
-#         data = data_json
-#         # Trigger balance and total USD updates on trade
-#         async_to_sync(channel_layer.group_send)(
-#             'crypto_updates',
-#             {'type': 'balance_update', 'data': ''}
-#         )
-#         async_to_sync(channel_layer.group_send)(
-#             'crypto_updates',
-#             {'type': 'total_usd_update', 'data': ''}
-#         )
-
-#     async_to_sync(channel_layer.group_send)(
-#         group_name,
-#         {
-#             'type': message_type,
-#             'data': data
-#         }
-#     )
-
-
-@receiver(post_save, sender=CryptoCategory)
-def notify_crypto_on_save(sender, instance, created, **kwargs):
-    event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
-    instance.notify(event)
-
+# def notify_on_save(sender, instance, created, **kwargs):
+#     # if created:
+#     instance.send_event()
 
 @receiver(post_save, sender=Order)
-def notify_order_on_save(sender, instance, created, **kwargs):
-    event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
-    instance.notify(event)
-
-
-# @receiver(post_save, sender=CryptoCurency)
-def add_crypto_to_dom(sender, instance, created, **kwargs):
-    content = f"New currency {instance.ticker} added with balance {instance.balance:.4f}"
-    # Calculate latest USD value for this coin
-    first_kline = Kline.objects.filter(
-        symbol=f"{instance.ticker}USDT").order_by('-time').first()
-
-    latest_price = first_kline.close if first_kline else Decimal(
-        "0.00")
-    usd_value = Decimal(instance.balance) * latest_price
-
-    # Calculate total USD value of all coins
-
-    data = {
-        'ticker': instance.ticker,
-        'balance': float(instance.balance),
-        'usd_value': usd_value,
-        'content': content,
-        'pnl': float(instance.pnl),
-    }
-
-
-@receiver(post_delete, sender=CryptoCurency)
-@receiver(post_delete, sender=Order)
-def notify_on_delete(sender, instance, **kwargs):
-    instance.notify(Notification.WorkflowEvents.DELETED)
-
-
-# Signal to send WebSocket updates
-# @receiver(post_save, sender=CryptoCurency)
-# @receiver(post_save, sender=Order)
-# def send_update(sender, instance, created, **kwargs):
-#     channel_layer = get_channel_layer()
-#     if sender == CryptoCurency:
-#         group_name = 'crypto_updates'
-#         message_type = 'balance_update'
-#         data = {
-#             'ticker': instance.ticker,
-#             'balance': str(instance.balance),
-#             'pnl': str(instance.pnl),
-#             'updated': instance.updated.isoformat(),
-#         }
-#     elif sender == Order:
-#         group_name = 'trade_notifications'
-#         message_type = 'trade_update'
-#         data = {
-#             'ticker': instance.ticker,
-#             'order_type': instance.order_type,
-#             'quantity': str(instance.quantity),
-#             'price': str(instance.price),
-#             'value': str(instance.value),
-#             'timestamp': instance.timestamp.isoformat(),
-#         }
-
-#     async_to_sync(channel_layer.group_send)(
-#         group_name,
-#         {
-#             'type': message_type,
-#             'data': data
-#         }
-#     )
+def notify_on_save(sender, instance, created, **kwargs):
+    if created:
+        instance.send_event()
+        crypto = instance.crypto
+        crypto.send_event()

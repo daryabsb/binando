@@ -17,7 +17,6 @@ from django.db import transaction
 [2025-03-08 16:02:20,496: WARNING/MainProcess] Error calculating trade amount for TRUMPUSDT: CryptoCurency matching query does not exist.
 '''
 
-# @shared_task
 
 
 @shared_task

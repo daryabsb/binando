@@ -1,0 +1,9 @@
+{% comment %} {% include 'partials/total-usd.html' %} {% endcomment %}
+<tbody id="balances" hx-swap-oob="afterbegin">
+    <tr>
+        <td>{{ balance.ticker }}</td>
+        <td>{{ balance.balance }}</td>
+        <td>{{ balance.usd_value }}</td>
+        <td>{{ balance.pnl }}</td>
+    </tr>
+</tbody>
