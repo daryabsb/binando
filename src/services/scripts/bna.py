@@ -143,16 +143,18 @@ def reset_cryptos():
 
 
 def run():
-    from src.market.tasks import update_total_usd
+    from src.core.tasks import update_symbols
 
     # usdt_obj = CryptoCurency.objects.get(ticker="USDT")
     # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
-    update_total_usd()
+    # update_total_usd()
+    update_symbols()
     # reset_cryptos()
     # while True:
     #     run_trading()
     #     sleep(3)
     # update_symbols()
+
 
 
 async def main():

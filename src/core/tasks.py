@@ -31,17 +31,23 @@ def update_usd_value():
 
 @shared_task
 def update_symbols():
+    from django.forms import model_to_dict
     Symbol = apps.get_model('market', 'Symbol')
-    CryptoCategory = apps.get_model('market', 'CryptoCategory')
     Kline = apps.get_model('market', 'Kline')
 
     symbols = Symbol.objects.filter(active=True)
 
     for symbol in symbols:
-        last_kline = Kline.objects.filter(symbol=symbol.pair).last().close
-        symbol.price = last_kline.close
-        symbol.volume_24h = last_kline.volume
-        symbol.save()
+        last_kline = Kline.objects.filter(symbol=symbol.pair).last()
+        try:
+            symbol.price = last_kline.close
+            symbol.volume_24h = str(last_kline.volume)
+            print('ticker = ', symbol.ticker)
+            symbol.save()
+            print(f'updated {symbol.ticker} || price: {symbol.price} || volume: {symbol.volume_24h}')
+        except Exception as e:
+            print(f"{symbol.ticker}: {e}")
+            print(model_to_dict(symbol))
 
 
     # json_path = os.path.join(settings.BASE_DIR, 'trading', 'data', 'coins.json')

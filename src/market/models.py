@@ -196,14 +196,14 @@ class Symbol(models.Model):
     rank = models.PositiveIntegerField(null=True, blank=True, unique=True)
     categories = models.ManyToManyField(CryptoCategory, blank=True)
     pair = models.CharField(max_length=50, unique=True, db_index=True)
-    price = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    change_24h = models.CharField(max_length=10, blank=True)  # e.g., "+2.35%"
+    price = models.DecimalField(max_digits=30, decimal_places=17, default=0.00)
+    change_24h = models.CharField(max_length=50, blank=True)  # e.g., "+2.35%"
     market_cap = models.CharField(
-        max_length=20, blank=True)  # e.g., "1.67T USD"
+        max_length=50, blank=True)  # e.g., "1.67T USD"
     volume_24h = models.CharField(
-        max_length=20, blank=True)  # e.g., "28.37B USD"
+        max_length=50, blank=True)  # e.g., "28.37B USD"
     circ_supply = models.DecimalField(
-        max_digits=15, decimal_places=2, default=0.00)
+        max_digits=30, decimal_places=17, default=0.00)
     precision = models.IntegerField(default=8)  # Add this
     active = models.BooleanField(default=True)
     logo = models.ImageField(null=True, blank=True, default='coins/XTVCUSDT.svg',
