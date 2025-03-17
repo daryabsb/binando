@@ -17107,8 +17107,5717 @@ websocket_urlpatterns = [
 
 This should get ws://127.0.0.1:8000/ws/crypto/ working—let me know the results or any new errors, and I’ll zero in on the fix!
 
-DeepSearch
-Think
+everything works exactly as I asked you to do, thank you.
+One last thing in this case, I need the index.html content you created for the websocket the homepage to use htmx and _hyperscript, I like smoother and lesser javascript contents, also more dynamic and harmonic with the django app
 
-Attach
+I’m thrilled to hear everything’s working as expected—great teamwork! Now, let’s swap out the vanilla JavaScript in index.html for HTMX and Hyperscript to make it smoother, more dynamic, and better integrated with Django. This will reduce client-side JavaScript, leverage server-side rendering, and keep things lightweight and harmonic with your Django app. I’ll redesign the WebSocket-driven dashboard to use HTMX for real-time updates and Hyperscript for minimal interactivity, while keeping the same functionality: displaying balances, total USD worth, and notifications.
+Why HTMX and Hyperscript?
+HTMX: Handles WebSocket updates by swapping HTML fragments from the server, eliminating most JavaScript for DOM manipulation.
+
+Hyperscript: Adds lightweight scripting for small client-side tweaks (e.g., auto-scrolling notifications), avoiding bulky JS logic.
+
+Django Harmony: Server-driven updates fit Django’s templating model perfectly.
+
+Updated index.html
+Here’s the new index.html using HTMX and Hyperscript, assuming it’s in trading/templates/index.html:
+html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <!-- Hyperscript -->
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+</head>
+<body>
+    <h1>Trading Dashboard</h1>
+    <h2>Total USD Worth: <span id="total-usd" hx-get="/total-usd/" hx-trigger="load, every 5s">0.00</span></h2>
+
+    <!-- Balances Table -->
+    <table hx-ext="ws" ws-connect="/ws/crypto/" hx-trigger="load">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances" hx-get="/balances/" hx-trigger="load, ws:balance_update from:body">
+        </tbody>
+    </table>
+
+    <!-- Notifications -->
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" 
+            hx-ext="ws" 
+            ws-connect="/ws/crypto/" 
+            hx-get="/notifications/" 
+            hx-trigger="load" 
+            _="on ws:trade_update put <li class=notification>${event.detail.data}</li> at the start of me then scrollTo(0, 0)">
+        </ul>
+    </div>
+
+    <!-- Test Button -->
+    <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
+</body>
+</html>
+
+Backend Updates
+1. New Views for HTMX
+Add these views to trading/views.py to serve HTML fragments:
+python
+
+# trading/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .models import CryptoCurency, Kline
+from .utils import send_websocket_message
+
+def index(request):
+    return render(request, 'index.html')
+
+def test_websocket(request):
+    send_websocket_message(
+        'trade_notifications',
+        'trade_update',
+        {
+            'ticker': 'TURBO',
+            'order_type': 'BUY',
+            'quantity': '5268.8467',
+            'price': '0.001138',
+            'value': '6.00',
+            'timestamp': '2025-03-10T12:00:00Z'
+        }
+    )
+    return HttpResponse("Test message sent.")
+
+def balances(request):
+    balances = []
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        usd_value = float(crypto.balance) * latest_price
+        balances.append({
+            'ticker': crypto.ticker,
+            'balance': float(crypto.balance),
+            'usd_value': usd_value,
+            'pnl': float(crypto.pnl),
+        })
+    usdt = CryptoCurency.objects.get(ticker='USDT')
+    balances.append({
+        'ticker': 'USDT',
+        'balance': float(usdt.balance),
+        'usd_value': float(usdt.balance),
+        'pnl': float(usdt.pnl),
+    })
+    return HttpResponse(render_to_string('partials/balances.html', {'balances': balances}))
+
+def total_usd(request):
+    total = 0.0
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        total += float(crypto.balance) * latest_price
+    total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+    return HttpResponse(f"{total:.2f}")
+
+def notifications(request):
+    # Initial empty list; updates come via WebSocket
+    return HttpResponse('<li class="notification">No notifications yet.</li>')
+
+2. Partial Template (partials/balances.html)
+Create trading/templates/partials/balances.html:
+html
+
+{% for balance in balances %}
+<tr>
+    <td>{{ balance.ticker }}</td>
+    <td>{{ balance.balance|floatformat:4 }}</td>
+    <td>{{ balance.usd_value|floatformat:2 }}</td>
+    <td>{{ balance.pnl|floatformat:2 }}</td>
+</tr>
+{% endfor %}
+
+3. Update Consumer (consumers.py)
+Adjust the WebSocket messages to work with HTMX:
+python
+
+# trading/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from .models import CryptoCurency, Kline
+from django.template.loader import render_to_string
+
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def balance_update(self, event):
+        # Send updated balances table
+        balances = []
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(crypto.balance) * latest_price
+            balances.append({
+                'ticker': crypto.ticker,
+                'balance': float(crypto.balance),
+                'usd_value': usd_value,
+                'pnl': float(crypto.pnl),
+            })
+        usdt = CryptoCurency.objects.get(ticker='USDT')
+        balances.append({
+            'ticker': 'USDT',
+            'balance': float(usdt.balance),
+            'usd_value': float(usdt.balance),
+            'pnl': float(usdt.pnl),
+        })
+        html = render_to_string('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+    async def trade_update(self, event):
+        # Send notification HTML
+        data = event['data']
+        html = f"<li class='notification'>{data['order_type']} {data['quantity']} {data['ticker']} at {data['price']} (Value: {data['value']}) - {data['timestamp']}</li>"
+        await self.send(text_data=json.dumps({'data': html}))
+
+4. Update URLs (urls.py)
+python
+
+# trading/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('test-websocket/', views.test_websocket, name='test_websocket'),
+    path('balances/', views.balances, name='balances'),
+    path('total-usd/', views.total_usd, name='total_usd'),
+    path('notifications/', views.notifications, name='notifications'),
+]
+
+5. Update Signals (models.py)
+Adjust the signal to send HTML-compatible data:
+python
+
+# trading/models.py (signal part only)
+@receiver(post_save, sender=CryptoCurency)
+@receiver(post_save, sender=Order)
+def send_update(sender, instance, created, **kwargs):
+    channel_layer = get_channel_layer()
+    if sender == CryptoCurency:
+        group_name = 'crypto_updates'
+        message_type = 'balance_update'
+        data = {}  # HTMX fetches full table, no need for data here
+    elif sender == Order:
+        group_name = 'trade_notifications'
+        message_type = 'trade_update'
+        data = f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': message_type,
+            'data': data
+        }
+    )
+
+How It Works
+HTMX:
+hx-get="/balances/" loads the initial balances table and updates on ws:balance_update.
+
+hx-get="/total-usd/" refreshes total USD every 5 seconds or on load.
+
+hx-ext="ws" ws-connect="/ws/crypto/" connects to the WebSocket and listens for events.
+
+Hyperscript:
+_="on ws:trade_update ..." adds new notifications dynamically and scrolls to the top.
+
+Server-Driven: The consumer sends HTML fragments, which HTMX swaps into the DOM—no heavy JS.
+
+Expected Output
+Initial Load:
+Table fills with balances from /balances/.
+
+Total USD shows from /total-usd/.
+
+Notifications start with “No notifications yet.”
+
+Trade Event (e.g., /test-websocket/):
+Notification list prepends: <li class="notification">BUY 5268.8467 TURBO at 0.001138 (Value: 6.00) - 2025-03-10T12:00:00Z</li>.
+
+Balance Update: Table refreshes with new balances and PNL.
+
+Why It’s Better
+Less JS: No socket.onmessage or manual DOM updates—HTMX handles it.
+
+Smoother: Server-rendered HTML swaps feel seamless.
+
+Django-Friendly: Leverages templates and views, keeping logic server-side.
+
+Test this with your running bot—everything should flow dynamically now! Let me know if you want tweaks or run into issues. Enjoy your pro-level dashboard!
+
+only the consumer.py block: django need sync_toasync to deal with websocket and async contents
+
+You’re absolutely right—my apologies for overlooking that! When using Django Channels with WebSockets, synchronous database calls (like CryptoCurency.objects.exclude()) inside an async consumer need to be wrapped with sync_to_async to avoid blocking the event loop. Let’s update the consumers.py block to use sync_to_async properly for database queries and synchronous operations, ensuring it works seamlessly with your async WebSocket setup.
+Here’s the corrected consumers.py:
+python
+
+# trading/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+from .models import CryptoCurency, Kline
+
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def balance_update(self, event):
+        # Fetch balances asynchronously
+        balances = await self.get_balances()
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+    async def trade_update(self, event):
+        # Send notification HTML directly from event data
+        data = event['data']
+        html = f"<li class='notification'>{data}</li>"  # Data is already formatted from signal
+        await self.send(text_data=json.dumps({'data': html}))
+
+    @sync_to_async
+    def get_balances(self):
+        balances = []
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(crypto.balance) * latest_price
+            balances.append({
+                'ticker': crypto.ticker,
+                'balance': float(crypto.balance),
+                'usd_value': usd_value,
+                'pnl': float(crypto.pnl),
+            })
+        usdt = CryptoCurency.objects.get(ticker='USDT')
+        balances.append({
+            'ticker': 'USDT',
+            'balance': float(usdt.balance),
+            'usd_value': float(usdt.balance),
+            'pnl': float(usdt.pnl),
+        })
+        return balances
+
+Key Changes
+sync_to_async:
+Wrapped render_to_string since it’s a synchronous Django function.
+
+Added a helper method get_balances wrapped with @sync_to_async to handle database queries (CryptoCurency.objects.exclude(), Kline.objects.filter(), etc.).
+
+Async Flow:
+connect, disconnect, balance_update, and trade_update remain async and use await for all async operations (e.g., self.send, channel_layer.group_add).
+
+Trade Update:
+Simplified to use the pre-formatted string from the signal, avoiding additional DB calls here.
+
+Why This Works
+Database Safety: sync_to_async ensures synchronous ORM calls don’t block the async event loop, adhering to Channels’ async design.
+
+HTMX Compatibility: Still sends HTML fragments for HTMX to swap into the DOM.
+
+Performance: Keeps the WebSocket responsive by offloading sync work correctly.
+
+Testing
+Run python manage.py runserver.
+
+Open http://127.0.0.1:8000/—WebSocket should connect.
+
+Hit http://127.0.0.1:8000/test-websocket/—notifications should appear, and balances update on bot activity.
+
+This should now work flawlessly with your HTMX setup—let me know if you hit any snags!
+
+The DOM keeps calling the endpoints /total-usd/, /balances/ and /notifications/, the django server is overwhelmed, the websocket client cannot connect either because of too many requests
+
+I see the issue—your current HTMX setup in index.html is causing a flood of requests to /total-usd/, /balances/, and /notifications/ due to aggressive polling (hx-trigger="load, every 5s" and WebSocket triggers), overwhelming the Django server and likely blocking the WebSocket connection. This creates a feedback loop where HTMX keeps requesting updates, and the server can’t handle the load, stalling the WebSocket client. Let’s optimize this by:
+Removing Polling: Rely solely on WebSocket updates instead of hx-get with every 5s or load.
+
+Fixing WebSocket Overlap: Ensure WebSocket messages don’t trigger redundant HTTP requests.
+
+Reducing Load: Use WebSocket events to push updates, minimizing server strain.
+
+Here’s how we’ll fix it:
+Updated index.html
+Remove polling and redundant hx-get calls, using WebSocket events to update the DOM:
+html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+    <!-- HTMX WebSocket Extension -->
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+</head>
+<body>
+    <h1>Trading Dashboard</h1>
+    <h2>Total USD Worth: <span id="total-usd">0.00</span></h2>
+
+    <!-- Balances Table -->
+    <table hx-ext="ws" ws-connect="/ws/crypto/">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances" hx-swap="innerHTML" hx-trigger="ws:balance_update from:body">
+            <!-- Initial empty state -->
+            <tr><td colspan="4">Loading balances...</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Notifications -->
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" 
+            hx-ext="ws" 
+            ws-connect="/ws/crypto/" 
+            hx-swap="beforeend" 
+            _="on ws:trade_update put event.detail.data at the start of me then scrollTo(0, 0)">
+            <!-- Initial empty state -->
+            <li class="notification">No notifications yet.</li>
+        </ul>
+    </div>
+
+    <!-- Test Button -->
+    <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
+
+    <!-- Hidden div to trigger total-usd updates -->
+    <div id="total-usd-updater" 
+         hx-ext="ws" 
+         ws-connect="/ws/crypto/" 
+         hx-trigger="ws:total_usd_update from:body" 
+         hx-swap="innerHTML" 
+         _="on ws:total_usd_update put event.detail.data into #total-usd">
+    </div>
+</body>
+</html>
+
+Updated consumers.py
+Add a total_usd_update handler and ensure all updates are pushed via WebSocket:
+python
+
+# trading/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+from .models import CryptoCurency, Kline
+
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+        # Send initial data on connect
+        await self.send_initial_data()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def balance_update(self, event):
+        balances = await self.get_balances()
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+    async def trade_update(self, event):
+        data = event['data']
+        html = f"<li class='notification'>{data}</li>"
+        await self.send(text_data=json.dumps({'data': html}))
+
+    async def total_usd_update(self, event):
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({'data': f"{total:.2f}"}))
+
+    @sync_to_async
+    def get_balances(self):
+        balances = []
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(crypto.balance) * latest_price
+            balances.append({
+                'ticker': crypto.ticker,
+                'balance': float(crypto.balance),
+                'usd_value': usd_value,
+                'pnl': float(crypto.pnl),
+            })
+        usdt = CryptoCurency.objects.get(ticker='USDT')
+        balances.append({
+            'ticker': 'USDT',
+            'balance': float(usdt.balance),
+            'usd_value': float(usdt.balance),
+            'pnl': float(usdt.pnl),
+        })
+        return balances
+
+    @sync_to_async
+    def get_total_usd(self):
+        total = 0.0
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            total += float(crypto.balance) * latest_price
+        total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+        return total
+
+    async def send_initial_data(self):
+        # Send initial balances
+        balances = await self.get_balances()
+        balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=balances_html)
+        # Send initial total USD
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
+
+Updated models.py (Signals)
+Add a total_usd_update event:
+python
+
+# trading/models.py (signal part only)
+@receiver(post_save, sender=CryptoCurency)
+@receiver(post_save, sender=Order)
+def send_update(sender, instance, created, **kwargs):
+    channel_layer = get_channel_layer()
+    if sender == CryptoCurency:
+        group_name = 'crypto_updates'
+        message_type = 'balance_update'
+        data = {}  # HTMX fetches full table
+        # Trigger total USD update too
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'total_usd_update', 'data': ''}  # Data computed in consumer
+        )
+    elif sender == Order:
+        group_name = 'trade_notifications'
+        message_type = 'trade_update'
+        data = f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+        # Trigger balance and total USD updates on trade
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'balance_update', 'data': ''}
+        )
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'total_usd_update', 'data': ''}
+        )
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': message_type,
+            'data': data
+        }
+    )
+
+Updated views.py
+Remove /total-usd/, /balances/, and /notifications/ endpoints since WebSocket handles everything:
+python
+
+# trading/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .utils import send_websocket_message
+
+def index(request):
+    return render(request, 'index.html')
+
+def test_websocket(request):
+    send_websocket_message(
+        'trade_notifications',
+        'trade_update',
+        f"Test BUY 1000 TEST at 1.00 (Value: 1000.00) - {timezone.now().isoformat()}"
+    )
+    return HttpResponse("Test message sent.")
+
+Updated urls.py
+python
+
+# trading/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('test-websocket/', views.test_websocket, name='test_websocket'),
+]
+
+How It Works Now
+Initial Load: 
+WebSocket connects on page load (ws-connect="/ws/crypto/").
+
+send_initial_data pushes balances and total USD once.
+
+Updates:
+balance_update: Replaces #balances with new table HTML.
+
+total_usd_update: Updates #total-usd via Hyperscript.
+
+trade_update: Prepends notifications with Hyperscript.
+
+No Polling: Removed hx-get and every 5s—all updates come via WebSocket.
+
+Test Button: Still triggers a trade notification via /test-websocket/.
+
+Why This Fixes It
+Reduced Requests: No more repeated HTTP calls—WebSocket pushes updates only when needed.
+
+Server Relief: Django handles fewer requests, freeing resources for WebSocket connections.
+
+WebSocket Stability: Less server load means ws://127.0.0.1:8000/ws/crypto/ connects reliably.
+
+Testing
+Run python manage.py runserver.
+
+Open http://127.0.0.1:8000/—initial balances and total USD load via WebSocket.
+
+Click “Test WebSocket”—notification appears, balances and total USD update.
+
+Check server logs—should see WebSocket connections, no flood of HTTP requests.
+
+If Issues Persist
+WebSocket Still Fails: Share logs for “WebSocket connection attempt” or errors.
+
+Updates Missing: Verify Kline data exists for USD calculations.
+
+Overload: If still overwhelmed, we can throttle WebSocket messages.
+
+This should keep your server happy and your dashboard snappy—let me know how it goes!
+
+It is still the same, I added a print to the view, it seems that the request comes from ASGI server:
+def total_usd(request):
+    total = 0.0
+    print(f'called: {request}')
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        total += float(crypto.balance) * latest_price
+    total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+    return HttpResponse(f"{total:.2f}")
+Output:
+(venv)
+darya@DESKTOP-0JB92VA MINGW64 /e/api/binando (main)
+$ python manage.py runserver 0.0.0.0:8000
+Watching for file changes with StatReloader
+HTTP GET /total-usd/ 200 [0.12, 127.0.0.1:61024]
+HTTP GET /total-usd/ 200 [0.09, 127.0.0.1:61024]
+HTTP GET /total-usd/ 200 [0.10, 127.0.0.1:61024]
+Performing system checks...System check identified no issues (0 silenced).
+March 11, 2025 - 14:33:26
+Django version 5.1.6, using settings 'src.settings'
+Starting ASGI/Daphne version 4.1.2 development server at http://0.0.0.0:8000/
+Quit the server with CTRL-BREAK.
+called: <ASGIRequest: GET '/total-usd/'>
+called: <ASGIRequest: GET '/total-usd/'>
+called: <ASGIRequest: GET '/total-usd/'>
+
+Thanks for the additional details! The output shows that /total-usd/ is still being called repeatedly via HTTP GET requests, even though we intended to remove polling and rely solely on WebSocket updates. The called: <ASGIRequest: GET '/total-usd/'> log confirms these are ASGI-handled HTTP requests, likely triggered by lingering HTMX polling in index.html. The WebSocket client failing to connect might be a secondary symptom of the server being overwhelmed by these requests. Let’s fix this by ensuring:
+No Polling Remains: Remove all hx-get triggers that hit /total-usd/, /balances/, and /notifications/.
+
+WebSocket-Only Updates: Push all data (balances, total USD, notifications) via WebSocket on connect and updates.
+
+Reduce Server Load: Eliminate unnecessary endpoints and confirm WebSocket stability.
+
+Your logs also show the server running correctly with ASGI/Daphne, so the issue is in the frontend configuration. Here’s the corrected setup:
+Updated index.html
+Remove all hx-get calls and rely entirely on WebSocket events:
+html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+</head>
+<body hx-ext="ws" ws-connect="/ws/crypto/">
+    <h1>Trading Dashboard</h1>
+    <h2>Total USD Worth: <span id="total-usd" hx-swap="innerHTML" hx-trigger="ws:total_usd_update from:body">0.00</span></h2>
+
+    <!-- Balances Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances" hx-swap="innerHTML" hx-trigger="ws:balance_update from:body">
+            <tr><td colspan="4">Loading balances...</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Notifications -->
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" 
+            hx-swap="beforeend" 
+            _="on ws:trade_update put event.detail.data at the start of me then scrollTo(0, 0)">
+            <li class="notification">No notifications yet.</li>
+        </ul>
+    </div>
+
+    <!-- Test Button -->
+    <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
+</body>
+</html>
+
+Key Changes:
+Removed hx-get: No more /total-usd/, /balances/, or /notifications/ calls—initial data comes from WebSocket on connect.
+
+Single WebSocket Connection: Moved hx-ext="ws" ws-connect="/ws/crypto/" to <body> to avoid multiple connections.
+
+Event-Driven: hx-trigger="ws:..." listens for WebSocket messages only.
+
+Updated consumers.py
+Ensure all data is sent via WebSocket on connect and updates:
+python
+
+# trading/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+from .models import CryptoCurency, Kline
+
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+        await self.send_initial_data()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def balance_update(self, event):
+        balances = await self.get_balances()
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+    async def trade_update(self, event):
+        data = event['data']
+        html = f"<li class='notification'>{data}</li>"
+        await self.send(text_data=json.dumps({'data': html}))
+
+    async def total_usd_update(self, event):
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({'data': f"{total:.2f}"}))
+
+    @sync_to_async
+    def get_balances(self):
+        balances = []
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(crypto.balance) * latest_price
+            balances.append({
+                'ticker': crypto.ticker,
+                'balance': float(crypto.balance),
+                'usd_value': usd_value,
+                'pnl': float(crypto.pnl),
+            })
+        usdt = CryptoCurency.objects.get(ticker='USDT')
+        balances.append({
+            'ticker': 'USDT',
+            'balance': float(usdt.balance),
+            'usd_value': float(usdt.balance),
+            'pnl': float(usdt.pnl),
+        })
+        return balances
+
+    @sync_to_async
+    def get_total_usd(self):
+        total = 0.0
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            total += float(crypto.balance) * latest_price
+        total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+        return total
+
+    async def send_initial_data(self):
+        # Initial balances
+        balances = await self.get_balances()
+        balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=balances_html)
+        # Initial total USD
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
+
+Updated views.py
+Remove unused endpoints since WebSocket handles everything:
+python
+
+# trading/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .utils import send_websocket_message
+from django.utils import timezone
+
+def index(request):
+    return render(request, 'index.html')
+
+def test_websocket(request):
+    send_websocket_message(
+        'trade_notifications',
+        'trade_update',
+        f"Test BUY 1000 TEST at 1.00 (Value: 1000.00) - {timezone.now().isoformat()}"
+    )
+    return HttpResponse("Test message sent.")
+
+Updated urls.py
+python
+
+# trading/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('test-websocket/', views.test_websocket, name='test_websocket'),
+]
+
+Why This Should Work
+No HTTP Polling: Removed hx-get="/total-usd/" hx-trigger="load, every 5s" and similar—/total-usd/ won’t be called unless explicitly requested (e.g., via a browser).
+
+WebSocket-Driven: Initial data and updates come via WebSocket on connect (send_initial_data) and model signals.
+
+Server Relief: No repeated ASGI HTTP requests—only WebSocket messages when data changes.
+
+Testing
+Run Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Logs should show Starting ASGI/Daphne and WebSocket connections, not repeated /total-usd/ calls.
+
+Open Page:
+Visit http://127.0.0.1:8000/—balances and total USD load once via WebSocket.
+
+Test WebSocket:
+Click “Test WebSocket”—notification appears, balances and total USD update without HTTP spam.
+
+Check Logs:
+No called: <ASGIRequest: GET '/total-usd/'> unless you manually hit the endpoint.
+
+Debugging If It Persists
+Lingering Requests: If /total-usd/ still floods logs, something external (e.g., browser extension, old tab) is calling it. Close all tabs and test in incognito mode.
+
+WebSocket Failure: Add logging to consumers.py:
+python
+
+async def connect(self):
+    print("WebSocket connecting...")
+    await self.channel_layer.group_add('crypto_updates', self.channel_name)
+    await self.channel_layer.group_add('trade_notifications', self.channel_name)
+    await self.accept()
+    print("WebSocket connected")
+    await self.send_initial_data()
+
+Logs should show “connected”—if not, check Redis (72.16.10.8:6379) connectivity.
+
+HTMX Bug: Ensure you’re using the exact index.html above—copy-paste it fresh to rule out old code.
+
+Expected Logs
+
+Starting ASGI/Daphne version 4.1.2 development server at http://0.0.0.0:8000/
+WebSocket connecting...
+WebSocket connected
+[No repeated "called: <ASGIRequest: GET '/total-usd/'>"]
+
+Your server should now breathe easy, and the WebSocket client should connect without issue. Let me know the outcome or any lingering logs—I’ll nail down any last quirks!
+
+$ python manage.py runserver 0.0.0.0:8000
+Watching for file changes with StatReloader
+HTTP GET /total-usd/ 200 [0.10, 127.0.0.1:61806]
+HTTP GET /total-usd/ 200 [0.10, 127.0.0.1:61806]
+HTTP GET / 200 [0.01, 127.0.0.1:61806]
+HTTP GET /static/assets/images/coin/BTC.png 304 [0.00, 127.0.0.1:61807]
+HTTP GET /static/assets/bundles/libscripts.bundle.js 304 [0.00, 127.0.0.1:61813]
+HTTP GET /static/assets/css/cryptoon.style.min.css 304 [0.00, 127.0.0.1:61806]
+HTTP GET /static/assets/bundles/dataTables.bundle.js 304 [0.00, 127.0.0.1:61806]
+HTTP GET /static/assets/bundles/apexcharts.bundle.js 304 [0.00, 127.0.0.1:61813]
+HTTP GET /static/assets/js/page/index.js 304 [0.00, 127.0.0.1:61806]
+HTTP GET /static/assets/js/template.js 304 [0.00, 127.0.0.1:61813]
+HTTP GET /static/assets/fonts/icofont/fonts/icofont.woff 304 [0.00, 127.0.0.1:61813]
+HTTP GET /static/favicon.ico 304 [0.00, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.11, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.09, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.09, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.09, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.09, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.10, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.11, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.09, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.12, 127.0.0.1:61813]
+HTTP GET /total-usd/ 200 [0.10, 127.0.0.1:61813]
+
+Thanks for sharing the logs! The repeated HTTP GET /total-usd/ 200 requests are still happening, despite our intent to eliminate polling and rely solely on WebSocket updates. This suggests either:
+Old Code: The index.html you’re serving still has an hx-get="/total-usd/" with a polling trigger (e.g., every 5s), or another part of your app is calling it.
+
+External Factor: Something outside our updated index.html (e.g., a script in index.js, a browser extension, or a cached page) is hitting /total-usd/.
+
+Misconfiguration: The server is serving an outdated template or the WebSocket isn’t initializing properly, causing a fallback to HTTP.
+
+Your logs also show static file requests (e.g., /static/assets/...), indicating a more complex frontend than just our index.html. Let’s pinpoint the culprit and stop these requests.
+Step 1: Confirm index.html
+Ensure the served index.html matches exactly what I provided:
+html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+</head>
+<body hx-ext="ws" ws-connect="/ws/crypto/">
+    <h1>Trading Dashboard</h1>
+    <h2>Total USD Worth: <span id="total-usd" hx-swap="innerHTML" hx-trigger="ws:total_usd_update from:body">0.00</span></h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances" hx-swap="innerHTML" hx-trigger="ws:balance_update from:body">
+            <tr><td colspan="4">Loading balances...</td></tr>
+        </tbody>
+    </table>
+
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" 
+            hx-swap="beforeend" 
+            _="on ws:trade_update put event.detail.data at the start of me then scrollTo(0, 0)">
+            <li class="notification">No notifications yet.</li>
+        </ul>
+    </div>
+
+    <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
+</body>
+</html>
+
+No hx-get="/total-usd/": This version has no polling—updates come via WebSocket only.
+
+Action: Replace trading/templates/index.html with this exact code, then clear any template cache:
+bash
+
+find . -name "*.pyc" -exec rm -f {} +
+find . -name "__pycache__" -exec rm -rf {} +
+
+Step 2: Check for External Triggers
+Your logs show static files like /static/assets/js/page/index.js and others, suggesting a larger frontend. These might include JavaScript polling /total-usd/:
+Inspect index.js:
+Open static/assets/js/page/index.js and search for /total-usd/ or fetch, ajax, or setInterval.
+If Found: Comment out or remove the polling logic (e.g., setInterval(() => fetch('/total-usd/'), 5000)).
+
+Quick Fix: Temporarily remove the script from index.html if it’s included elsewhere:
+html
+
+<!-- Remove or comment out -->
+<!-- <script src="/static/assets/js/page/index.js"></script> -->
+
+Browser Test: Open http://127.0.0.1:8000/ in incognito mode (to bypass cache/extensions) and check the Network tab (F12):
+Look for /total-usd/ requests in the “Fetch/XHR” section.
+
+If present, note the “Initiator” column—e.g., index.js:line_number.
+
+Step 3: Remove /total-usd/ Endpoint
+Since WebSocket should handle it, let’s remove the endpoint to confirm it’s not needed:
+views.py
+python
+
+# trading/views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from .utils import send_websocket_message
+from django.utils import timezone
+
+def index(request):
+    return render(request, 'index.html')
+
+def test_websocket(request):
+    send_websocket_message(
+        'trade_notifications',
+        'trade_update',
+        f"Test BUY 1000 TEST at 1.00 (Value: 1000.00) - {timezone.now().isoformat()}"
+    )
+    return HttpResponse("Test message sent.")
+
+urls.py
+python
+
+# trading/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('test-websocket/', views.test_websocket, name='test_websocket'),
+]
+
+Restart Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+If /total-usd/ still gets hit, it should now return 404, proving it’s not our view being called.
+
+Step 4: Verify WebSocket
+The WebSocket client failing might be due to server overload. Let’s ensure it’s working:
+Add Logging:
+python
+
+# trading/consumers.py
+async def connect(self):
+    print("WebSocket connecting...")
+    await self.channel_layer.group_add('crypto_updates', self.channel_name)
+    await self.channel_layer.group_add('trade_notifications', self.channel_name)
+    await self.accept()
+    print("WebSocket connected")
+    await self.send_initial_data()
+
+Test:
+Open http://127.0.0.1:8000/.
+
+Logs should show:
+
+WebSocket connecting...
+WebSocket connected
+
+If not, check Redis (redis-cli -h 72.16.10.8 -p 6379 ping → PONG).
+
+Why This Happens
+Old Template: If index.html wasn’t updated, hx-get="/total-usd/" hx-trigger="load, every 5s" would spam the server.
+
+External JS: Your static files suggest a template with custom JS polling /total-usd/.
+
+Cache: Browser or server might cache an old page.
+
+Expected Logs After Fix
+
+Starting ASGI/Daphne version 4.1.2 development server at http://0.0.0.0:8000/
+HTTP GET / 200 [0.01, 127.0.0.1:61806]
+WebSocket connecting...
+WebSocket connected
+HTTP GET /test-websocket/ 200 [0.01, 127.0.0.1:61806]  # Only when button clicked
+
+No /total-usd/ unless manually requested.
+
+Next Steps
+Replace index.html: Use the exact version above.
+
+Check Static JS: Disable or inspect /static/assets/js/page/index.js for polling.
+
+Restart and Test:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Open in incognito mode.
+
+Click “Test WebSocket”—updates should flow via WebSocket, no /total-usd/ spam.
+
+If /total-usd/ still floods logs, share:
+Contents of static/assets/js/page/index.js (or any JS including /total-usd/).
+
+Full index.html being served (view source in browser).
+I’ll squash this for good!
+
+When I test the notification ws with a test websocket client, the message arrives with no error, but in the template it is not coming through, please check my latest consumer and the html snippet:<ul id="notification-list" 
+                                    
+
+                                    hx-get="/notifications/" 
+                                    hx-trigger="load" 
+                                    _="on ws:trade_update 
+                                        put '<li class=\"py-2 mb-1 border-bottom\"> 
+                                                <a href=\"javascript:void(0);\" class=\"d-flex\">
+                                                    <img class=\"avatar rounded-circle\" src=\"{% static 'assets/images/coin/BTC.png' %}\" alt=\"\">
+                                                    <div class=\"flex-fill ms-2\">
+                                                        <p class=\"d-flex justify-content-between mb-0\">
+                                                            <span class=\"font-weight-bold\">Trade Notification</span>
+                                                            <small>Just Now</small>
+                                                        </p>
+                                                        <span>${event.detail.data} <span class=\"badge bg-success\">Add</span></span>
+                                                    </div>
+                                                </a>
+                                            </li>' 
+                                        at the start of me 
+                                        then scrollTo(0, 0)"
+                                        >
+
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+        await self.send_initial_data()
+
+async def disconnect(self, close_code):
+    await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+    await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+async def balance_update(self, event):
+    balances = await self.get_balances()
+    html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+    await self.send(text_data=html)
+
+async def trade_update(self, event):
+    data = event['data']
+    html = f"<li class='notification'>{data}</li>"
+    await self.send(text_data=json.dumps({'data': html}))
+
+async def total_usd_update(self, event):
+    total = await self.get_total_usd()
+    await self.send(text_data=json.dumps({'data': f"{total:.2f}"}))
+
+@sync_to_async
+def get_balances(self):
+    balances = []
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        usd_value = float(crypto.balance) * latest_price
+        balances.append({
+            'ticker': crypto.ticker,
+            'balance': float(crypto.balance),
+            'usd_value': usd_value,
+            'pnl': float(crypto.pnl),
+        })
+    usdt = CryptoCurency.objects.get(ticker='USDT')
+    balances.append({
+        'ticker': 'USDT',
+        'balance': float(usdt.balance),
+        'usd_value': float(usdt.balance),
+        'pnl': float(usdt.pnl),
+    })
+    return balances
+
+@sync_to_async
+def get_total_usd(self):
+    total = 0.0
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        total += float(crypto.balance) * latest_price
+    total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+    return total
+
+async def send_initial_data(self):
+    # Initial balances
+    balances = await self.get_balances()
+    balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+    await self.send(text_data=balances_html)
+    # Initial total USD
+    total = await self.get_total_usd()
+    await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
+
+Thanks for sharing your latest code! I can see the issue: your WebSocket test client receives the trade_update message correctly, but the notification isn’t appearing in the template. The problem lies in a mismatch between how the WebSocket message is sent and how HTMX/Hyperscript expects to receive it. Let’s break it down and fix it:
+Diagnosis
+Consumer (trade_update):
+You’re sending: await self.send(text_data=json.dumps({'data': html}))
+
+Format: {"data": "<li class='notification'>...</li>"}
+
+This works with your test WebSocket client because it just prints the raw message.
+
+Template (notification-list):
+<ul id="notification-list" hx-get="/notifications/" hx-trigger="load" ...>:
+The hx-get="/notifications/" on load fetches initial data via HTTP, not WebSocket, which might overwrite WebSocket updates or confuse the setup.
+
+Hyperscript: _="on ws:trade_update put ${event.detail.data} ...":
+Expects a WebSocket message with a type: "trade_update" and a data field that Hyperscript can access via event.detail.data.
+
+Mismatch: The consumer sends {"data": "<li>...</li>"}, but HTMX’s WebSocket extension (hx-ext="ws") expects the message to match the event name (ws:trade_update) and directly use the data field correctly.
+
+Result:
+The Hyperscript ws:trade_update event isn’t triggering properly because the message format doesn’t align with HTMX’s expectations, or the hx-get is interfering.
+
+Fix
+1. Update consumers.py
+Ensure the trade_update message matches HTMX’s WebSocket event structure:
+python
+
+# trading/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+from .models import CryptoCurency, Kline
+
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+        await self.send_initial_data()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def balance_update(self, event):
+        balances = await self.get_balances()
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+    async def trade_update(self, event):
+        data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+        # Format the HTML to match your template
+        html = (
+            f'<li class="py-2 mb-1 border-bottom">'
+            f'    <a href="javascript:void(0);" class="d-flex">'
+            f'        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">'
+            f'        <div class="flex-fill ms-2">'
+            f'            <p class="d-flex justify-content-between mb-0">'
+            f'                <span class="font-weight-bold">Trade Notification</span>'
+            f'                <small>Just Now</small>'
+            f'            </p>'
+            f'            <span>{data} <span class="badge bg-success">Add</span></span>'
+            f'        </div>'
+            f'    </a>'
+            f'</li>'
+        )
+        # Send with proper type for HTMX
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+    async def total_usd_update(self, event):
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({'data': f"{total:.2f}"}))
+
+    @sync_to_async
+    def get_balances(self):
+        balances = []
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(crypto.balance) * latest_price
+            balances.append({
+                'ticker': crypto.ticker,
+                'balance': float(crypto.balance),
+                'usd_value': usd_value,
+                'pnl': float(crypto.pnl),
+            })
+        usdt = CryptoCurency.objects.get(ticker='USDT')
+        balances.append({
+            'ticker': 'USDT',
+            'balance': float(usdt.balance),
+            'usd_value': float(usdt.balance),
+            'pnl': float(usdt.pnl),
+        })
+        return balances
+
+    @sync_to_async
+    def get_total_usd(self):
+        total = 0.0
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            total += float(crypto.balance) * latest_price
+        total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+        return total
+
+    async def send_initial_data(self):
+        balances = await self.get_balances()
+        balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=balances_html)
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({'type': 'total_usd_update', 'data': f"{total:.2f}"}))
+
+Changes:
+Message Format: Added 'type': 'trade_update' to match the ws:trade_update event in Hyperscript.
+
+HTML: Moved your formatted <li> into the consumer so it sends the exact HTML you want, avoiding duplicate rendering in Hyperscript.
+
+2. Update index.html Snippet
+Simplify the <ul> to use WebSocket without hx-get:
+html
+
+<ul id="notification-list" 
+    hx-ext="ws" 
+    ws-connect="/ws/crypto/" 
+    _="on ws:trade_update 
+        put event.detail.data at the start of me 
+        then scrollTo(0, 0)">
+    <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+</ul>
+
+Changes:
+Removed hx-get="/notifications/" hx-trigger="load": This was causing an HTTP fetch on page load, overriding WebSocket updates. Initial state is now static until WebSocket pushes data.
+
+Simplified Hyperscript: Just inserts event.detail.data (the pre-formatted HTML from the consumer) and scrolls.
+
+Why This Fixes It
+Correct Event: The consumer now sends {"type": "trade_update", "data": "<li>...</li>"}, which HTMX’s WebSocket extension recognizes as a ws:trade_update event.
+
+No HTTP Interference: Removing hx-get ensures the <ul> doesn’t fetch /notifications/ and overwrite WebSocket updates.
+
+Direct HTML: The consumer formats the HTML, so Hyperscript just places it, avoiding rendering issues.
+
+Testing
+Run Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Test WebSocket Client:
+Use your test client to send a trade_update message (e.g., via /test-websocket/ or a manual tool).
+
+Expected consumer output: {"type": "trade_update", "data": "<li class='py-2 mb-1 border-bottom'>..."}
+
+Check Browser:
+Open http://127.0.0.1:8000/.
+
+Click “Test WebSocket” or trigger a trade—notification should appear with the BTC image, “Trade Notification,” and your data.
+
+Debugging If It Still Fails
+Logs: Add print(f"Trade update: {event['data']}") in trade_update to confirm the message reaches the consumer.
+
+Browser Console: Check for errors (F12) like “WebSocket connection failed” or Hyperscript issues.
+
+WebSocket Message: Use browser DevTools (Network > WS tab) to inspect the message—should match {"type": "trade_update", "data": "<li..."}.
+
+Static Path: Ensure /static/assets/images/coin/BTC.png exists (python manage.py collectstatic if needed).
+
+Expected Result
+Test client: Message received.
+
+Browser: Notification appears like:
+
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>Just Now</small>
+            </p>
+            <span>Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+This should sync your WebSocket and template perfectly—let me know how it goes or if you need further tweaks!
+
+Tested your fix, the websocket client received this:
+{"type": "trade_update", "data": "<li class="py-2 mb-1 border-bottom">    <a href="javascript:void(0);" class="d-flex">        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">        <div class="flex-fill ms-2">            <p class="d-flex justify-content-between mb-0">                <span class="font-weight-bold">Trade Notification</span>                <small>Just Now</small>            </p>            <span>{'ticker': 'TURBO', 'order_type': 'BUY', 'quantity': '5268.8467', 'price': '0.001138', 'value': '6.00', 'timestamp': '2025-03-10T12:00:00Z'} <span class="badge bg-success">Add</span></span>        </div>    </a></li>"}But the notification did not show
+
+Thanks for testing and sharing the output! The WebSocket client is receiving the message correctly, with the expected type: "trade_update" and the formatted HTML in the data field. However, the notification not appearing in the template suggests an issue with how HTMX and Hyperscript are handling the WebSocket message in the browser. Let’s analyze why and fix it.
+Diagnosis
+The message received by the WebSocket client is:
+json
+
+{
+  "type": "trade_update",
+  "data": "<li class=\"py-2 mb-1 border-bottom\">    <a href=\"javascript:void(0);\" class=\"d-flex\">        <img class=\"avatar rounded-circle\" src=\"/static/assets/images/coin/BTC.png\" alt=\"\">        <div class=\"flex-fill ms-2\">            <p class=\"d-flex justify-content-between mb-0\">                <span class=\"font-weight-bold\">Trade Notification</span>                <small>Just Now</small>            </p>            <span>{'ticker': 'TURBO', 'order_type': 'BUY', 'quantity': '5268.8467', 'price': '0.001138', 'value': '6.00', 'timestamp': '2025-03-10T12:00:00Z'} <span class=\"badge bg-success\">Add</span></span>        </div>    </a></li>"
+}
+
+Good News: The consumer is sending the correct type and HTML-formatted data.
+
+Problem: The <ul id="notification-list"> isn’t updating. Possible reasons:
+WebSocket Connection: The browser isn’t connecting to /ws/crypto/, so ws:trade_update never fires.
+
+HTMX WS Extension: The hx-ext="ws" or ws-connect isn’t properly loaded or configured.
+
+Hyperscript Event: The ws:trade_update event isn’t triggering due to a mismatch in how HTMX delivers the message to Hyperscript.
+
+Message Format: Hyperscript might not be processing the event.detail.data correctly.
+
+Fix
+1. Ensure WebSocket Connection
+Your <ul> has hx-ext="ws" ws-connect="/ws/crypto/", but let’s move it to <body> to ensure a single, global connection:
+Updated index.html Snippet
+html
+
+<body hx-ext="ws" ws-connect="/ws/crypto/">
+    <!-- Other content (table, total-usd, etc.) -->
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" 
+            _="on ws:trade_update 
+                put event.detail.data at the start of me 
+                then scrollTo(0, 0)">
+            <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+        </ul>
+    </div>
+    <!-- Rest of your HTML -->
+</body>
+
+Change: Moved hx-ext="ws" ws-connect="/ws/crypto/" to <body> to avoid duplicate connections and ensure the WebSocket is active for all elements.
+
+2. Verify HTMX WebSocket Extension
+The <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"> must be loaded after the main HTMX script. Check your full <head>:
+html
+
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+</head>
+
+Order Matters: ws.js must follow htmx.org—swap them if reversed.
+
+3. Fix Consumer Message Format
+The current trade_update sends HTML directly, but let’s ensure it’s explicitly tied to the ws:trade_update event and test a simpler approach:
+python
+
+# trading/consumers.py (only trade_update changed)
+async def trade_update(self, event):
+    data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+    html = (
+        f'<li class="py-2 mb-1 border-bottom">'
+        f'    <a href="javascript:void(0);" class="d-flex">'
+        f'        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">'
+        f'        <div class="flex-fill ms-2">'
+        f'            <p class="d-flex justify-content-between mb-0">'
+        f'                <span class="font-weight-bold">Trade Notification</span>'
+        f'                <small>Just Now</small>'
+        f'            </p>'
+        f'            <span>{data} <span class="badge bg-success">Add</span></span>'
+        f'        </div>'
+        f'    </a>'
+        f'</li>'
+    )
+    await self.send(text_data=json.dumps({
+        'event': 'trade_update',  # Explicit event name
+        'data': html
+    }))
+
+Change: Used 'event': 'trade_update' instead of 'type' to align with HTMX’s WebSocket extension naming (though 'type' should work—testing both).
+
+Testing
+Update Files:
+Replace the <ul> snippet and <head> in index.html.
+
+Update trade_update in consumers.py.
+
+Run Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Browser Test:
+Open http://127.0.0.1:8000/ in Chrome/Firefox.
+
+Open DevTools (F12) > Network > WS tab.
+
+Look for /ws/crypto/ connection—should show “101 Switching Protocols”.
+
+Trigger a trade (e.g., /test-websocket/)—watch for:
+json
+
+{"event": "trade_update", "data": "<li class=\"py-2 mb-1 border-bottom\">..."}
+
+Check Console:
+Any errors like “WebSocket connection failed” or “Hyperscript parse error”?
+
+Debugging If It Still Fails
+WebSocket Not Connecting:
+Add logs:
+python
+
+async def connect(self):
+    print("WebSocket connecting...")
+    await self.channel_layer.group_add('crypto_updates', self.channel_name)
+    await self.channel_layer.group_add('trade_notifications', self.channel_name)
+    await self.accept()
+    print("WebSocket connected")
+    await self.send_initial_data()
+
+Logs should show “connected”—if not, check Redis (redis-cli -h 72.16.10.8 -p 6379 ping).
+
+Hyperscript Not Firing:
+Test with a simpler message:
+python
+
+async def trade_update(self, event):
+    await self.send(text_data=json.dumps({
+        'event': 'trade_update',
+        'data': '<li>Simple Test</li>'
+    }))
+
+If “Simple Test” appears, the issue is the HTML string’s complexity.
+
+Event Name Mismatch:
+Try 'type' again:
+python
+
+await self.send(text_data=json.dumps({
+    'type': 'trade_update',
+    'data': html
+}))
+
+Browser Cache: Test in incognito mode to rule out cached scripts.
+
+Expected Output
+WebSocket Client: Same as before—correct message received.
+
+Browser: Notification appears as:
+
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>Just Now</small>
+            </p>
+            <span>BUY 5268.8467 TURBO at 0.001138 (Value: 6.00) - 2025-03-10T12:00:00Z <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+Why This Should Work
+Single WS Connection: Moving ws-connect to <body> ensures the WebSocket is active.
+
+Correct Event: 'event': 'trade_update' matches ws:trade_update.
+
+Hyperscript: Directly inserts the pre-formatted data into the DOM.
+
+Let me know the result—logs, console errors, or if the notification still doesn’t show, and I’ll dig deeper! We’re close to nailing this.
+
+This error in the java script console:
+hyperscript.org@0.9.12:1 hyperscript errors were found on the following element: <ul id=​"notification-list" _=​"on ws:​trade_update 
+                                            log event.detail.data at the start of me 
+                                            then scrollTo(0, 0)​">​…​</ul>​  Unexpected Token : at
+
+                                        log event.detail.data at the start of me 
+                                                               ^^
+
+ Error: Unexpected Token : at
+
+                                        log event.detail.data at the start of me 
+                                                               ^^
+at a.raiseParseError (https://unpkg.com/hyperscript.org@0.9.12:1:12649)
+at a.raiseParseError (https://unpkg.com/hyperscript.org@0.9.12:1:12707)
+at a.parseHyperScript (https://unpkg.com/hyperscript.org@0.9.12:1:12809)
+at o.initElement (https://unpkg.com/hyperscript.org@0.9.12:1:19725)
+at https://unpkg.com/hyperscript.org@0.9.12:1:19388
+at o.forEach (https://unpkg.com/hyperscript.org@0.9.12:1:14862)
+at o.processNode (https://unpkg.com/hyperscript.org@0.9.12:1:19318)
+at HTMLDocument.<anonymous> (https://unpkg.com/hyperscript.org@0.9.12:1:99525)
+
+The error in the JavaScript console points to a syntax issue in your Hyperscript code within the <ul id="notification-list"> element. The Hyperscript parser is choking on log event.detail.data at the start of me, specifically at the colon (:) in ws:trade_update. This suggests either:
+Hyperscript Syntax Error: The log command doesn’t fit the expected Hyperscript grammar for DOM manipulation, or the event name ws:trade_update isn’t being parsed correctly due to a typo or formatting issue.
+
+Event Mismatch: The WebSocket message’s event or type might not align with what Hyperscript expects (ws:trade_update).
+
+Your latest snippet shows:
+html
+
+<ul id="notification-list" 
+    _="on ws:trade_update 
+        log event.detail.data at the start of me 
+        then scrollTo(0, 0)">
+
+But my last suggestion used put event.detail.data at the start of me. It seems you’ve modified it to log, which is causing the parse error. Let’s fix the Hyperscript syntax and ensure it works with the WebSocket message.
+Fix
+1. Correct Hyperscript Syntax
+Hyperscript’s log command is for debugging (e.g., log event.detail.data to console), not DOM manipulation. To insert the WebSocket data into the <ul>, use put instead. Here’s the corrected snippet:
+html
+
+<ul id="notification-list" 
+    hx-ext="ws" 
+    ws-connect="/ws/crypto/" 
+    _="on ws:trade_update 
+        put event.detail.data at the start of me 
+        then scrollTo(0, 0)">
+    <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+</ul>
+
+Change: Replaced log with put to insert the HTML from event.detail.data at the start of the <ul>.
+
+Kept: ws-connect on the <ul> for testing, but you can move it to <body> later for a single connection.
+
+2. Verify Consumer Output
+Your WebSocket client received:
+json
+
+{"type": "trade_update", "data": "<li class=\"py-2 mb-1 border-bottom\">..."}
+
+But the consumer I suggested last used 'event': 'trade_update'. HTMX’s WebSocket extension typically expects 'type' to match the event name (ws:trade_update). Let’s align them:
+python
+
+# trading/consumers.py (trade_update only)
+async def trade_update(self, event):
+    data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+    html = (
+        f'<li class="py-2 mb-1 border-bottom">'
+        f'    <a href="javascript:void(0);" class="d-flex">'
+        f'        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">'
+        f'        <div class="flex-fill ms-2">'
+        f'            <p class="d-flex justify-content-between mb-0">'
+        f'                <span class="font-weight-bold">Trade Notification</span>'
+        f'                <small>Just Now</small>'
+        f'            </p>'
+        f'            <span>{data} <span class="badge bg-success">Add</span></span>'
+        f'        </div>'
+        f'    </a>'
+        f'</li>'
+    )
+    await self.send(text_data=json.dumps({
+        'type': 'trade_update',  # Match ws:trade_update
+        'data': html
+    }))
+
+Change: Ensure 'type': 'trade_update' (not 'event') to match Hyperscript’s ws:trade_update.
+
+Testing
+Update Files:
+Replace the <ul> snippet with the corrected version.
+
+Update trade_update in consumers.py.
+
+Run Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Browser Test:
+Open http://127.0.0.1:8000/.
+
+Trigger a trade (e.g., /test-websocket/).
+
+Check DevTools (F12):
+Network > WS: Look for /ws/crypto/ messages like {"type": "trade_update", "data": "<li..."}.
+
+Console: No Hyperscript errors.
+
+WebSocket Client:
+Should still receive the same message format.
+
+Why This Fixes It
+Syntax: put is the correct Hyperscript command for DOM insertion, avoiding the Unexpected Token : error from log.
+
+Event Match: 'type': 'trade_update' triggers ws:trade_update in HTMX, delivering event.detail.data to Hyperscript.
+
+No Overlap: No hx-get means no HTTP interference.
+
+Expected Output
+WebSocket Client: 
+json
+
+{"type": "trade_update", "data": "<li class=\"py-2 mb-1 border-bottom\">..."}
+
+Browser: Notification appears at the top of <ul> with the formatted HTML, no console errors.
+
+Debugging If It Still Fails
+Console Errors: Share any new errors post-fix.
+
+WebSocket Connection:
+Add print("Sending trade update:", html) in trade_update—confirm it’s sent.
+
+DevTools WS tab: No connection? Check ws://127.0.0.1:8000/ws/crypto/ status.
+
+Hyperscript Test:
+Simplify:
+html
+
+<ul id="notification-list" 
+    hx-ext="ws" 
+    ws-connect="/ws/crypto/" 
+    _="on ws:trade_update 
+        put '<li>Test</li>' at the start of me">
+
+If “Test” appears, the issue is the event.detail.data HTML complexity.
+
+This should resolve the Hyperscript error and display notifications—let me know the result!
+
+I did your test, the ws:trade_update was not triggered, may be the _hyperscript is the issue, can we stick to htmx and take out _hyperscript from the picture?
+
+Thanks for testing! Since the ws:trade_update event isn’t triggering with Hyperscript, and you’re fine with removing Hyperscript entirely, let’s switch to a pure HTMX solution. This simplifies things by using HTMX’s built-in WebSocket support (hx-ext="ws") and swapping mechanisms (hx-swap) without relying on Hyperscript’s _ attribute. We’ll ensure the notifications update dynamically via WebSocket alone.
+Here’s how we’ll do it:
+Updated index.html Snippet (Pure HTMX)
+Remove Hyperscript and use HTMX attributes:
+html
+
+<ul id="notification-list" 
+    hx-ext="ws" 
+    ws-connect="/ws/crypto/" 
+    hx-ws="trade_update:beforeend">
+    <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+</ul>
+
+Explanation:
+hx-ext="ws" ws-connect="/ws/crypto/": Connects the <ul> to the WebSocket at /ws/crypto/.
+
+hx-ws="trade_update:beforeend": Tells HTMX to listen for a trade_update WebSocket message and append the received data (HTML) to the end of the <ul> (you can change beforeend to afterbegin to add at the start instead).
+
+No Hyperscript: Removed the _ attribute entirely—no additional scripting needed.
+
+Updated consumers.py (No Change Needed)
+Your consumer already sends the correct format for HTMX’s hx-ws:
+python
+
+# trading/consumers.py (trade_update only for reference)
+async def trade_update(self, event):
+    data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+    html = (
+        f'<li class="py-2 mb-1 border-bottom">'
+        f'    <a href="javascript:void(0);" class="d-flex">'
+        f'        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">'
+        f'        <div class="flex-fill ms-2">'
+        f'            <p class="d-flex justify-content-between mb-0">'
+        f'                <span class="font-weight-bold">Trade Notification</span>'
+        f'                <small>Just Now</small>'
+        f'            </p>'
+        f'            <span>{data} <span class="badge bg-success">Add</span></span>'
+        f'        </div>'
+        f'    </a>'
+        f'</li>'
+    )
+    await self.send(text_data=json.dumps({
+        'type': 'trade_update',  # Matches hx-ws="trade_update:..."
+        'data': html
+    }))
+
+Confirmed: The {"type": "trade_update", "data": "<li>..."} format is exactly what HTMX expects for hx-ws.
+
+Full <head> (Remove Hyperscript)
+Update your <head> to drop Hyperscript:
+html
+
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+</head>
+
+Removed: <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>—no longer needed.
+
+Testing
+Update Template:
+Replace the <ul> snippet with the new version.
+
+Ensure <head> only has HTMX and the WS extension.
+
+Run Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Browser Test:
+Open http://127.0.0.1:8000/.
+
+Trigger a trade (e.g., via /test-websocket/).
+
+Check DevTools (F12):
+Network > WS: Look for /ws/crypto/ messages like {"type": "trade_update", "data": "<li..."}.
+
+Console: No Hyperscript errors.
+
+WebSocket Client:
+Should still receive: {"type": "trade_update", "data": "<li..."}.
+
+Expected Output
+WebSocket Client: Same as before—message received correctly.
+
+Browser: Notification appends to <ul>:
+html
+
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle" src="/static/assets/images/coin/BTC.png" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>Just Now</small>
+            </p>
+            <span>BUY 5268.8467 TURBO at 0.001138 (Value: 6.00) - 2025-03-10T12:00:00Z <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+Why This Works
+HTMX Native: hx-ws="trade_update:beforeend" directly handles the trade_update event from the WebSocket, appending the data HTML without needing Hyperscript.
+
+No Parse Errors: Eliminates Hyperscript’s syntax issues.
+
+Simpler: Fewer dependencies, cleaner code.
+
+Debugging If It Still Fails
+WebSocket Not Connecting:
+Add logs:
+python
+
+async def connect(self):
+    print("WebSocket connecting...")
+    await self.channel_layer.group_add('crypto_updates', self.channel_name)
+    await self.channel_layer.group_add('trade_notifications', self.channel_name)
+    await self.accept()
+    print("WebSocket connected")
+    await self.send_initial_data()
+
+Logs should show “connected”—if not, check Redis (redis-cli -h 72.16.10.8 -p 6379 ping).
+
+No Update:
+DevTools WS tab: Confirm /ws/crypto/ sends {"type": "trade_update", "data": "<li..."}.
+
+If sent but no update, test with:
+python
+
+await self.send(text_data=json.dumps({
+    'type': 'trade_update',
+    'data': '<li>Test</li>'
+}))
+
+Direction: Want notifications at the top? Change hx-ws="trade_update:beforeend" to hx-ws="trade_update:afterbegin".
+
+This should get your notifications flowing smoothly with HTMX alone—let me know the result or any new logs/errors!
+
+Now the notification is fixed thanks to you, please check my update below:
+class CryptoConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.channel_layer.group_add('trade_update', self.channel_name)
+        await self.accept()
+        await self.send_initial_data()
+
+async def disconnect(self, close_code):
+    await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+    await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+async def balance_update(self, event):
+    balances = await self.get_balances()
+    html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+    await self.send(text_data=html)
+
+async def trade_update(self, event):
+    data = event['data']  # e.g., "Test BUY 1000 TEST at 1.00 (Value: 1000.00) - timestamp"
+    received_data = json.loads(data)
+
+    notification_html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': received_data})
+    await self.send(text_data=notification_html)
+
+    return data
+
+async def total_usd_update(self, event):
+    total = await self.get_total_usd()
+    await self.send(text_data=json.dumps({'data': f"{total:.2f}"}))
+
+@sync_to_async
+def get_balances(self):
+    balances = []
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        usd_value = float(crypto.balance) * latest_price
+        balances.append({
+            'ticker': crypto.ticker,
+            'balance': float(crypto.balance),
+            'usd_value': usd_value,
+            'pnl': float(crypto.pnl),
+        })
+    usdt = CryptoCurency.objects.get(ticker='USDT')
+    balances.append({
+        'ticker': 'USDT',
+        'balance': float(usdt.balance),
+        'usd_value': float(usdt.balance),
+        'pnl': float(usdt.pnl),
+    })
+    return balances
+
+@sync_to_async
+def get_total_usd(self):
+    total = 0.0
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        latest_price = float(Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+        total += float(crypto.balance) * latest_price
+    total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+    return total
+
+notification.html:{% load static%}<ul id="notification-list"  hx-swap-oob="afterbegin">
+    <li class="py-2 mb-1 border-bottom">
+        <a href="javascript:void(0);" class="d-flex">
+            <img class="avatar rounded-circle"
+                src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+            <div class="flex-fill ms-2">
+                <p class="d-flex justify-content-between mb-0 "><span
+                        class="font-weight-bold">Chloe Walkerr</span>
+                    <small>2MIN</small>
+                </p>
+                <span class="">You bought {{ notification.quantity }} of {{ notification.ticker }} <span
+                        class="badge bg-success">Add</span></span>
+            </div>
+        </a>
+    </li>
+</ul>
+
+signals:trading/models.py (signal part only)@receiver
+(post_save, sender=CryptoCurency)
+@receiver
+(post_save, sender=Order)
+def send_update(sender, instance, created, **kwargs):
+    channel_layer = get_channel_layer()
+    if sender == CryptoCurency:
+        group_name = 'crypto_updates'
+        message_type = 'balance_update'
+        data = {}  # HTMX fetches full table
+        # Trigger total USD update too
+        async_to_sync(channel_layer.group_send)(
+            'crypto_updates',
+            {'type': 'total_usd_update', 'data': ''}  # Data computed in consumer
+        )
+    elif sender == Order:
+        group_name = 'trade_notifications'
+        message_type = 'trade_update'
+        data_dict = {
+            "order_type": str(instance.order_type),
+            "quantity": str(instance.quantity),
+            "ticker": str(instance.ticker),
+            "price": str(instance.price),
+            "value": str(instance.value),
+            "timestamp": str(instance.timestamp.isoformat())
+        }
+        data_json = json.dumps(data_dict)
+
+    data = data_json # f"{instance.order_type} {instance.quantity} {instance.ticker} at {instance.price} (Value: {instance.value}) - {instance.timestamp.isoformat()}"
+    # Trigger balance and total USD updates on trade
+    async_to_sync(channel_layer.group_send)(
+        'crypto_updates',
+        {'type': 'balance_update', 'data': ''}
+    )
+    async_to_sync(channel_layer.group_send)(
+        'crypto_updates',
+        {'type': 'total_usd_update', 'data': ''}
+    )
+
+async_to_sync(channel_layer.group_send)(
+    group_name,
+    {
+        'type': message_type,
+        'data': data
+    }
+)
+
+Now I need to separate my consumer into three, one for notification, one for orders and one for the usd balance updates
+
+I’m glad the notifications are working now—great progress! Your updated CryptoConsumer looks solid, but I’ll point out a couple of issues in your current setup before splitting it into three separate consumers. Then, I’ll refactor it into NotificationConsumer, OrderConsumer, and BalanceConsumer to handle notifications, trades, and USD/balance updates independently. This will make your WebSocket logic cleaner and more modular.
+Issues in Current Setup
+trade_update in CryptoConsumer:
+You’re sending notification_html directly as text_data, but HTMX expects a JSON message with {"type": "trade_update", "data": "..."} for hx-ws="trade_update:...". This might break the notification display unless HTMX is lenient here.
+
+The return data line after await self.send(...) doesn’t do anything (it’s not used in async consumers).
+
+notification.html:
+It’s a full <ul> with hx-swap-oob="afterbegin", which replaces the entire #notification-list on each update. This could overwrite existing notifications instead of appending them. We’ll adjust it to render just the <li> and append.
+
+Group Names:
+You added 'trade_update' to group_add, but your signal sends to 'trade_notifications'. This mismatch means trade_update won’t trigger unless you fix the group name consistency.
+
+Let’s address these as we split the consumers.
+Refactored Consumers
+We’ll create three consumers:
+NotificationConsumer: Handles trade notifications.
+
+OrderConsumer: Could handle order-specific updates (if needed later), but since your signals tie trades to notifications, we’ll merge this into NotificationConsumer for now unless you specify otherwise.
+
+BalanceConsumer: Handles balance and total USD updates.
+
+1. NotificationConsumer
+For trade notifications only:
+python
+
+# trading/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = event['data']  # JSON string from signal
+        received_data = json.loads(data)  # Parse to dict
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': received_data})
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+2. BalanceConsumer
+For balance and total USD updates:
+python
+
+# trading/consumers.py
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+from .models import CryptoCurency, Kline
+
+class BalanceConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('crypto_updates', self.channel_name)
+        await self.accept()
+        await self.send_initial_data()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('crypto_updates', self.channel_name)
+
+    async def balance_update(self, event):
+        balances = await self.get_balances()
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+    async def total_usd_update(self, event):
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({
+            'type': 'total_usd_update',
+            'data': f"{total:.2f}"
+        }))
+
+    @sync_to_async
+    def get_balances(self):
+        balances = []
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(crypto.balance) * latest_price
+            balances.append({
+                'ticker': crypto.ticker,
+                'balance': float(crypto.balance),
+                'usd_value': usd_value,
+                'pnl': float(crypto.pnl),
+            })
+        usdt = CryptoCurency.objects.get(ticker='USDT')
+        balances.append({
+            'ticker': 'USDT',
+            'balance': float(usdt.balance),
+            'usd_value': float(usdt.balance),
+            'pnl': float(usdt.pnl),
+        })
+        return balances
+
+    @sync_to_async
+    def get_total_usd(self):
+        total = 0.0
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            latest_price = float(Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+            total += float(crypto.balance) * latest_price
+        total += float(CryptoCurency.objects.get(ticker='USDT').balance)
+        return total
+
+    async def send_initial_data(self):
+        balances = await self.get_balances()
+        balances_html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=balances_html)
+        total = await self.get_total_usd()
+        await self.send(text_data=json.dumps({
+            'type': 'total_usd_update',
+            'data': f"{total:.2f}"
+        }))
+
+Note:
+I didn’t create a separate OrderConsumer since your signals tie orders to trade_notifications, which NotificationConsumer handles. If you need a distinct order-specific consumer later (e.g., for order status updates), let me know!
+
+Updated notification.html
+Render just the <li> to append, not the whole <ul>:
+html
+
+<!-- trading/templates/partials/notification.html -->
+{% load static %}
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle"
+             src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>Just Now</small>
+            </p>
+            <span>You {{ notification.order_type|lower }} {{ notification.quantity }} of {{ notification.ticker }} <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+Change: Removed <ul> and hx-swap-oob—HTMX’s hx-ws="trade_update:afterbegin" will append this <li> to the existing <ul>.
+
+Updated index.html Snippet
+Adjust the <ul> to work with the new setup:
+html
+
+<ul id="notification-list" 
+    hx-ext="ws" 
+    ws-connect="/ws/crypto/" 
+    hx-ws="trade_update:afterbegin">
+    <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+</ul>
+
+hx-ws="trade_update:afterbegin": Adds new notifications at the top of the list.
+
+Updated routing.py
+Split the WebSocket routes:
+python
+
+# trading/routing.py
+from django.urls import re_path
+from . import consumers
+
+websocket_urlpatterns = [
+    re_path(r'ws/crypto/$', consumers.BalanceConsumer.as_asgi()),
+    re_path(r'ws/notifications/$', consumers.NotificationConsumer.as_asgi()),
+]
+
+Updated asgi.py
+Update to use the new routes:
+python
+
+# trading/asgi.py
+import os
+from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+import trading.routing
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trading.settings')
+
+application = ProtocolTypeRouter({
+    'http': get_asgi_application(),
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            trading.routing.websocket_urlpatterns
+        )
+    ),
+})
+
+Update index.html (Full Context)
+Connect balances and notifications to their respective WebSocket endpoints:
+html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+        .notification { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+</head>
+<body>
+    <h1>Trading Dashboard</h1>
+    <h2>Total USD Worth: <span id="total-usd" hx-ext="ws" ws-connect="/ws/crypto/" hx-ws="total_usd_update:innerHTML">0.00</span></h2>
+
+    <table hx-ext="ws" ws-connect="/ws/crypto/" hx-ws="balance_update:innerHTML:#balances">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances">
+            <tr><td colspan="4">Loading balances...</td></tr>
+        </tbody>
+    </table>
+
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" 
+            hx-ext="ws" 
+            ws-connect="/ws/notifications/" 
+            hx-ws="trade_update:afterbegin">
+            <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+        </ul>
+    </div>
+
+    <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
+</body>
+</html>
+
+Testing
+Run Server:
+bash
+
+python manage.py runserver 0.0.0.0:8000
+
+Browser:
+Open http://127.0.0.1:8000/.
+
+Balances and total USD load via /ws/crypto/.
+
+Trigger a trade (e.g., /test-websocket/)—notification appears via /ws/notifications/.
+
+WebSocket Client:
+Connect to ws://127.0.0.1:8000/ws/notifications/—should receive {"type": "trade_update", "data": "<li..."}.
+
+Why This Works
+Separation: NotificationConsumer handles trades, BalanceConsumer handles balances/USD.
+
+HTMX: hx-ws targets specific events and elements, no Hyperscript needed.
+
+Correct Groups: Matches your signals (trade_notifications, crypto_updates).
+
+Let me know if you need an OrderConsumer for something specific or if anything’s off—happy to tweak it further!
+
+I need to setup a notification and logging system for my bot, using django ContentType and a workflow mixin to be present in every model I want to notify the client for changes, I also need a Notification model equiped with workflow event class, I will put an eample from another app I worked on different from this, but only get the idea from it:
+class Notification(models.Model):
+    content = models.CharField((('content')), max_length=999, null=True)
+    is_sent = models.BooleanField((('status')), default=False)
+    event = models.SmallIntegerField((('event')), null=True)
+    commit_time = models.DateField((('commit_time')), auto_now_add=True)
+    send_time = models.DateField((('send_time')), null=True)
+    exception_id = models.CharField((('exception_id')), max_length=255, null=True)
+    content_type_id = models.CharField((_('content_type_id')), max_length=255, null=True)
+
+class Meta:
+    ordering = [
+     'id']
+    app_label = 'notifications'
+    verbose_name = _('notifications')
+    verbose_name_plural = verbose_name
+
+class WorkflowEvents:
+    ON_NEW_WORKFLOW = 1
+    ON_WORKFLOW_NODE_APPROVAL = 2
+    ON_WORKFLOW_NODE_REJECT = 3
+    ON_WORKFLOW_EXCEPTION_APPROVED = 4
+    ON_WORKFLOW_EXCEPTION_REJECTED = 5
+
+class ContentKeys:
+    APPLICANT_ID = 'applicant_id'
+    NOTIFIER_ROLES_ID = 'notifier_roles_id'
+    CURRENT_APPROVER_ROLES_ID = 'current_approver_roles_id'
+    NEXT_APPROVER_ROLES_ID = 'next_approver_roles_id'
+    ALL_APPROVER_ROLES_ID = 'all_approver_roles_id'
+    CURRENT_NOTIFIER_BY_OVERALL = 'CURRENT_NOTIFIER_BY_OVERALL'
+    CURRENT_APPROVER_BY_OVERALL = 'CURRENT_APPROVER_BY_OVERALL'
+    CURRENT_DEPARTMENTS = 'CURRENT_DEPARTMENTS'
+    next_APPROVER_BY_OVERALL = 'next_APPROVER_BY_OVERALL'
+    next_notify_BY_OVERALL = 'next_notify_BY_OVERALL'
+    NEXT_NOTIFIER_ROLES_ID = 'NEXT_NOTIFIER_ROLES_ID'
+    IS_LAST_NODE = 'IS_LAST_NODE'
+
+Let’s build a notification and logging system for your trading bot, inspired by the example you provided but tailored to your current app (e.g., CryptoCurency, Order, etc.). We’ll use Django’s ContentType framework to make it generic across models, integrate a workflow mixin for tracking changes, and create a Notification model with a WorkflowEvents class. This system will notify clients via WebSocket (using your existing NotificationConsumer) and log events for auditing.
+Here’s the plan:
+Notification Model: A generic model tied to ContentType with workflow events.
+
+Workflow Mixin: Add to models like CryptoCurency and Order to trigger notifications.
+
+Signals: Hook into model saves to create notifications and send WebSocket updates.
+
+Logging: Integrate Django’s logging to record events.
+
+WebSocket Integration: Use your existing NotificationConsumer to push notifications.
+
+1. Notification Model
+Create a Notification model in trading/models.py (or a separate notifications app if preferred):
+python
+
+# trading/models.py
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+import json
+
+class Notification(models.Model):
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        verbose_name=_('content type'),
+        null=True,
+        blank=True
+    )
+    object_id = models.PositiveIntegerField(
+        verbose_name=_('object id'),
+        null=True,
+        blank=True
+    )
+    content = models.CharField(
+        _('content'),
+        max_length=999,
+        null=True,
+        blank=True
+    )
+    is_sent = models.BooleanField(
+        _('is sent'),
+        default=False
+    )
+    event = models.SmallIntegerField(
+        _('event'),
+        choices=[
+            (1, 'Created'),
+            (2, 'Updated'),
+            (3, 'Deleted'),
+            (4, 'Trade Executed'),
+            (5, 'Error Occurred'),
+        ],
+        null=True,
+        blank=True
+    )
+    commit_time = models.DateTimeField(
+        _('commit time'),
+        auto_now_add=True
+    )
+    send_time = models.DateTimeField(
+        _('send time'),
+        null=True,
+        blank=True
+    )
+    exception_id = models.CharField(
+        _('exception id'),
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        ordering = ['-commit_time']
+        verbose_name = _('notification')
+        verbose_name_plural = _('notifications')
+
+    class WorkflowEvents:
+        CREATED = 1
+        UPDATED = 2
+        DELETED = 3
+        TRADE_EXECUTED = 4
+        ERROR_OCCURRED = 5
+
+    def save(self, *args, **kwargs):
+        if self.is_sent and not self.send_time:
+            self.send_time = timezone.now()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.get_event_display()} - {self.content} ({self.commit_time})"
+
+Fields:
+content_type and object_id: Link to any model via ContentType.
+/GenericForeignKey`.
+
+content: Descriptive message.
+
+event: Workflow event type (customized for your bot).
+
+is_sent, commit_time, send_time: Track notification status and timing.
+
+exception_id: Optional error tracking.
+
+2. Workflow Mixin
+Add this mixin to models you want to notify on (e.g., CryptoCurency, Order):
+python
+
+# trading/models.py
+class WorkflowMixin:
+    def notify(self, event, content=None, exception_id=None):
+        """Create and send a notification for this instance."""
+        from django.contrib.contenttypes.models import ContentType
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        import logging
+
+        logger = logging.getLogger(__name__)
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        obj_id = self.pk
+
+        # Default content if not provided
+        if content is None:
+            content = f"{self.__class__.__name__} {obj_id} - Event {event}"
+
+        # Create notification
+        notification = Notification(
+            content_type=content_type,
+            object_id=obj_id,
+            content=content,
+            event=event,
+            exception_id=exception_id,
+        )
+        notification.save()
+
+        # Log the event
+        logger.info(f"Notification created: {notification}")
+
+        # Send via WebSocket (adjust group based on event)
+        channel_layer = get_channel_layer()
+        group_name = 'trade_notifications' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'crypto_updates'
+        message_type = 'trade_update' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'balance_update'
+
+        data = {
+            'id': notification.id,
+            'content': notification.content,
+            'event': notification.event,
+            'timestamp': notification.commit_time.isoformat(),
+        }
+        if event == Notification.WorkflowEvents.TRADE_EXECUTED and hasattr(self, 'to_dict'):
+            data = self.to_dict()  # Assuming Order has a to_dict method
+
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                'data': json.dumps(data),
+            }
+        )
+
+        notification.is_sent = True
+        notification.save()
+
+Usage: Add to models like:
+python
+
+class CryptoCurency(models.Model, WorkflowMixin):
+    # Existing fields...
+
+class Order(models.Model, WorkflowMixin):
+    # Existing fields...
+    def to_dict(self):
+        return {
+            'order_type': str(self.order_type),
+            'quantity': str(self.quantity),
+            'ticker': str(self.ticker),
+            'price': str(self.price),
+            'value': str(self.value),
+            'timestamp': str(self.timestamp.isoformat())
+        }
+
+3. Signals
+Hook into model saves to trigger notifications:
+python
+
+# trading/models.py
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver(post_save, sender=CryptoCurency)
+@receiver(post_save, sender=Order)
+def notify_on_save(sender, instance, created, **kwargs):
+    event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
+    instance.notify(event)
+
+@receiver(post_delete, sender=CryptoCurency)
+@receiver(post_delete, sender=Order)
+def notify_on_delete(sender, instance, **kwargs):
+    instance.notify(Notification.WorkflowEvents.DELETED)
+
+4. Logging Setup
+Configure Django logging in settings.py:
+python
+
+# trading/settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'trading_bot.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'trading': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+Usage: The mixin logs via logger.info()—check trading_bot.log or console output.
+
+5. Update WebSocket Consumers
+Adjust NotificationConsumer and BalanceConsumer to use the new notification data:
+NotificationConsumer
+python
+
+# trading/consumers.py
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = json.loads(event['data'])  # Dict from Order.to_dict()
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': data})
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+BalanceConsumer
+python
+
+# trading/consumers.py
+class BalanceConsumer(AsyncWebsocketConsumer):
+    # ... (connect, disconnect, get_balances, get_total_usd, send_initial_data unchanged)
+
+    async def balance_update(self, event):
+        data = json.loads(event['data'])  # Dict from notify()
+        balances = await self.get_balances()
+        html = await sync_to_async(render_to_string)('partials/balances.html', {'balances': balances})
+        await self.send(text_data=html)
+
+6. Update routing.py
+Ensure both endpoints are routed:
+python
+
+# trading/routing.py
+websocket_urlpatterns = [
+    re_path(r'ws/crypto/$', consumers.BalanceConsumer.as_asgi()),
+    re_path(r'ws/notifications/$', consumers.NotificationConsumer.as_asgi()),
+]
+
+Testing
+Migrate:
+bash
+
+python manage.py makemigrations
+python manage.py migrate
+
+Create an Order:
+python
+
+from trading.models import Order
+order = Order(order_type='BUY', quantity='100', ticker='BTC', price='50000', value='5000000')
+order.save()  # Triggers notification
+
+Check Logs:
+trading_bot.log should show: INFO ... Notification created: BUY 100 BTC....
+
+WebSocket:
+Browser at http://127.0.0.1:8000/—notification appears.
+
+Client at ws://127.0.0.1:8000/ws/notifications/—receives JSON.
+
+Notes
+Error Handling: Add try-except in notify() if you want to capture exceptions and set exception_id.
+
+Customization: Adjust WorkflowEvents or add more ContentKeys-like fields if needed.
+
+Performance: Consider throttling notifications if your bot generates many events.
+
+This setup gives you a flexible, reusable notification system—let me know if you need tweaks or more features!
+
+The notification system, the logging and the workflow is working like a clock, perfectly! What is is two things, one is I need you to explain the code for me block by block as simple as you can, second is: the notification and logging system is good, but I need the better content to save like a good description of what actually happened, for example when a new order is saved, I want the notification content to say "You bought/sold this amount of that symbol and got or paid this amount of usd for it, etc.
+
+I’m thrilled to hear the notification, logging, and workflow system is working perfectly for you! Let’s tackle your two requests: first, I’ll explain the code block by block in simple terms, and then I’ll enhance the content in the Notification system to provide richer, more descriptive messages like “You bought 100 BTC for $5,000 USD.”
+Part 1: Explaining the Code Block by Block (Simple Terms)
+1. Notification Model (Notification Class)
+python
+
+class Notification(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name=_('content type'), null=True, blank=True)
+    object_id = models.PositiveIntegerField(verbose_name=_('object id'), null=True, blank=True)
+    content = models.CharField(_('content'), max_length=999, null=True, blank=True)
+    is_sent = models.BooleanField(_('is sent'), default=False)
+    event = models.SmallIntegerField(_('event'), choices=[(1, 'Created'), (2, 'Updated'), (3, 'Deleted'), (4, 'Trade Executed'), (5, 'Error Occurred')], null=True, blank=True)
+    commit_time = models.DateTimeField(_('commit time'), auto_now_add=True)
+    send_time = models.DateTimeField(_('send time'), null=True, blank=True)
+    exception_id = models.CharField(_('exception id'), max_length=255, null=True, blank=True)
+
+What It Does: This is like a note-taker for your bot. It keeps track of what happens (e.g., a new order, an update).
+
+Fields:
+content_type and object_id: Tells us which thing (like an Order or CryptoCurency) this note is about.
+
+content: The message, like “You bought 100 BTC.”
+
+is_sent: A checkbox—False means “not sent yet,” True means “sent to the user.”
+
+event: A number that says what happened (1 = created, 4 = trade done, etc.).
+
+commit_time: When the note was written (automatically set to now).
+
+send_time: When the note was sent (blank until sent).
+
+exception_id: If something went wrong, this holds an error code.
+
+python
+
+    class Meta:
+        ordering = ['-commit_time']
+        verbose_name = _('notification')
+        verbose_name_plural = _('notifications')
+
+What It Does: Sets rules for the note-taker.
+
+Details:
+ordering: Shows newest notes first.
+
+verbose_name: Calls it a “notification” in the admin panel.
+
+python
+
+    class WorkflowEvents:
+        CREATED = 1
+        UPDATED = 2
+        DELETED = 3
+        TRADE_EXECUTED = 4
+        ERROR_OCCURRED = 5
+
+What It Does: A list of “what happened” options, like a menu for the event field.
+
+python
+
+    def save(self, *args, **kwargs):
+        if self.is_sent and not self.send_time:
+            self.send_time = timezone.now()
+        super().save(*args, **kwargs)
+
+What It Does: When saving a note, if it’s marked “sent” but has no send time, it sets the send time to now.
+
+2. Workflow Mixin (WorkflowMixin)
+python
+
+class WorkflowMixin:
+    def notify(self, event, content=None, exception_id=None):
+        from django.contrib.contenttypes.models import ContentType
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        import logging
+
+        logger = logging.getLogger(__name__)
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        obj_id = self.pk
+
+What It Does: A helper you can add to any model (like Order) to send notes and alerts.
+
+Details:
+notify: A function to make a note and tell the user.
+
+logger: A tool to write what’s happening to a log file.
+
+content_type: Figures out what kind of thing (e.g., Order) this is.
+
+obj_id: The ID of this specific thing (e.g., Order #5).
+
+python
+
+        if content is None:
+            content = f"{self.__class__.__name__} {obj_id} - Event {event}"
+
+What It Does: If no message is given, it makes a basic one like “Order 5 - Event 4.”
+
+python
+
+        notification = Notification(content_type=content_type, object_id=obj_id, content=content, event=event, exception_id=exception_id)
+        notification.save()
+        logger.info(f"Notification created: {notification}")
+
+What It Does: Creates a new note with the details and saves it, then logs it (e.g., “Notification created: Trade Executed - You bought 100 BTC”).
+
+python
+
+        channel_layer = get_channel_layer()
+        group_name = 'trade_notifications' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'crypto_updates'
+        message_type = 'trade_update' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'balance_update'
+
+What It Does: Prepares to send the note to the user via WebSocket.
+channel_layer: The “mailbox” for sending messages.
+
+group_name: Picks who gets the message (trades go to trade_notifications, others to crypto_updates).
+
+message_type: The type of message (e.g., trade_update for trades).
+
+python
+
+        data = {'id': notification.id, 'content': notification.content, 'event': notification.event, 'timestamp': notification.commit_time.isoformat()}
+        if event == Notification.WorkflowEvents.TRADE_EXECUTED and hasattr(self, 'to_dict'):
+            data = self.to_dict()
+
+What It Does: Packs the note’s info into a package to send. For trades, it uses the Order’s details (from to_dict).
+
+python
+
+        async_to_sync(channel_layer.group_send)(group_name, {'type': message_type, 'data': json.dumps(data)})
+        notification.is_sent = True
+        notification.save()
+
+What It Does: Sends the package to the user via WebSocket, marks the note as sent, and saves it.
+
+3. Signals
+python
+
+@receiver(post_save, sender=CryptoCurency)
+@receiver(post_save, sender=Order)
+def notify_on_save(sender, instance, created, **kwargs):
+    event = Notification.WorkflowEvents.CREATED if created else Notification.WorkflowEvents.UPDATED
+    instance.notify(event)
+
+What It Does: Watches for when CryptoCurency or Order is saved. If it’s new, it says “Created”; if updated, it says “Updated,” then calls notify.
+
+python
+
+@receiver(post_delete, sender=CryptoCurency)
+@receiver(post_delete, sender=Order)
+def notify_on_delete(sender, instance, **kwargs):
+    instance.notify(Notification.WorkflowEvents.DELETED)
+
+What It Does: Watches for deletes and calls notify with “Deleted.”
+
+4. Logging Setup
+python
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {'verbose': {'format': '{levelname} {asctime} {module} {message}', 'style': '{'}},
+    'handlers': {
+        'file': {'level': 'INFO', 'class': 'logging.FileHandler', 'filename': 'trading_bot.log', 'formatter': 'verbose'},
+        'console': {'level': 'INFO', 'class': 'logging.StreamHandler', 'formatter': 'verbose'},
+    },
+    'loggers': {'trading': {'handlers': ['file', 'console'], 'level': 'INFO', 'propagate': True}},
+}
+
+What It Does: Sets up a logbook.
+formatters: How log entries look (e.g., “INFO 2025-03-13 Trading Notification created”).
+
+handlers: Where logs go (file trading_bot.log and console).
+
+loggers: Turns on logging for the trading app.
+
+Part 2: Improving Notification Content
+Let’s make the content field more descriptive, like “You bought 5268.8467 TURBO for 6.00 USD” or “You sold 100 BTC for 5,000 USD.”
+Updated WorkflowMixin
+Modify notify to generate better content based on the model and event:
+python
+
+class WorkflowMixin:
+    def notify(self, event, content=None, exception_id=None):
+        from django.contrib.contenttypes.models import ContentType
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        import logging
+
+        logger = logging.getLogger(__name__)
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        obj_id = self.pk
+
+        # Generate descriptive content
+        if content is None:
+            if content_type.model == 'order':
+                action = 'bought' if self.order_type == 'BUY' else 'sold'
+                content = f"You {action} {self.quantity} {self.ticker} for {self.value} USD at {self.price} per unit on {self.timestamp}"
+            elif content_type.model == 'cryptocurency':
+                if event == Notification.WorkflowEvents.CREATED:
+                    content = f"New currency {self.ticker} added with balance {self.balance}"
+                elif event == Notification.WorkflowEvents.UPDATED:
+                    content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+                elif event == Notification.WorkflowEvents.DELETED:
+                    content = f"Currency {self.ticker} removed"
+            else:
+                content = f"{self.__class__.__name__} {obj_id} - Event {event}"
+
+        notification = Notification(
+            content_type=content_type,
+            object_id=obj_id,
+            content=content,
+            event=event,
+            exception_id=exception_id,
+        )
+        notification.save()
+        logger.info(f"Notification created: {notification}")
+
+        channel_layer = get_channel_layer()
+        group_name = 'trade_notifications' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'crypto_updates'
+        message_type = 'trade_update' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'balance_update'
+
+        data = {
+            'id': notification.id,
+            'content': notification.content,
+            'event': notification.event,
+            'timestamp': notification.commit_time.isoformat(),
+        }
+        if event == Notification.WorkflowEvents.TRADE_EXECUTED and hasattr(self, 'to_dict'):
+            data = self.to_dict()
+
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                'data': json.dumps(data),
+            }
+        )
+
+        notification.is_sent = True
+        notification.save()
+
+Updated notification.html
+Reflect the new content in the template:
+html
+
+<!-- trading/templates/partials/notification.html -->
+{% load static %}
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle"
+             src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>{{ notification.timestamp|timesince }} ago</small>
+            </p>
+            <span>{{ notification.content }} <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+Updated NotificationConsumer
+Use the full content field:
+python
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = json.loads(event['data'])  # Dict with 'content', etc.
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': data})
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+Testing
+Save an Order:
+python
+
+order = Order(order_type='BUY', quantity='5268.8467', ticker='TURBO', price='0.001138', value='6.00', timestamp=timezone.now())
+order.save()
+
+Notification Content: “You bought 5268.8467 TURBO for 6.00 USD at 0.001138 per unit on 2025-03-13...”
+
+Log: “INFO ... Notification created: You bought 5268.8467 TURBO...”
+
+Update CryptoCurency:
+python
+
+crypto = CryptoCurency.objects.get(ticker='BTC')
+crypto.balance = 150
+crypto.save()
+
+Notification Content: “Balance of BTC updated to 150, PNL now X”
+
+Explanation of Improvements
+Better Content: Checks the model type (Order or CryptoCurency) and event to craft a clear message.
+
+Dynamic: Uses model fields (e.g., quantity, value) for real-time descriptions.
+
+Consistent: Same message in logs, WebSocket, and UI.
+
+Let me know if you want more detail or adjustments—happy it’s ticking like a clock for you!
+
+This output came from workflow notify method:
+Exception inside application: 'str' object has no attribute 'year'
+Traceback (most recent call last):
+  File "C:\api\binando\venv\Lib\site-packages\django\contrib\staticfiles\handlers.py", line 101, in call
+    return await self.application(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\routing.py", line 48, in call
+    return await application(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\sessions.py", line 44, in call
+    return await self.inner(dict(scope, cookies=cookies), receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\sessions.py", line 261, in call
+    return await self.inner(wrapper.scope, receive, wrapper.send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\auth.py", line 185, in call
+    return await super().call(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\middleware.py", line 24, in call
+    return await self.inner(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\routing.py", line 118, in call
+    return await application(
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\consumer.py", line 95, in app
+    return await consumer(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\channels\consumer.py", line 58, in call
+    await await_many_dispatch(
+  File "C:\api\binando\venv\Lib\site-packages\channels\utils.py", line 50, in await_many_dispatch
+    await dispatch(result)
+  File "C:\api\binando\venv\Lib\site-packages\channels\consumer.py", line 74, in dispatch
+    await handler(message)
+  File "C:\api\binando\src\app\consumers.py", line 127, in trade_update
+    html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': received_data})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\asgiref\sync.py", line 468, in call
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\darya\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 1067, in render
+    output = self.filter_expression.resolve(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\base.py", line 745, in resolve
+    new_obj = func(obj, *arg_vals)
+              ^^^^^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\template\defaultfilters.py", line 814, in timesince_filter
+    return timesince(value)
+           ^^^^^^^^^^^^^^^^
+  File "C:\api\binando\venv\Lib\site-packages\django\utils\timesince.py", line 62, in timesince
+    d = datetime.datetime(d.year, d.month, d.day)
+                          ^^^^^^
+AttributeError: 'str' object has no attribute 'year'
+Exception inside application: 'str' object has no attribute 'year'
+
+The error 'str' object has no attribute 'year' is happening because the timestamp in your notification data is being treated as a string instead of a datetime object when the timesince filter in your notification.html template tries to process it. The timesince filter expects a datetime object to calculate the time difference (e.g., "2 minutes ago"), but your WorkflowMixin is passing timestamp as a string via isoformat() in the data dictionary. Let’s fix this and improve the content generation as you requested.
+Here’s what’s going on and how we’ll resolve it:
+Why the Error Occurs
+Source: In WorkflowMixin.notify(), you set data['timestamp'] = notification.commit_time.isoformat() or self.timestamp.isoformat() for trades. This converts the timestamp to a string (e.g., "2025-03-13T12:00:00Z").
+
+Template: In notification.html, <small>{{ notification.timestamp|timesince }} ago</small> expects notification.timestamp to be a datetime object, not a string. When it tries to access .year on a string, it crashes.
+
+Fix: We need to pass the timestamp as a datetime object or parse it correctly before timesince.
+
+Fixing the Issue + Improving Content
+Updated WorkflowMixin
+We’ll:
+Keep timestamp as a datetime object in the data dictionary.
+
+Generate richer content messages like “You bought 5268.8467 TURBO for 6.00 USD.”
+
+python
+
+class WorkflowMixin:
+    def notify(self, event, content=None, exception_id=None):
+        from django.contrib.contenttypes.models import ContentType
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        import logging
+
+        logger = logging.getLogger(__name__)
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        obj_id = self.pk
+
+        # Generate descriptive content
+        if content is None:
+            if content_type.model == 'order':
+                action = 'bought' if self.order_type == 'BUY' else 'sold'
+                amount = 'USD' if self.ticker != 'USDT' else self.ticker
+                content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
+            elif content_type.model == 'cryptocurency':
+                if event == Notification.WorkflowEvents.CREATED:
+                    content = f"New currency {self.ticker} added with balance {self.balance}"
+                elif event == Notification.WorkflowEvents.UPDATED:
+                    content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+                elif event == Notification.WorkflowEvents.DELETED:
+                    content = f"Currency {self.ticker} removed"
+                else:
+                    content = f"{self.ticker} event {event} occurred"
+            else:
+                content = f"{self.__class__.__name__} {obj_id} - Event {event}"
+
+        notification = Notification(
+            content_type=content_type,
+            object_id=obj_id,
+            content=content,
+            event=event,
+            exception_id=exception_id,
+        )
+        notification.save()
+        logger.info(f"Notification created: {notification}")
+
+        channel_layer = get_channel_layer()
+        group_name = 'trade_notifications' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'crypto_updates'
+        message_type = 'trade_update' if event == Notification.WorkflowEvents.TRADE_EXECUTED else 'balance_update'
+
+        data = {
+            'id': notification.id,
+            'content': notification.content,
+            'event': notification.event,
+            'timestamp': notification.commit_time,  # Keep as datetime object
+        }
+        if event == Notification.WorkflowEvents.TRADE_EXECUTED and hasattr(self, 'to_dict'):
+            trade_data = self.to_dict()
+            trade_data['timestamp'] = self.timestamp  # Keep as datetime
+            data = trade_data
+
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                'data': json.dumps(data, default=str),  # Convert datetime to string only when sending
+            }
+        )
+
+        notification.is_sent = True
+        notification.save()
+
+Changes:
+Timestamp: Changed notification.commit_time.isoformat() to notification.commit_time (and self.timestamp for trades) to keep it as a datetime object in data.
+
+JSON Serialization: Added default=str to json.dumps() to handle datetime objects when sending over WebSocket (converts them to ISO strings only at the last step).
+
+Content: Enhanced for Order to say, e.g., “You bought 5268.8467 TURBO for 6.00 USD at 0.001138 per unit on 2025-03-13...”.
+
+Updated NotificationConsumer
+Ensure the timestamp is passed correctly:
+python
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = json.loads(event['data'])  # Dict with 'content', 'timestamp', etc.
+        # Ensure timestamp is a string for template (already handled by json.dumps)
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': data})
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+Note: json.loads converts the timestamp string back to a string, but the template’s timesince filter can handle ISO strings if needed—we’ll adjust the template next.
+
+Updated notification.html
+Handle the timestamp as a string or datetime:
+html
+
+<!-- trading/templates/partials/notification.html -->
+{% load static %}
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle"
+             src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>{{ notification.timestamp|timesince }} ago</small>
+            </p>
+            <span>{{ notification.content }} <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+Fix: The timesince filter works with both datetime objects and ISO strings (Django parses them automatically), so this should now work since notification.timestamp is an ISO string from json.loads.
+
+Why This Fixes It
+Timestamp Type: Keeping timestamp as a datetime object until json.dumps (with default=str) ensures it’s only a string when sent over WebSocket, and the template can process it.
+
+Error Avoided: No attempt to access .year on a string—timesince handles the ISO string format ("2025-03-13T12:00:00Z") correctly.
+
+Testing
+Save an Order:
+python
+
+from django.utils import timezone
+order = Order(order_type='BUY', quantity='5268.8467', ticker='TURBO', price='0.001138', value='6.00', timestamp=timezone.now())
+order.save()
+
+Expected Content: “You bought 5268.8467 TURBO for 6.00 USD at 0.001138 per unit on 2025-03-13...”
+
+UI: <small>0 minutes ago</small> (or similar).
+
+Check Logs:
+Should see: INFO ... Notification created: You bought 5268.8467 TURBO....
+
+WebSocket:
+Message: {"type": "trade_update", "data": "<li...You bought 5268.8467 TURBO..."}.
+
+If It Still Fails
+Error Persists: Share the new traceback—might be an issue with how to_dict() handles timestamp.
+
+Timestamp Format: If timesince still chokes, add a custom filter:
+python
+
+# trading/templatetags/notification_tags.py
+from django import template
+from datetime import datetime
+
+register = template.Library()
+
+@register.filter
+def parse_timesince(value):
+    if isinstance(value, str):
+        return datetime.fromisoformat(value.replace('Z', '+00:00'))
+    return value
+
+Update template: <small>{{ notification.timestamp|parse_timesince|timesince }} ago</small>.
+
+This should resolve the error and give you those detailed notifications—let me know how it goes!
+
+In the WorkflowMixin.notify method, I need to separate each content_type.model to behave and send message with their needs, below is example of what I need:if the model was order: notification will be sent to the consumer like it is doing it now:group_name = 'trade_notification'
+message_type = 'trade_update'
+data will be converted to json before sending to the client.
+
+if the model was cryptocurency: then the message will not be notification, it will be the instance data that will be added to the current balances table at the beginning, except an updated USD value of the whole coins will be included as total, the header of the table will contain an updated total of the USD values live accumulated from the current price of the coins.
+
+current code:import json
+from decimal import Decimal, ROUND_HALF_UP
+from django.forms import model_to_dicttrading/models.pyclass WorkflowMixin:
+    def notify(self, event, content=None, exception_id=None):
+        from django.contrib.contenttypes.models import ContentType
+        from src.market.models import Notification
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        import logging
+
+    logger = logging.getLogger(__name__)
+    content_type = ContentType.objects.get_for_model(self.__class__)
+    obj_id = self.pk
+    order_data = {}
+    crypto_data = {}
+
+    # Generate descriptive content
+    channel_layer = get_channel_layer()
+
+    if content is None:
+        if content_type.model == 'order':
+            action = 'bought' if self.order_type == 'BUY' else 'sold'
+            amount = 'USD' if self.ticker != 'USDT' else self.ticker
+            content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
+
+            order_data = {
+                'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+
+            }
+
+        elif content_type.model == 'cryptocurency':
+            # group_name = 'crypto_updates'
+            # message_type = 'balance_update'
+
+            if event == Notification.WorkflowEvents.CREATED:
+                content = f"New currency {self.ticker} added with balance {self.balance}"
+            elif event == Notification.WorkflowEvents.UPDATED:
+                content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+            elif event == Notification.WorkflowEvents.DELETED:
+                content = f"Currency {self.ticker} removed"
+            else:
+                content = f"{self.ticker} event {event} occurred"
+            crypto_data = {
+                'name': self.name,
+                'ticker': self.ticker,
+                'balance': self.balance,
+                'pnl': self.pnl
+
+            }
+        else:
+            content = f"{self.__class__.__name__} {obj_id} - Event {event}"
+
+    notification = Notification(
+        content_type=content_type,
+        object_id=obj_id,
+        content=content,
+        event=event,
+        exception_id=exception_id,
+    )
+    notification.save()
+    logger.info(f"Notification created: {notification}")
+
+    data = {
+        **crypto_data,
+        'id': notification.id,
+        'ticker': f'{self.ticker}',
+        'content': notification.content,
+        'event': notification.event,
+        'timestamp': notification.commit_time,  # Keep as datetime object
+    }
+    # if event == Notification.WorkflowEvents.TRADE_EXECUTED and hasattr(self, 'to_dict'):
+    #     trade_data = self.to_dict()
+    #     trade_data['timestamp'] = self.timestamp  # Keep as datetime
+    #     data = trade_data
+
+    order_group_name = 'trade_notifications'
+    order_message_type = 'trade_update'
+    crypto_group_name = 'balances_notifications'
+    crypto_message_type = 'balances_update'
+
+    async_to_sync(channel_layer.group_send)(
+        crypto_group_name,
+        {
+            'type': crypto_message_type,
+            # Convert datetime to string only when sending
+            'data': json.dumps(
+                {
+                    **crypto_data,
+                    'id': notification.id,
+                    'ticker': f'{self.ticker}',
+                    'content': notification.content,
+                    'event': notification.event,
+                    'timestamp': notification.commit_time,
+                }, default=str),
+        }
+    )
+    async_to_sync(channel_layer.group_send)(
+        order_group_name,
+        {
+            'type': order_message_type,
+            # Convert datetime to string only when sending
+            'data': json.dumps(
+                {
+                    **order_data,
+                    'id': notification.id,
+                    'ticker': f'{self.ticker}',
+                    'content': notification.content,
+                    'event': notification.event,
+                    'timestamp': notification.commit_time,
+                }, default=str),
+        }
+    )
+
+    notification.is_sent = True
+    notification.save()
+
+Let’s refine your WorkflowMixin.notify method to handle Order and CryptoCurency models differently, as per your requirements. I’ll also update the WebSocket consumers and template to support your new setup, including adding a live total USD value in the balances table header. Below, I’ll modify the code block by block, keeping it simple and aligned with your example.
+Updated WorkflowMixin.notify
+We’ll separate the logic for Order and CryptoCurency, sending tailored messages to their respective WebSocket groups.
+python
+
+# trading/models.py
+import json
+from decimal import Decimal, ROUND_HALF_UP
+from django.contrib.contenttypes.models import ContentType
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import logging
+from .models import Notification, CryptoCurency, Kline  # Ensure Kline is imported
+
+class WorkflowMixin:
+    def notify(self, event, content=None, exception_id=None):
+        logger = logging.getLogger(__name__)
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        obj_id = self.pk
+        channel_layer = get_channel_layer()
+
+        # Generate descriptive content and prepare data
+        if content_type.model == 'order':
+            # Order-specific logic
+            action = 'bought' if self.order_type == 'BUY' else 'sold'
+            amount = 'USD' if self.ticker != 'USDT' else self.ticker
+            content = f"You {action} {self.quantity} {self.ticker} for {self.value} {amount} at {self.price} per unit on {self.timestamp}"
+            
+            data = {
+                'order_type': self.order_type,
+                'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'ticker': self.ticker,
+                'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'timestamp': self.timestamp,  # Keep as datetime
+            }
+            group_name = 'trade_notifications'
+            message_type = 'trade_update'
+
+        elif content_type.model == 'cryptocurency':
+            # CryptoCurency-specific logic
+            if event == Notification.WorkflowEvents.CREATED:
+                content = f"New currency {self.ticker} added with balance {self.balance}"
+            elif event == Notification.WorkflowEvents.UPDATED:
+                content = f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+            elif event == Notification.WorkflowEvents.DELETED:
+                content = f"Currency {self.ticker} removed"
+            else:
+                content = f"{self.ticker} event {event} occurred"
+
+            # Calculate latest USD value for this coin
+            latest_price = float(Kline.objects.filter(symbol=f"{self.ticker}USDT").order_by('-time').first().close)
+            usd_value = float(self.balance) * latest_price
+
+            # Calculate total USD value of all coins
+            total_usd = 0.0
+            for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+                price = float(Kline.objects.filter(symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+                total_usd += float(crypto.balance) * price
+            total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+
+            data = {
+                'ticker': self.ticker,
+                'balance': f'{self.balance.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'pnl': f'{self.pnl.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+                'usd_value': f'{usd_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
+                'total_usd': f'{total_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}',
+                'event': event,
+                'timestamp': self.updated_at if hasattr(self, 'updated_at') else self.created_at,  # Assuming timestamp fields
+            }
+            group_name = 'balances_notifications'
+            message_type = 'balances_update'
+
+        else:
+            # Fallback for other models
+            content = content or f"{self.__class__.__name__} {obj_id} - Event {event}"
+            data = {
+                'content': content,
+                'event': event,
+                'timestamp': timezone.now(),
+            }
+            group_name = 'crypto_updates'
+            message_type = 'balance_update'
+
+        # Create and save notification
+        notification = Notification(
+            content_type=content_type,
+            object_id=obj_id,
+            content=content,
+            event=event,
+            exception_id=exception_id,
+        )
+        notification.save()
+        logger.info(f"Notification created: {notification}")
+
+        # Send WebSocket message
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                'data': json.dumps(data, default=str),  # Convert datetime to string only when sending
+            }
+        )
+
+        notification.is_sent = True
+        notification.save()
+
+Explanation:
+Order:
+Group: trade_notifications
+
+Message Type: trade_update
+
+Data: Detailed trade info (e.g., quantity, price) as a JSON string.
+
+CryptoCurency:
+Group: balances_notifications
+
+Message Type: balances_update
+
+Data: Instance data (ticker, balance, PNL) plus usd_value for this coin and total_usd for all coins, added to the balances table.
+
+Fallback: Other models use crypto_updates with basic data.
+
+Updated consumers.py
+Add a new BalancesConsumer and adjust NotificationConsumer:
+python
+
+# trading/consumers.py
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.template.loader import render_to_string
+from asgiref.sync import sync_to_async
+import json
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = json.loads(event['data'])
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': data})
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+class BalancesConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('balances_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('balances_notifications', self.channel_name)
+
+    async def balances_update(self, event):
+        data = json.loads(event['data'])
+        # Render a single row for the table
+        row_html = await sync_to_async(render_to_string)('partials/balance_row.html', {'crypto': data})
+        # Send row HTML and total USD separately
+        await self.send(text_data=json.dumps({
+            'type': 'balances_update',
+            'row': row_html,
+            'total_usd': data['total_usd']
+        }))
+
+# BalanceConsumer remains for full table updates if needed
+
+New balance_row.html
+For individual row updates:
+html
+
+<!-- trading/templates/partials/balance_row.html -->
+<tr>
+    <td>{{ crypto.ticker }}</td>
+    <td>{{ crypto.balance }}</td>
+    <td>{{ crypto.usd_value }}</td>
+    <td>{{ crypto.pnl }}</td>
+</tr>
+
+Updated index.html
+Add WebSocket for balances and update the table header:
+html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #notifications { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        #notification-list { list-style: none; padding: 0; }
+    </style>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+</head>
+<body>
+    <h1>Trading Dashboard</h1>
+    <h2>Total USD Worth: <span id="total-usd" hx-ext="ws" ws-connect="/ws/crypto/" hx-ws="total_usd_update:innerHTML">0.00</span></h2>
+
+    <table hx-ext="ws" ws-connect="/ws/balances/">
+        <thead>
+            <tr hx-ws="balances_update:innerHTML:#total-usd">
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances" hx-ws="balances_update:afterbegin">
+            <tr><td colspan="4">Loading balances...</td></tr>
+        </tbody>
+    </table>
+
+    <div id="notifications">
+        <h3>Notifications</h3>
+        <ul id="notification-list" hx-ext="ws" ws-connect="/ws/notifications/" hx-ws="trade_update:afterbegin">
+            <li class="py-2 mb-1 border-bottom">No notifications yet.</li>
+        </ul>
+    </div>
+
+    <button hx-get="/test-websocket/" hx-target="#notification-list" hx-swap="beforebegin">Test WebSocket</button>
+</body>
+</html>
+
+Updated routing.py
+Add the new balances endpoint:
+python
+
+# trading/routing.py
+from django.urls import re_path
+from . import consumers
+
+websocket_urlpatterns = [
+    re_path(r'ws/crypto/$', consumers.BalanceConsumer.as_asgi()),
+    re_path(r'ws/notifications/$', consumers.NotificationConsumer.as_asgi()),
+    re_path(r'ws/balances/$', consumers.BalancesConsumer.as_asgi()),
+]
+
+Testing
+Order:
+python
+
+order = Order(order_type='BUY', quantity=Decimal('5268.8467'), ticker='TURBO', price=Decimal('0.001138'), value=Decimal('6.00'), timestamp=timezone.now())
+order.save()
+
+Notification: “You bought 5268.847 TURBO for 6.000 USD...”
+
+WebSocket: /ws/notifications/ sends trade update.
+
+CryptoCurency:
+python
+
+crypto = CryptoCurency(ticker='BTC', balance=Decimal('1.5'), pnl=Decimal('100.00'))
+crypto.save()
+
+Balances table: New row added at top with BTC data.
+
+Total USD: Updates in header (e.g., “15075.50” if BTC price is ~$10,000).
+
+Explanation
+Order: Sends detailed trade info to trade_notifications, rendered as a notification.
+
+CryptoCurency: Sends instance data + total_usd to balances_notifications, adding a row to the table and updating the total USD in the header.
+
+Consumers: BalancesConsumer handles row-by-row updates and total USD separately.
+
+Let me know if you need tweaks (e.g., initial balances load, formatting)!
+
+I have 5000 coins save in a json file like this:
+[
+    {
+        "coin": "BTCBitcoin",
+        "rank": 1,
+        "price": 83956.98,
+        "change_24h": "+2.35%",
+        "market_cap": "1.67T USD",
+        "volume24h": "28.37B USD",
+        "circ_supply": 19.84,
+        "category": "Cryptocurrencies, Layer 1",
+        "logo": "coins\XTVCBTC.svg",
+        "ticker": "BTC"
+    },
+    {
+        "coin": "ETHEthereum",
+        "rank": 2,
+        "price": 1918.98,
+        "change_24h": "+1.41%",
+        "market_cap": "231.46B USD",
+        "volume24h": "11.51B USD",
+        "circ_supply": 120.62,
+        "category": "Smart contract platforms, Layer 1",
+        "logo": "coins\XTVCETH.svg",
+        "ticker": "ETH"
+    },
+    {
+        "coin": "USDTTether USDt",
+        "rank": 3,
+        "price": 0.99993,
+        "change_24h": "+0.03%",
+        "market_cap": "143.45B USD",
+        "volume24h": "57.63B USD",
+        "circ_supply": 143.47,
+        "category": "Stablecoins, Asset-backed Stablecoins",
+        "logo": "coins\XTVCUSDT.svg",
+        "ticker": "USDT"
+    },more coins]
+I need a few things:I need a model called CryptoCategory to create categories for the coins
+Revise my Symbol model to include all the fields in the sample and for the category, I need a many to many relation with the crypto_category model.
+I have this sample in the admin, it is something I have a script for post_migration process, to restore all symbols in case I reset the db or delete then re-migrate, I need to restore the initial data:
+
+INITIAL_DATA = [
+    {"id": 1, "name": "Products", "slug": "products", "rank": 1},
+    {"id": 2, "name": "Grocery", "slug": "grocery", "rank": 2},
+    {"id": 3, "name": "Electronics", "slug": "electronics", "rank": 8},
+    {"id": 4, "name": "Home", "slug": "home", "rank": 14},
+    {"id": 5, "name": "Accessories", "slug": "accessories", "rank": 20},
+    {"id": 6, "name": "Goodies", "slug": "goodies", "rank": 26},
+    {"id": 7, "name": "Vapery", "slug": "vapery", "rank": 32},
+]@admin
+.register(ProductGroup)
+class ProductGroupAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'slug', 'user', 'created')
+    ordering = ('created', )
+    list_filter = ('name', )
+
+@staticmethod
+def initial_data():
+    for index, group in enumerate(INITIAL_DATA):
+        grp = ProductGroup.objects.filter(slug=(group['slug'])).first()
+        if not grp:
+            user = User.objects.get(email='root@root.com')
+            grp = ProductGroup(**group)
+            grp.user = user
+            grp.image = f"initial/{group['slug']}.jpg"
+            grp.save(force_insert=True)
+        else:
+            grp.slug = group['slug']
+            grp.save(force_update=True)
+
+I need a periodic task to update the symbol every  minutes, to update rank, price, 24h vol and other data
+
+Let’s tackle your requirements step-by-step: creating a CryptoCategory model, revising your Symbol model, setting up initial data restoration in the admin, and adding a periodic task to update the Symbol data every few minutes. I’ll assume your JSON file (coins.json) is in a known location (e.g., trading/data/coins.json) and build from there.
+1. CryptoCategory Model
+This model will store categories like "Cryptocurrencies," "Stablecoins," etc., for your coins.
+python
+
+# trading/models.py
+from django.db import models
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
+
+class CryptoCategory(models.Model):
+    name = models.CharField(_('name'), max_length=100, unique=True)
+    slug = models.SlugField(_('slug'), max_length=100, unique=True)
+    rank = models.PositiveIntegerField(_('rank'), default=0, help_text="Order of importance")
+
+    class Meta:
+        verbose_name = _('crypto category')
+        verbose_name_plural = _('crypto categories')
+        ordering = ['rank', 'name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+Fields: name (e.g., "Stablecoins"), slug (e.g., "stablecoins"), rank (for ordering).
+
+Auto-Slug: Generates slug from name if not provided.
+
+2. Revised Symbol Model
+Revise your Symbol model (assuming it’s called Symbol, adjust if it’s CryptoCurency) to include all fields from the JSON and a many-to-many relationship with CryptoCategory.
+python
+
+# trading/models.py
+class Symbol(models.Model, WorkflowMixin):  # Include WorkflowMixin if still using it
+    coin = models.CharField(_('coin'), max_length=100, unique=True)  # e.g., "BTCBitcoin"
+    ticker = models.CharField(_('ticker'), max_length=10, unique=True)  # e.g., "BTC"
+    rank = models.PositiveIntegerField(_('rank'), default=0)
+    price = models.DecimalField(_('price'), max_digits=15, decimal_places=2, default=0.00)
+    change_24h = models.CharField(_('24h change'), max_length=10, blank=True)  # e.g., "+2.35%"
+    market_cap = models.CharField(_('market cap'), max_length=20, blank=True)  # e.g., "1.67T USD"
+    volume_24h = models.CharField(_('24h volume'), max_length=20, blank=True)  # e.g., "28.37B USD"
+    circ_supply = models.DecimalField(_('circulating supply'), max_digits=15, decimal_places=2, default=0.00)
+    categories = models.ManyToManyField(CryptoCategory, verbose_name=_('categories'), blank=True)
+    logo = models.CharField(_('logo'), max_length=255, blank=True)  # e.g., "coins\XTVCBTC.svg"
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('symbol')
+        verbose_name_plural = _('symbols')
+        ordering = ['rank', 'ticker']
+
+    def __str__(self):
+        return f"{self.ticker} ({self.coin})"
+
+Fields: Matches your JSON structure.
+
+ManyToMany: categories links to CryptoCategory (e.g., BTC can be in "Cryptocurrencies" and "Layer 1").
+
+Notes: Adjust max_digits/decimal_places if your data needs more precision.
+
+3. Initial Data Restoration in Admin
+Adapt your ProductGroupAdmin example for Symbol and CryptoCategory. Place the JSON file in trading/data/coins.json and create a script to load it post-migration.
+SymbolAdmin
+python
+
+# trading/admin.py
+from django.contrib import admin
+from .models import Symbol, CryptoCategory
+import json
+import os
+from django.conf import settings
+
+@admin.register(Symbol)
+class SymbolAdmin(admin.ModelAdmin):
+    list_display = ('ticker', 'coin', 'rank', 'price', 'updated_at')
+    ordering = ('rank', 'ticker')
+    list_filter = ('categories',)
+
+    @staticmethod
+    def initial_data():
+        json_path = os.path.join(settings.BASE_DIR, 'trading', 'data', 'coins.json')
+        if not os.path.exists(json_path):
+            return
+
+        with open(json_path, 'r') as f:
+            coins = json.load(f)
+
+        for coin_data in coins:
+            symbol = Symbol.objects.filter(ticker=coin_data['ticker']).first()
+            if not symbol:
+                # Create new symbol
+                symbol = Symbol(
+                    coin=coin_data['coin'],
+                    ticker=coin_data['ticker'],
+                    rank=coin_data['rank'],
+                    price=coin_data['price'],
+                    change_24h=coin_data['change_24h'],
+                    market_cap=coin_data['market_cap'],
+                    volume_24h=coin_data['volume24h'],
+                    circ_supply=coin_data['circ_supply'],
+                    logo=coin_data['logo'],
+                )
+                symbol.save(force_insert=True)
+            else:
+                # Update existing symbol
+                symbol.coin = coin_data['coin']
+                symbol.rank = coin_data['rank']
+                symbol.price = coin_data['price']
+                symbol.change_24h = coin_data['change_24h']
+                symbol.market_cap = coin_data['market_cap']
+                symbol.volume_24h = coin_data['volume24h']
+                symbol.circ_supply = coin_data['circ_supply']
+                symbol.logo = coin_data['logo']
+                symbol.save(force_update=True)
+
+            # Handle categories
+            category_names = coin_data['category'].split(', ')
+            for cat_name in category_names:
+                category, _ = CryptoCategory.objects.get_or_create(
+                    name=cat_name,
+                    defaults={'slug': slugify(cat_name), 'rank': symbol.rank}
+                )
+                symbol.categories.add(category)
+
+@admin.register(CryptoCategory)
+class CryptoCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'rank')
+    ordering = ('rank', 'name')
+
+Post-Migration Signal
+Create a signal to run initial_data after migrations:
+python
+
+# trading/apps.py
+from django.apps import AppConfig
+
+class TradingConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'trading'
+
+    def ready(self):
+        from django.db.models.signals import post_migrate
+        from .admin import SymbolAdmin
+
+        def load_initial_data(sender, **kwargs):
+            SymbolAdmin.initial_data()
+
+        post_migrate.connect(load_initial_data, sender=self)
+
+Update settings.py:
+python
+
+INSTALLED_APPS = [
+    ...
+    'trading.apps.TradingConfig',
+    ...
+]
+
+How It Works: After python manage.py migrate, it loads coins.json, creates/updates Symbol instances, and links categories.
+
+4. Periodic Task to Update Symbols
+Use Celery to update Symbol data every 5 minutes. Assuming you have an external API or the JSON updates periodically.
+Install Celery
+bash
+
+pip install celery redis
+
+Celery Config
+python
+
+# trading/celery.py
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trading.settings')
+
+app = Celery('trading')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+
+Settings
+python
+
+# trading/settings.py
+CELERY_BROKER_URL = 'redis://72.16.10.8:6379/0'  # Adjust to your Redis
+CELERY_RESULT_BACKEND = 'redis://72.16.10.8:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'update-symbols-every-5-minutes': {
+        'task': 'trading.tasks.update_symbols',
+        'schedule': 300.0,  # 5 minutes in seconds
+    },
+}
+
+Task
+python
+
+# trading/tasks.py
+from celery import shared_task
+import json
+import os
+from django.conf import settings
+from .models import Symbol, CryptoCategory
+from django.utils.text import slugify
+
+@shared_task
+def update_symbols():
+    json_path = os.path.join(settings.BASE_DIR, 'trading', 'data', 'coins.json')
+    if not os.path.exists(json_path):
+        return
+
+    with open(json_path, 'r') as f:
+        coins = json.load(f)
+
+    for coin_data in coins:
+        symbol = Symbol.objects.filter(ticker=coin_data['ticker']).first()
+        if symbol:
+            # Update fields
+            symbol.rank = coin_data['rank']
+            symbol.price = coin_data['price']
+            symbol.change_24h = coin_data['change_24h']
+            symbol.market_cap = coin_data['market_cap']
+            symbol.volume_24h = coin_data['volume24h']
+            symbol.circ_supply = coin_data['circ_supply']
+            symbol.save()  # Triggers WorkflowMixin.notify if included
+
+            # Update categories
+            symbol.categories.clear()
+            category_names = coin_data['category'].split(', ')
+            for cat_name in category_names:
+                category, _ = CryptoCategory.objects.get_or_create(
+                    name=cat_name,
+                    defaults={'slug': slugify(cat_name), 'rank': symbol.rank}
+                )
+                symbol.categories.add(category)
+
+Run Celery
+Start Redis (if not already running).
+
+Run Celery worker:
+bash
+
+celery -A trading worker -l info
+
+Run Celery Beat (for scheduling):
+bash
+
+celery -A trading beat -l info
+
+Notes: Replace JSON loading with an API call (e.g., CoinGecko) if your data source updates dynamically:
+python
+
+import requests
+@shared_task
+def update_symbols():
+    response = requests.get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd')
+    coins = response.json()
+    # Map API fields to Symbol model
+
+Testing
+Migrate:
+bash
+
+python manage.py makemigrations
+python manage.py migrate
+
+Check Admin: Reset DB, migrate, and see Symbol and CryptoCategory populated.
+
+Periodic Update: Update coins.json, wait 5 minutes, and verify Symbol changes.
+
+Let me know if you need API integration or further tweaks!
+
+going back to WorkflowMixin.notify, the mechanism is well constructed and sends notification. The problem is, to create and ship data to the client, every model has its own structure, for this implementation I have to implement an elif to check every single model and create payload for them.
+I want to create the following:I need to create a couple of models and classes for the workflow to work for every model on its own:
+-- WorkflowInstnace abstract model: creates extra field to basically convert the instance of each model into a dict or json format to be used as data.
+  -- Workflow mixin methods such as the one we have with notify, only add other methods such as created data so that I can use for adding rows to table, manipulating data in the dom like updating totals and charts.. etc. and clean the current one and have each model that inherit from this, create their own events and ship it.
+-- create a method template to fire the event on the workflow, for example:
+class CryptoCurrency(models.Model):fields def send_event(self):
+ # this event is to send the newly created crypto to be added to the list of cryptos
+
+class Order(models.Model):
+    # fields
+    def send_event(self):
+        # this event is to send the newly created order to be added to the list of orders and trigger a notification at the same timeThis way my app will behave more dynamically and without any headaches
+
+Your idea to make WorkflowMixin.notify more modular and dynamic by abstracting the workflow logic and letting each model define its own event-handling behavior is spot-on. This will eliminate the need for elif chains in notify and make the system more scalable and maintainable. Let’s implement this step-by-step with an abstract WorkflowInstance model, an enhanced WorkflowMixin with new methods, and a send_event template for models like CryptoCurrency and Order.
+Here’s the plan:
+Abstract WorkflowInstance Model: Adds a method to convert instances to a dict/JSON payload.
+
+Enhanced WorkflowMixin: Cleans up notify, adds methods like create_data, and supports DOM updates (e.g., adding rows, updating totals).
+
+Model-Specific send_event: Each model (e.g., CryptoCurrency, Order) defines its own event logic.
+
+1. Abstract WorkflowInstance Model
+This will be an abstract base class that provides a standard way to convert model instances to a payload.
+python
+
+# trading/models.py
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
+import json
+
+class WorkflowInstance(models.Model):
+    class Meta:
+        abstract = True
+
+    def to_payload(self):
+        """Convert instance to a dict/JSON-ready payload."""
+        data = {
+            'model': self._meta.model_name,
+            'id': self.pk,
+        }
+        # Add model-specific fields via subclass override or generic approach
+        for field in self._meta.fields:
+            if field.name not in ['id']:  # Exclude id, already added
+                value = getattr(self, field.name)
+                data[field.name] = value
+        return data
+
+    def get_content(self, event):
+        """Generate a descriptive message for the event (override in subclasses if needed)."""
+        return f"{self._meta.model_name} {self.pk} - Event {event}"
+
+to_payload: Converts the instance to a dict with all fields (customizable per model).
+
+get_content: Default content generator, overridable for specific messages.
+
+2. Enhanced WorkflowMixin
+Clean up notify and add methods like create_data for DOM manipulation.
+python
+
+# trading/models.py
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import logging
+from .models import Notification
+
+class WorkflowMixin:
+    def notify(self, event, group_name, message_type, data=None, exception_id=None):
+        """Base method to send a workflow event to WebSocket clients."""
+        logger = logging.getLogger(__name__)
+        content_type = ContentType.objects.get_for_model(self.__class__)
+
+        # Use provided data or generate it
+        payload = data or self.to_payload()
+        content = self.get_content(event)
+
+        # Create notification
+        notification = Notification(
+            content_type=content_type,
+            object_id=self.pk,
+            content=content,
+            event=event,
+            exception_id=exception_id,
+        )
+        notification.save()
+        logger.info(f"Notification created: {notification}")
+
+        # Send to WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                'data': json.dumps(payload, default=str),  # Convert datetime to string
+            }
+        )
+
+        notification.is_sent = True
+        notification.save()
+
+    def create_data(self):
+        """Default method to prepare data for creation events (e.g., adding rows)."""
+        return self.to_payload()
+
+    def update_data(self):
+        """Default method for update events (e.g., updating totals, charts)."""
+        return self.to_payload()
+
+    def send_event(self):
+        """Template method for models to override."""
+        raise NotImplementedError("Subclasses must implement send_event()")
+
+notify: Simplified to take group_name, message_type, and optional data. Uses to_payload or custom data.
+
+create_data: Prepares data for adding new rows (default uses to_payload).
+
+update_data: Prepares data for updates (e.g., totals, charts).
+
+send_event: Abstract method that each model will override.
+
+3. Model-Specific send_event Implementations
+Update CryptoCurrency (assuming it’s now Symbol) and Order to inherit from WorkflowInstance and WorkflowMixin.
+Symbol Model
+python
+
+# trading/models.py
+class Symbol(WorkflowInstance, WorkflowMixin):
+    coin = models.CharField(_('coin'), max_length=100, unique=True)
+    ticker = models.CharField(_('ticker'), max_length=10, unique=True)
+    rank = models.PositiveIntegerField(_('rank'), default=0)
+    price = models.DecimalField(_('price'), max_digits=15, decimal_places=2, default=0.00)
+    change_24h = models.CharField(_('24h change'), max_length=10, blank=True)
+    market_cap = models.CharField(_('market cap'), max_length=20, blank=True)
+    volume_24h = models.CharField(_('24h volume'), max_length=20, blank=True)
+    circ_supply = models.DecimalField(_('circulating supply'), max_digits=15, decimal_places=2, default=0.00)
+    categories = models.ManyToManyField(CryptoCategory, verbose_name=_('categories'), blank=True)
+    logo = models.CharField(_('logo'), max_length=255, blank=True)
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
+    def get_content(self, event):
+        if event == Notification.WorkflowEvents.CREATED:
+            return f"New currency {self.ticker} added with price ${self.price}"
+        elif event == Notification.WorkflowEvents.UPDATED:
+            return f"{self.ticker} price updated to ${self.price}, rank now {self.rank}"
+        elif event == Notification.WorkflowEvents.DELETED:
+            return f"Currency {self.ticker} removed"
+        return f"{self.ticker} event {event} occurred"
+
+    def send_event(self):
+        """Send event based on the workflow state."""
+        from .models import Notification
+        event = Notification.WorkflowEvents.CREATED if not self.pk else Notification.WorkflowEvents.UPDATED
+        
+        # Calculate total USD for updates
+        total_usd = 0.0
+        for crypto in Symbol.objects.exclude(ticker='USDT'):
+            total_usd += float(crypto.price) * float(crypto.circ_supply)
+        total_usd += float(Symbol.objects.get(ticker='USDT').circ_supply)
+
+        data = self.create_data()
+        data['total_usd'] = f"{total_usd:.2f}"
+        
+        self.notify(
+            event=event,
+            group_name='balances_notifications',
+            message_type='balances_update',
+            data=data
+        )
+
+Order Model
+python
+
+# trading/models.py
+class Order(WorkflowInstance, WorkflowMixin):
+    order_type = models.CharField(_('order type'), max_length=10)
+    quantity = models.DecimalField(_('quantity'), max_digits=15, decimal_places=4)
+    ticker = models.CharField(_('ticker'), max_length=10)
+    price = models.DecimalField(_('price'), max_digits=15, decimal_places=6)
+    value = models.DecimalField(_('value'), max_digits=15, decimal_places=2)
+    timestamp = models.DateTimeField(_('timestamp'), default=timezone.now)
+
+    def get_content(self, event):
+        action = 'bought' if self.order_type == 'BUY' else 'sold'
+        return f"You {action} {self.quantity} {self.ticker} for {self.value} USD at {self.price} per unit on {self.timestamp}"
+
+    def to_payload(self):
+        """Override to_payload for Order-specific data."""
+        return {
+            'order_type': self.order_type,
+            'quantity': f"{self.quantity.quantize(Decimal('0.001'))}",
+            'ticker': self.ticker,
+            'price': f"{self.price.quantize(Decimal('0.001'))}",
+            'value': f"{self.value.quantize(Decimal('0.01'))}",
+            'timestamp': self.timestamp,
+        }
+
+    def send_event(self):
+        """Send trade event and trigger notification."""
+        from .models import Notification
+        event = Notification.WorkflowEvents.TRADE_EXECUTED
+        self.notify(
+            event=event,
+            group_name='trade_notifications',
+            message_type='trade_update',
+            data=self.to_payload()
+        )
+
+Updated Signals
+Trigger send_event on save/delete:
+python
+
+# trading/models.py
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Symbol)
+@receiver(post_save, sender=Order)
+def notify_on_save(sender, instance, created, **kwargs):
+    instance.send_event()
+
+@receiver(post_delete, sender=Symbol)
+@receiver(post_delete, sender=Order)
+def notify_on_delete(sender, instance, **kwargs):
+    instance.notify(
+        event=Notification.WorkflowEvents.DELETED,
+        group_name='balances_notifications' if isinstance(instance, Symbol) else 'trade_notifications',
+        message_type='balances_update' if isinstance(instance, Symbol) else 'trade_update'
+    )
+
+Why This Works
+Dynamic: Each model (Symbol, Order) defines its own send_event, specifying group_name, message_type, and data.
+
+No Elif: notify is generic—models handle their own logic.
+
+Payload Flexibility: to_payload can be overridden for custom data structures.
+
+DOM Updates: Symbol.send_event adds rows and updates totals; Order.send_event triggers notifications.
+
+Testing
+Create Symbol:
+python
+
+symbol = Symbol(ticker='BTC', price=83956.98, circ_supply=19.84, coin='BTCBitcoin')
+symbol.save()
+
+Adds row to balances table, updates total USD.
+
+Create Order:
+python
+
+order = Order(order_type='BUY', quantity=Decimal('100'), ticker='BTC', price=Decimal('83956.98'), value=Decimal('8395698'))
+order.save()
+
+Sends trade notification.
+
+Let me know if you need to refine the payload or add more methods!
+
+The code is better and faster, payloads are sent correctly, only the order payload to notification doesn't work as I expect, can you get the context from my old Worflow.notify, for order notification I didn't have a problem before:
+        if content_type.model == 'order':
+            print('Order triggered')
+            # Order-specific logic
+            action = 'bought' if self.order_type == 'BUY' else 'sold'
+            amount = 'USD' if self.ticker != 'USDT' else self.ticker
+            # per unit on {self.timestamp}
+            content = f"You {action} {self.quantity:.2f} {self.ticker} for {self.value:.4f} {amount} at {self.price}"
+
+        group_name = 'trade_notifications'
+        message_type = 'trade_update'
+
+        notification = Notification(
+            content_type=content_type,
+            object_id=obj_id,
+            content=content,
+            event=event,
+            exception_id=exception_id,
+        )
+        data = {
+            'order_type': self.order_type,
+            'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'ticker': self.ticker,
+            'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'content': content,
+            'content_type': content_type,
+            'object_id': obj_id,
+            'event': event,
+            'exception_id': exception_id,
+            'timestamp': self.timestamp,  # Keep as datetime
+        }
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                'data': json.dumps(data, default=str),
+            }
+        )
+
+I’m glad the new setup is working faster and payloads are being sent correctly! Let’s fix the Order notification issue by aligning it with your previous WorkflowMixin.notify logic, which worked well for Order notifications. The old version sent a detailed content string and a comprehensive data payload to trade_notifications, and we’ll restore that behavior in the new send_event method for Order.
+The issue seems to be that the current Order.send_event isn’t sending the same rich content or full payload as before. We’ll update it to match the old structure, ensuring the notification displays correctly (e.g., "You bought 100.000 BTC for 8395698.0000 USD at 83956.98") and the WebSocket payload includes all necessary fields.
+Updated Order Model
+Here’s the revised Order model, incorporating the old notify logic into send_event:
+python
+
+# trading/models.py
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from decimal import Decimal, ROUND_HALF_UP
+
+class Order(WorkflowInstance, WorkflowMixin):
+    order_type = models.CharField(_('order type'), max_length=10)
+    quantity = models.DecimalField(_('quantity'), max_digits=15, decimal_places=4)
+    ticker = models.CharField(_('ticker'), max_length=10)
+    price = models.DecimalField(_('price'), max_digits=15, decimal_places=6)
+    value = models.DecimalField(_('value'), max_digits=15, decimal_places=2)
+    timestamp = models.DateTimeField(_('timestamp'), default=timezone.now)
+
+    def get_content(self, event):
+        """Generate descriptive content matching the old notify logic."""
+        action = 'bought' if self.order_type == 'BUY' else 'sold'
+        amount = 'USD' if self.ticker != 'USDT' else self.ticker
+        return f"You {action} {self.quantity:.2f} {self.ticker} for {self.value:.4f} {amount} at {self.price}"
+
+    def to_payload(self):
+        """Override to_payload to match the old detailed data structure."""
+        return {
+            'order_type': self.order_type,
+            'quantity': f'{self.quantity.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'ticker': self.ticker,
+            'price': f'{self.price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'value': f'{self.value.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)}',
+            'content': self.get_content(Notification.WorkflowEvents.TRADE_EXECUTED),
+            'content_type': str(ContentType.objects.get_for_model(self.__class__)),
+            'object_id': self.pk,
+            'event': Notification.WorkflowEvents.TRADE_EXECUTED,
+            'exception_id': None,  # Adjust if you use this
+            'timestamp': self.timestamp,  # Keep as datetime
+        }
+
+    def send_event(self):
+        """Send trade event with detailed notification payload."""
+        from .models import Notification
+        event = Notification.WorkflowEvents.TRADE_EXECUTED
+        self.notify(
+            event=event,
+            group_name='trade_notifications',
+            message_type='trade_update',
+            data=self.to_payload()
+        )
+
+Changes:
+get_content: Restored the old formatting logic (e.g., "You bought 100.00 BTC for 8395698.0000 USD at 83956.98").
+
+to_payload: Matches the old data structure with all fields, including content, content_type, etc., formatted as strings where needed.
+
+send_event: Uses the updated to_payload to send the full payload to trade_notifications.
+
+Verify NotificationConsumer
+Ensure it handles the payload correctly:
+python
+
+# trading/consumers.py
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('trade_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('trade_notifications', self.channel_name)
+
+    async def trade_update(self, event):
+        data = json.loads(event['data'])  # Full payload from Order.to_payload()
+        html = await sync_to_async(render_to_string)('partials/notification.html', {'notification': data})
+        await self.send(text_data=json.dumps({
+            'type': 'trade_update',
+            'data': html
+        }))
+
+Confirmed: This should work with the old payload structure—no changes needed here.
+
+Updated notification.html
+Ensure the template uses the content field correctly:
+html
+
+<!-- trading/templates/partials/notification.html -->
+{% load static %}
+<li class="py-2 mb-1 border-bottom">
+    <a href="javascript:void(0);" class="d-flex">
+        <img class="avatar rounded-circle"
+             src="{% static 'assets/images/coin/BTC.png' %}" alt="">
+        <div class="flex-fill ms-2">
+            <p class="d-flex justify-content-between mb-0">
+                <span class="font-weight-bold">Trade Notification</span>
+                <small>{{ notification.timestamp|timesince }} ago</small>
+            </p>
+            <span>{{ notification.content }} <span class="badge bg-success">Add</span></span>
+        </div>
+    </a>
+</li>
+
+Confirmed: The content field (e.g., "You bought 100.00 BTC for 8395698.0000 USD at 83956.98") is displayed as expected.
+
+Testing
+Create an Order:
+python
+
+from decimal import Decimal
+from django.utils import timezone
+order = Order(
+    order_type='BUY',
+    quantity=Decimal('100'),
+    ticker='BTC',
+    price=Decimal('83956.98'),
+    value=Decimal('8395698'),
+    timestamp=timezone.now()
+)
+order.save()
+
+Expected Output:
+Notification: “You bought 100.00 BTC for 8395698.0000 USD at 83956.98”
+
+WebSocket Payload (via ws://127.0.0.1:8000/ws/notifications/):
+json
+
+{
+    "type": "trade_update",
+    "data": "<li class=\"py-2 mb-1 border-bottom\">...</li>"
+}
+
+Raw Data Sent:
+json
+
+{
+    "order_type": "BUY",
+    "quantity": "100.000",
+    "ticker": "BTC",
+    "price": "83956.980",
+    "value": "8395698.000",
+    "content": "You bought 100.00 BTC for 8395698.0000 USD at 83956.98",
+    "content_type": "order",
+    "object_id": 1,
+    "event": 4,
+    "exception_id": null,
+    "timestamp": "2025-03-13T12:00:00Z"
+}
+
+Why This Fixes It
+Restored Logic: The old notify block for order is now fully integrated into Order.send_event and to_payload, ensuring the same detailed content and payload.
+
+Consistency: Matches your previous working version, so notifications should display as they did before.
+
+Dynamic: Still fits the new modular workflow design without elif chains.
+
+Debugging If It Still Fails
+Check Payload: Add print(json.dumps(self.to_payload(), default=str)) in send_event to verify the data.
+
+Template Issue: If the notification doesn’t show, ensure notification.content is rendered—test with <span>{{ notification.quantity }} {{ notification.ticker }}</span> to isolate fields.
+
+WebSocket: Use a WebSocket client to confirm the message matches the old format.
+
+Let me know how it works or if you need further adjustments!
+
+The notification is fixed now, but the CryptoCurrency payload is kind of a mess now, I will put all three blocks I have for CryptoCurrency and balances code along with the output from client side:
+class CryptoCurency(WorkflowInstance, WorkflowMixin):
+    name = models.CharField(max_length=120)
+    ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    description = models.TextField(blank=True, null=True)
+    # EXAMPLE =  0.25386236600000167
+    balance = models.DecimalField(max_digits=30, decimal_places=17)
+    pnl = models.DecimalField(max_digits=30, decimal_places=17, default=0)
+    active = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+def __str__(self):
+    return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
+
+def save(self, *args, **kwargs):
+    created = False
+    if self.pk is None:
+        created = True
+    self.ticker = f"{self.ticker}".upper()
+    super().save(*args, **kwargs)
+    if created:
+        print('created crypto: ', self.balance)
+    # tasks.sync_crypto_currency_quotes.delay(self.pk)
+
+def get_content(self, event):
+    if event == Notification.WorkflowEvents.CREATED:
+        return f"New currency {self.ticker} added with price ${self.balance}"
+    elif event == Notification.WorkflowEvents.UPDATED:
+        return f"{self.ticker} price updated to ${self.balance}"
+    elif event == Notification.WorkflowEvents.DELETED:
+        return f"Currency {self.ticker} removed"
+    return f"{self.ticker} event {event} occurred"
+
+def send_event(self):
+    """Send event based on the workflow state."""
+    from src.market.models import Notification
+    event = Notification.WorkflowEvents.CREATED if not self.pk else Notification.WorkflowEvents.UPDATED
+    
+    # Calculate total USD for updates
+    total_usd = 0.0
+    for crypto in Symbol.objects.exclude(ticker='USDT'):
+        total_usd += float(crypto.price) * float(crypto.circ_supply)
+    total_usd += float(Symbol.objects.get(ticker='USDT').circ_supply)
+
+    data = self.create_data()
+    data['total_usd'] = f"{total_usd:.2f}"
+    
+    self.notify(
+        event=event,
+        group_name='balances_notifications',
+        message_type='balances_update',
+        data=data
+    )
+
+@receiver
+(post_save, sender=CryptoCurency)
+@receiver
+(post_save, sender=Order)
+def notify_on_save(sender, instance, created, **kwargs):
+    instance.send_event()@receiver
+(post_delete, sender=CryptoCurency)
+@receiver
+(post_delete, sender=Order)
+def notify_on_delete(sender, instance, **kwargs):
+    instance.notify(
+        event=Notification.WorkflowEvents.DELETED,
+        group_name='balances_notifications' if isinstance(instance, CryptoCurency) else 'trade_notifications',
+        message_type='balances_update' if isinstance(instance, CryptoCurency) else 'trade_update'
+    )
+class WorkflowMixin:
+    def notify(self, event, group_name, message_type, data=None, exception_id=None):
+        """Base method to send a workflow event to WebSocket clients."""
+        from src.market.models import Notification
+        logger = logging.getLogger(name)
+        content_type = ContentType.objects.get_for_model(self.class)
+
+    # Use provided data or generate it
+    payload = data or self.to_payload()
+    content = self.get_content(event)
+
+    # Create notification
+    notification = Notification(
+        content_type=content_type,
+        object_id=self.pk,
+        content=content,
+        event=event,
+        exception_id=exception_id,
+    )
+    notification.save()
+    logger.info(f"Notification created: {notification}")
+
+    # Send to WebSocket
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': message_type,
+            'data': json.dumps(payload, default=str),  # Convert datetime to string
+        }
+    )
+
+    notification.is_sent = True
+    notification.save()
+
+class BalancesConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('balances_notifications', self.channel_name)
+        await self.accept()
+
+async def disconnect(self, close_code):
+    await self.channel_layer.group_discard('balances_notifications', self.channel_name)
+
+async def balances_update(self, event):
+    data = event['data']
+    received_data = json.loads(data)  # Dict with 'content', etc.
+
+    print('received: ', received_data)
+
+    html = await sync_to_async(render_to_string)('partials/balance.html', {'balance': received_data})
+    await self.send(text_data=html)
+
+Output:
+    Ticker	Balance	USD Value	PNL
+USDT	75.6654		0.00
+DOT	1.9138		0.00
+DOT	0.0000		0.00
+USDT	84.0727		0.00
+NEAR	3.6590		0.00
+NEAR	0.0000		0.00
+USDT	93.4141		0.00
+TRX	48.7522		0.00
+TRX	0.0000		0.00
+USDT	103.7934		0.00
+TRUMP	1.0197		0.00
+TRUMP	0.0000		0.00
+USDT	115.3260		0.00
+SUI	5.5890		0.00
+SUI	0.0000		0.00
+USDT	128.1400		0.00
+PEPE	1000000.0000		0.00
+PEPE	0.0000		0.00
+XRP	6.4105	15.00	0.00
+USDT	135.0000	135.00	0.00
+
+I’m glad the Order notification is fixed! Let’s clean up the CryptoCurency payload mess. The output shows that the USD Value and PNL columns are mostly 0.00, and the data seems inconsistent (e.g., duplicate rows for DOT, NEAR, etc.). This suggests issues with how the CryptoCurency payload is constructed and processed. The problems likely stem from:
+Payload Construction: The send_event method uses Symbol data for total_usd but doesn’t align it with CryptoCurency fields (e.g., balance vs. circ_supply, no price field in CryptoCurency).
+
+Consumer Handling: BalancesConsumer isn’t rendering the data correctly into the table, possibly due to missing usd_value calculations or template mismatches.
+
+Template: The partials/balance.html template might not be set up to handle the payload properly.
+
+Let’s fix this by aligning CryptoCurency with your Symbol model (assuming they’re related), ensuring a proper payload, and updating the consumer and template.
+Step 1: Align Models and Fix CryptoCurency
+Since your JSON data uses Symbol with price and circ_supply, but CryptoCurency uses balance and lacks price, there’s a disconnect. Let’s assume CryptoCurency tracks your holdings (with balance), and Symbol provides market data (like price). We’ll link them and calculate usd_value using Symbol.price.
+Updated CryptoCurency
+python
+
+# trading/models.py
+class CryptoCurency(WorkflowInstance, WorkflowMixin):
+    name = models.CharField(max_length=120)
+    ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    description = models.TextField(blank=True, null=True)
+    balance = models.DecimalField(max_digits=30, decimal_places=17)
+    pnl = models.DecimalField(max_digits=30, decimal_places=17, default=0)
+    active = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        self.ticker = self.ticker.upper()
+        super().save(*args, **kwargs)
+        if created:
+            print('created crypto: ', self.balance)
+
+    def get_content(self, event):
+        if event == Notification.WorkflowEvents.CREATED:
+            return f"New currency {self.ticker} added with balance {self.balance}"
+        elif event == Notification.WorkflowEvents.UPDATED:
+            return f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+        elif event == Notification.WorkflowEvents.DELETED:
+            return f"Currency {self.ticker} removed"
+        return f"{self.ticker} event {event} occurred"
+
+    def to_payload(self):
+        """Generate payload with USD value based on Symbol price."""
+        try:
+            symbol = Symbol.objects.get(ticker=self.ticker)
+            usd_value = float(self.balance) * float(symbol.price)
+        except Symbol.DoesNotExist:
+            usd_value = 0.0  # Default if no Symbol data
+
+        return {
+            'ticker': self.ticker,
+            'balance': f'{self.balance.quantize(Decimal("0.0001"))}',
+            'usd_value': f'{usd_value:.2f}',
+            'pnl': f'{self.pnl.quantize(Decimal("0.0001"))}',
+            'timestamp': self.updated,
+        }
+
+    def send_event(self):
+        """Send event with total USD calculated from all CryptoCurency instances."""
+        from .models import Notification
+        event = Notification.WorkflowEvents.CREATED if not self.pk else Notification.WorkflowEvents.UPDATED
+
+        # Calculate total USD from all CryptoCurency instances
+        total_usd = 0.0
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            try:
+                symbol = Symbol.objects.get(ticker=crypto.ticker)
+                total_usd += float(crypto.balance) * float(symbol.price)
+            except Symbol.DoesNotExist:
+                continue
+        total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+
+        data = self.to_payload()
+        data['total_usd'] = f"{total_usd:.2f}"
+
+        self.notify(
+            event=event,
+            group_name='balances_notifications',
+            message_type='balances_update',
+            data=data
+        )
+
+Changes:
+to_payload: Adds usd_value by multiplying balance with Symbol.price.
+
+send_event: Calculates total_usd using CryptoCurency.balance and Symbol.price, not circ_supply.
+
+Step 2: Update BalancesConsumer
+Adjust the consumer to send both row HTML and total USD separately:
+python
+
+# trading/consumers.py
+class BalancesConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('balances_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('balances_notifications', self.channel_name)
+
+    async def balances_update(self, event):
+        data = json.loads(event['data'])
+        print('received: ', data)
+
+        # Render row HTML
+        row_html = await sync_to_async(render_to_string)('partials/balance_row.html', {'balance': data})
+        # Send row and total USD
+        await self.send(text_data=json.dumps({
+            'type': 'balances_update',
+            'row': row_html,
+            'total_usd': data['total_usd']
+        }))
+
+Changes: Sends row (HTML for table row) and total_usd separately, avoiding full table replacement.
+
+Step 3: Update Templates
+balance_row.html (Renamed from balance.html)
+html
+
+<!-- trading/templates/partials/balance_row.html -->
+<tr>
+    <td>{{ balance.ticker }}</td>
+    <td>{{ balance.balance }}</td>
+    <td>{{ balance.usd_value }}</td>
+    <td>{{ balance.pnl }}</td>
+</tr>
+
+Updated index.html
+html
+
+<table hx-ext="ws" ws-connect="/ws/balances/">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Balance</th>
+            <th>USD Value</th>
+            <th>PNL</th>
+        </tr>
+    </thead>
+    <tbody id="balances" hx-ws="balances_update:afterbegin:#balances">
+        <tr><td colspan="4">Loading balances...</td></tr>
+    </tbody>
+</table>
+<h2>Total USD Worth: <span id="total-usd" hx-ext="ws" ws-connect="/ws/balances/" hx-ws="balances_update:innerHTML:#total-usd">0.00</span></h2>
+
+Changes: hx-ws targets #balances for row updates and #total-usd for total updates.
+
+Why This Fixes It
+Correct Data: to_payload uses Symbol.price to calculate usd_value, avoiding 0.00.
+
+No Duplicates: Each send_event adds one row; duplicate rows suggest multiple saves—check your signal logic or DB state.
+
+Total USD: Calculated from CryptoCurency holdings, not Symbol supply, matching your table intent.
+
+Testing
+Populate Symbols (from your JSON):
+python
+
+symbol = Symbol(ticker='XRP', price=Decimal('2.34'), circ_supply=Decimal('1000'), coin='XRP Ripple')
+symbol.save()
+
+Create CryptoCurency:
+python
+
+crypto = CryptoCurency(ticker='XRP', balance=Decimal('6.4105'))
+crypto.save()
+
+Expected Payload:
+json
+
+{
+    "ticker": "XRP",
+    "balance": "6.4105",
+    "usd_value": "15.00",
+    "pnl": "0.0000",
+    "timestamp": "2025-03-13T...",
+    "total_usd": "15.00"  # Assuming only XRP and USDT=0
+}
+
+Table: Adds row “XRP | 6.4105 | 15.00 | 0.0000”.
+
+Check Output: No duplicate rows, correct usd_value.
+
+Debugging If Issues Persist
+Duplicates: Add print(f"Sending event for {self.ticker}") in send_event to see if it’s called multiple times.
+
+USD Value 0.00: Ensure Symbol has data for all CryptoCurency tickers.
+
+Total USD: Verify CryptoCurency instances exist in DB (CryptoCurency.objects.all()).
+
+Let me know the new output or if something’s still off!
+
+This time it made it even worse:Ticker	Balance	USD Value	PNL
+USDT	135.0000	135.00	0.0000
+USDT	135.0000	135.00	0.0000
+NEAR	5.8916	15.55	0.0000
+NEAR	5.8916	15.55	0.0000
+NEAR	0.0000	0.00	0.0000
+NEAR	0.0000	0.00	0.0000And this is for only one creation of CrytoCurrency
+
+I apologize for the regression—it looks like we’ve introduced duplicate notifications and inconsistent data rendering for CryptoCurency. The output shows multiple identical rows for USDT and NEAR, which suggests that send_event is being triggered multiple times for a single creation, and the payload might not be updating correctly across instances. Let’s diagnose and fix this by:
+Preventing Duplicates: Ensure send_event is called only once per save.
+
+Fixing Payload: Ensure to_payload and send_event generate consistent, correct data.
+
+Updating Consumer: Handle the payload properly to avoid duplicate renders.
+
+Here’s the step-by-step fix based on your latest output.
+Diagnosis
+Duplicates: The signal notify_on_save might be firing multiple times, or save() is being called repeatedly due to some logic (e.g., super().save() plus another trigger).
+
+USD Value: 135.00 for USDT is correct (since price ≈ 1), but NEAR showing 15.55 then 0.00 suggests Symbol.price isn’t consistently applied or fetched.
+
+Context: You’re creating one CryptoCurency, but the table shows multiple rows—likely a signal or consumer issue.
+
+Step 1: Fix CryptoCurency Model
+Let’s ensure send_event runs only once and the payload is accurate.
+python
+
+# trading/models.py
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from decimal import Decimal, ROUND_HALF_UP
+from django.utils import timezone
+
+class CryptoCurency(WorkflowInstance, WorkflowMixin):
+    name = models.CharField(max_length=120)
+    ticker = models.CharField(max_length=20, unique=True, db_index=True)
+    description = models.TextField(blank=True, null=True)
+    balance = models.DecimalField(max_digits=30, decimal_places=17)
+    pnl = models.DecimalField(max_digits=30, decimal_places=17, default=0)
+    active = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        self.ticker = self.ticker.upper()
+        super().save(*args, **kwargs)
+        if created:
+            print('created crypto: ', self.balance)
+            self.send_event()  # Call send_event only on creation here
+        elif 'update_fields' not in kwargs or kwargs['update_fields']:  # Only if fields changed
+            self.send_event()
+
+    def get_content(self, event):
+        if event == Notification.WorkflowEvents.CREATED:
+            return f"New currency {self.ticker} added with balance {self.balance}"
+        elif event == Notification.WorkflowEvents.UPDATED:
+            return f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
+        elif event == Notification.WorkflowEvents.DELETED:
+            return f"Currency {self.ticker} removed"
+        return f"{self.ticker} event {event} occurred"
+
+    def to_payload(self):
+        """Generate payload with USD value based on Symbol price."""
+        try:
+            symbol = Symbol.objects.get(ticker=self.ticker)
+            usd_value = float(self.balance) * float(symbol.price)
+        except Symbol.DoesNotExist:
+            usd_value = 0.0
+        return {
+            'ticker': self.ticker,
+            'balance': f'{self.balance.quantize(Decimal("0.0001"))}',
+            'usd_value': f'{usd_value:.2f}',
+            'pnl': f'{self.pnl.quantize(Decimal("0.0001"))}',
+            'timestamp': self.updated,
+        }
+
+    def send_event(self):
+        """Send event with total USD calculated from all CryptoCurency instances."""
+        from .models import Notification
+        event = Notification.WorkflowEvents.CREATED if not self.pk else Notification.WorkflowEvents.UPDATED
+
+        # Calculate total USD
+        total_usd = 0.0
+        for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+            try:
+                symbol = Symbol.objects.get(ticker=crypto.ticker)
+                total_usd += float(crypto.balance) * float(symbol.price)
+            except Symbol.DoesNotExist:
+                continue
+        try:
+            total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+        except CryptoCurency.DoesNotExist:
+            pass
+
+        data = self.to_payload()
+        data['total_usd'] = f"{total_usd:.2f}"
+
+        print(f"Sending event for {self.ticker}: {data}")  # Debug
+
+        self.notify(
+            event=event,
+            group_name='balances_notifications',
+            message_type='balances_update',
+            data=data
+        )
+
+Changes:
+Moved send_event to save(): Ensures it’s called explicitly once per save, avoiding signal over-firing.
+
+Check update_fields: Only triggers on actual updates, not silent saves.
+
+Debug Print: Logs the payload to confirm what’s sent.
+
+Step 2: Update Signals
+Remove the post_save signal for CryptoCurency since save() now handles it:
+python
+
+# trading/models.py
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Order)
+def notify_on_save(sender, instance, created, **kwargs):
+    instance.send_event()
+
+@receiver(post_delete, sender=CryptoCurency)
+@receiver(post_delete, sender=Order)
+def notify_on_delete(sender, instance, **kwargs):
+    instance.notify(
+        event=Notification.WorkflowEvents.DELETED,
+        group_name='balances_notifications' if isinstance(instance, CryptoCurency) else 'trade_notifications',
+        message_type='balances_update' if isinstance(instance, CryptoCurency) else 'trade_update'
+    )
+
+Change: Removed CryptoCurency from post_save to prevent double calls.
+
+Step 3: Fix BalancesConsumer
+Ensure it sends unique updates and avoids duplicating rows:
+python
+
+# trading/consumers.py
+class BalancesConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('balances_notifications', self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('balances_notifications', self.channel_name)
+
+    async def balances_update(self, event):
+        data = json.loads(event['data'])
+        print('Received in consumer:', data)
+
+        # Render row HTML
+        row_html = await sync_to_async(render_to_string)('partials/balance_row.html', {'balance': data})
+        # Send row and total USD as JSON
+        await self.send(text_data=json.dumps({
+            'type': 'balances_update',
+            'row': row_html,
+            'total_usd': data['total_usd']
+        }))
+
+Confirmed: Matches your intent—sends row HTML and total USD separately.
+
+Step 4: Verify Template
+balance_row.html
+html
+
+<!-- trading/templates/partials/balance_row.html -->
+<tr>
+    <td>{{ balance.ticker }}</td>
+    <td>{{ balance.balance }}</td>
+    <td>{{ balance.usd_value }}</td>
+    <td>{{ balance.pnl }}</td>
+</tr>
+
+index.html (Snippet)
+html
+
+<table hx-ext="ws" ws-connect="/ws/balances/">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Balance</th>
+            <th>USD Value</th>
+            <th>PNL</th>
+        </tr>
+    </thead>
+    <tbody id="balances" hx-ws="balances_update:afterbegin:#balances">
+        <tr><td colspan="4">Loading balances...</td></tr>
+    </tbody>
+</table>
+<h2>Total USD Worth: <span id="total-usd" hx-ext="ws" ws-connect="/ws/balances/" hx-ws="balances_update:innerHTML:#total-usd">0.00</span></h2>
+
+Confirmed: Should work with the consumer’s output.
+
+Testing
+Populate Symbols:
+python
+
+Symbol(ticker='NEAR', price=Decimal('2.64'), circ_supply=Decimal('1000'), coin='NEAR Protocol').save()
+Symbol(ticker='USDT', price=Decimal('1.00'), circ_supply=Decimal('1000'), coin='Tether USDt').save()
+
+Create CryptoCurency:
+python
+
+crypto = CryptoCurency(ticker='NEAR', balance=Decimal('5.8916'))
+crypto.save()
+
+Expected Output:
+Console:
+
+created crypto: 5.8916
+Sending event for NEAR: {'ticker': 'NEAR', 'balance': '5.8916', 'usd_value': '15.55', 'pnl': '0.0000', 'timestamp': '2025-03-...Z', 'total_usd': '15.55'}
+Received in consumer: {'ticker': 'NEAR', 'balance': '5.8916', 'usd_value': '15.55', 'pnl': '0.0000', 'timestamp': '2025-03-...Z', 'total_usd': '15.55'}
+
+Table:
+
+Ticker | Balance | USD Value | PNL
+NEAR   | 5.8916  | 15.55     | 0.0000
+
+Total USD: “15.55” (assuming no USDT yet).
+
+Add USDT:
+python
+
+CryptoCurency(ticker='USDT', balance=Decimal('135.0000')).save()
+
+Table:
+
+Ticker | Balance | USD Value | PNL
+USDT   | 135.0000| 135.00    | 0.0000
+NEAR   | 5.8916  | 15.55     | 0.0000
+
+Total USD: “150.55”
+
+Why This Fixes It
+No Duplicates: Moving send_event to save() ensures it’s called once, and removing the post_save signal prevents double triggers.
+
+Correct USD Value: to_payload uses Symbol.price consistently; 0.00 only if no Symbol exists.
+
+Consumer: Sends one row per event, avoiding duplicate renders.
+
+If It Still Fails
+Duplicates Persist: Check save() calls—add print(f"Saving {self.ticker}") before super().save().
+
+USD Value Wrong: Verify Symbol data (Symbol.objects.all()).
+
+Share Output: Post the console logs from print statements to pinpoint the issue.
+
+This should resolve the mess—let me know the new results!
+
+USDT	135.0000	135.00	0.0000
+USDT	135.0000	135.00	0.0000
+SUI	6.5249	15.27	0.0000
+SUI	6.5249	15.27	0.0000
+SUI	0.0000	0.00	0.0000
+SUI	0.0000	0.00	0.0000If you see, the problem is the same, let be more specific about my request:
+This app is originally a bot that you helped creating it with me, so there will not be a lot of interaction from the user manually so, the DOM should be updated periodically through websocket as it is now. So when I asked earlier about adding more methods like notify to the WorkflowMixin, I meant to add a method like update to send newly created data such as new cryptos to the dom, because I may need to send notification about a new order to the user, but the new crypto doesn't need notification, it only needs to send the new crypto and add it to the table, same for other models
+
+I created a shared task to send total_usd periodically to the websocket:
+@shared_task
+
+def update_total_usd():
+    total_usd = get_total_usd()
+
+group_name = 'total_usd_update'
+message_type = 'total_usd'
+
+channel_layer = get_channel_layer()
+print(f'updated updated 1: ', total_usd)
+async_to_sync(channel_layer.group_send)(
+    group_name,
+    {
+        'type': message_type,
+        'data': str(total_usd),  # Convert datetime to string
+    }
+)
+
+There is a problem in the output:
+The full contents of the message headers:
+{'lang': 'py', 'task': 'src.services.tasks.update_total_usd', 'id': '44e8f61f-0adf-40a6-916a-e11a9a1bba18', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '44e8f61f-0adf-40a6-916a-e11a9a1bba18', 'parent_id': None, 'argsrepr': '()', 'kwargsrepr': '{}', 'origin': 'gen13188@admin', 'ignore_result': False, 'replaced_task_nesting': 0, 'stamped_headers': None, 'stamps': {}}The delivery info for this task is:
+{'exchange': '', 'routing_key': 'celery'}
+Traceback (most recent call last):
+  File "C:\api\binando\venv\Lib\site-packages\celery\worker\consumer\consumer.py", line 659, in on_task_received
+    strategy = strategies[type_]
+               ~~~~~~~~~~^^^^^^^
+KeyError: 'src.services.tasks.update_total_usd'
+
+Thought for
+18s
+
+Expand for details
+
+app = Celery('trading')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks(['src.services'])  # Add 'src.services' if not already
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+```
+
+• Change: app.autodiscover_tasks(['src.services']) ensures Celery looks in src/services/tasks.py.
+
+Step 3: Check Task Invocation
+Ensure the task is called correctly. If it’s scheduled via Celery Beat, verify the schedule.
+
+Example Schedule
+# trading/settings.py
+CELERY_BEAT_SCHEDULE = {
+    'update-total-usd-every-5-minutes': {
+        'task': 'src.services.tasks.update_total_usd',
+        'schedule': 300.0,  # 5 minutes
+    },
+}
+
+• Confirmed: The task name matches 'src.services.tasks.update_total_usd'.
+
+Step 4: Restart Celery Worker
+After changes, restart the Celery worker to reload the task registry:
+
+celery -A trading worker -l info
+
+• Note: Ensure the worker is running from the correct directory where src/ is accessible.
+
+Step 5: Verify Task Execution
+Manually trigger the task to test:
+
+# In Django shell
+from src.services.tasks import update_total_usd
+update_total_usd.delay()
+
+• Check Worker Logs: Look for updated total_usd: <value> or any errors.
+
+If It Still Fails
+
+Example Fix
+If your project structure is:
+trading/
+├── src/
+│   └── services/
+│       └── tasks.py
+└── trading/
+    └── celery.py
+
+Then:
+
+This should register the task correctly—let me know if the error persists!
+
+The error KeyError: 'src.services.tasks.update_total_usd' in Celery indicates that the worker cannot find the task 'src.services.tasks.update_total_usd' in its task registry. This typically happens when the task isn’t imported or registered correctly in the Celery app. Let’s diagnose and fix this step-by-step.
+Why the Error Occurs
+Task Not Found: Celery workers need to know about all tasks they might execute. If a task isn’t imported or registered, the worker raises a KeyError when it receives a message for that task.
+
+Module Path: The task is referenced as 'src.services.tasks.update_total_usd', so Celery expects to find it in src/services/tasks.py.
+
+Step 1: Verify Task Module and Import
+Ensure that update_total_usd is defined in src/services/tasks.py and that the module is correctly structured.
+Check tasks.py
+python
+
+# src/services/tasks.py
+from celery import shared_task
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from src.trading.models import CryptoCurency, Symbol  # Adjust imports as needed
+
+@shared_task
+def update_total_usd():
+    total_usd = get_total_usd()
+    group_name = 'total_usd_update'
+    message_type = 'total_usd'
+
+    channel_layer = get_channel_layer()
+    print(f'updated total_usd: {total_usd}')
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': message_type,
+            'data': str(total_usd),
+        }
+    )
+
+def get_total_usd():
+    total_usd = 0.0
+    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
+        try:
+            symbol = Symbol.objects.get(ticker=crypto.ticker)
+            total_usd += float(crypto.balance) * float(symbol.price)
+        except Symbol.DoesNotExist:
+            continue
+    try:
+        total_usd += float(CryptoCurency.objects.get(ticker='USDT').balance)
+    except CryptoCurency.DoesNotExist:
+        pass
+    return total_usd
+
+Note: Added get_total_usd for clarity—adjust if it’s defined elsewhere.
+
+Step 2: Ensure Task Registration
+Celery needs to discover and register the task. If you’re using app.autodiscover_tasks(), ensure it includes 'src.services'.
+Update celery.py
+python
+
+# trading/celery.py
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trading.settings')
+
+app = Celery('trading')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks(['src.services'])  # Add 'src.services' if not already
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+
+Change: app.autodiscover_tasks(['src.services']) ensures Celery looks in src/services/tasks.py.
+
+Step 3: Check Task Invocation
+Ensure the task is called correctly. If it’s scheduled via Celery Beat, verify the schedule.
+Example Schedule
+python
+
+# trading/settings.py
+CELERY_BEAT_SCHEDULE = {
+    'update-total-usd-every-5-minutes': {
+        'task': 'src.services.tasks.update_total_usd',
+        'schedule': 300.0,  # 5 minutes
+    },
+}
+
+Confirmed: The task name matches 'src.services.tasks.update_total_usd'.
+
+Step 4: Restart Celery Worker
+After changes, restart the Celery worker to reload the task registry:
+bash
+
+celery -A trading worker -l info
+
+Note: Ensure the worker is running from the correct directory where src/ is accessible.
+
+Step 5: Verify Task Execution
+Manually trigger the task to test:
+python
+
+# In Django shell
+from src.services.tasks import update_total_usd
+update_total_usd.delay()
+
+Check Worker Logs: Look for updated total_usd: <value> or any errors.
+
+If It Still Fails
+Module Path: Ensure src.services.tasks is importable. Try from src.services.tasks import update_total_usd in the Django shell.
+
+App Structure: If your app is trading, not src, adjust paths (e.g., trading.services.tasks).
+
+Task Name: Double-check the task name in CELERY_BEAT_SCHEDULE matches the module path.
+
+Celery Config: Add app.conf.task_default_queue = 'celery' if using a custom queue.
+
+Example Fix
+If your project structure is:
+
+trading/
+├── src/
+│   └── services/
+│       └── tasks.py
+└── trading/
+    └── celery.py
+
+Then:
+In celery.py: app.autodiscover_tasks(['src.services'])
+
+In settings.py: 'task': 'src.services.tasks.update_total_usd'
+
+This should register the task correctly—let me know if the error persists!
+
+Let’s tackle the KeyError: 'src.services.tasks.update_total_usd' error you’re seeing in Celery. This error means the Celery worker doesn’t recognize the task 'src.services.tasks.update_total_usd' when it receives a message to execute it. Don’t worry—I’ll walk you through why this happens and how to fix it step-by-step.
+Why the Error Happens
+The KeyError occurs because the Celery worker can’t find the task in its registry. For a task to work, it must be:
+Defined correctly in your codebase.
+
+Imported or registered with the Celery app so the worker knows it exists.
+
+Invoked with the correct task name.
+
+From your query, the task is defined in src/services/tasks.py as a @shared_task, but the worker isn’t picking it up. Let’s fix that.
+Step 1: Verify the Task Definition
+Your task looks mostly fine, but let’s ensure it’s set up correctly in src/services/tasks.py:
+python
+
+# src/services/tasks.py
+from celery import shared_task
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+@shared_task
+def update_total_usd():
+    total_usd = get_total_usd()  # Assuming this function is defined elsewhere
+    group_name = 'total_usd_update'
+    message_type = 'total_usd'
+
+    channel_layer = get_channel_layer()
+    print(f'updated total_usd: {total_usd}')
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': message_type,
+            'data': str(total_usd),
+        }
+    )
+
+Checklist:
+The @shared_task decorator is used, which is good—it registers the task with Celery.
+
+get_total_usd() is called but not shown. Make sure it’s defined in the same file or imported correctly.
+
+No syntax errors here—looks solid.
+
+If get_total_usd() isn’t defined, add it (e.g., from your models) or import it properly.
+Step 2: Register the Task with Celery
+Celery needs to discover your task. This usually happens in your celery.py file (e.g., trading/celery.py). Here’s how to set it up:
+python
+
+# trading/celery.py
+import os
+from celery import Celery
+
+# Set the default Django settings module
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trading.settings')
+
+# Create the Celery app
+app = Celery('trading')
+
+# Load config from Django settings with CELERY_ namespace
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Auto-discover tasks in specified modules
+app.autodiscover_tasks(['src.services'])  # Tell Celery to look in src/services/
+
+Key Fix: app.autodiscover_tasks(['src.services']) ensures Celery scans src/services/tasks.py for tasks. If this line is missing or doesn’t include 'src.services', the worker won’t know about update_total_usd.
+
+Project Structure: This assumes your structure is like:
+
+trading/
+├── src/
+│   └── services/
+│       └── tasks.py
+└── trading/
+    └── celery.py
+
+If your app name or structure differs (e.g., services is directly under trading/), adjust to app.autodiscover_tasks(['services']).
+
+Step 3: Check Task Invocation
+Your task is likely scheduled periodically (e.g., via Celery Beat). Ensure the task name matches exactly in your settings.py:
+python
+
+# trading/settings.py
+CELERY_BEAT_SCHEDULE = {
+    'update-total-usd-every-5-minutes': {
+        'task': 'src.services.tasks.update_total_usd',  # Must match the module path
+        'schedule': 300.0,  # Every 5 minutes
+    },
+}
+
+Verify: The 'task' value ('src.services.tasks.update_total_usd') matches the error message’s task name, so this looks correct.
+
+Step 4: Restart the Celery Worker
+After making changes, restart your Celery worker to reload the task registry:
+bash
+
+celery -A trading worker -l info
+
+Run from the Right Directory: Execute this from the trading/ directory (where celery.py lives) so the src/ module is importable.
+
+Check Logs: Look for “Registered tasks” in the worker startup logs—it should list src.services.tasks.update_total_usd.
+
+If you’re using Celery Beat too, restart it:
+bash
+
+celery -A trading beat -l info
+
+Step 5: Test the Task Manually
+To confirm it’s working, trigger the task in a Django shell:
+python
+
+# python manage.py shell
+from src.services.tasks import update_total_usd
+update_total_usd.delay()
+
+Worker Output: Check the worker logs for updated total_usd: <value>. If you see this, the task is running!
+
+If It Fails: You’ll see an error—let’s troubleshoot further.
+
+Troubleshooting If It Still Fails
+If the KeyError persists, try these:
+Check Importability:
+In the shell:
+python
+
+from src.services.tasks import update_total_usd
+
+If this fails, your module path is wrong. Adjust the path in CELERY_BEAT_SCHEDULE and autodiscover_tasks() (e.g., trading.services.tasks instead of src.services.tasks).
+
+Worker Command:
+Ensure the -A trading argument matches your celery.py module. If it’s src.celery, use -A src.
+
+Celery Version:
+Old versions might behave oddly. Check with pip show celery and upgrade if needed:
+bash
+
+pip install -U celery
+
+Logs:
+Add this debug task to celery.py to inspect what’s registered:
+python
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+
+Then run debug_task.delay() and check the output.
+
+Final Working Setup
+Assuming your structure is as shown, here’s the complete fix:
+tasks.py: As you wrote it, with get_total_usd() defined or imported.
+
+celery.py:
+python
+
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trading.settings')
+app = Celery('trading')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks(['src.services'])
+
+settings.py:
+python
+
+CELERY_BEAT_SCHEDULE = {
+    'update-total-usd-every-5-minutes': {
+        'task': 'src.services.tasks.update_total_usd',
+        'schedule': 300.0,
+    },
+}
+
+Run:
+bash
+
+celery -A trading worker -l info
+celery -A trading beat -l info
+
+Conclusion
+The KeyError likely stems from the task not being registered because src.services wasn’t in autodiscover_tasks(). Adding it and restarting the worker should resolve this. If you still see issues, double-check your project structure and share any new errors—I’m here to help!
+
+I added the periodic_task from the admin and it is in the registered task, it is registered but not running
+
+Thought for
+22s
+
+Expand for details
+
+• Worker Logs: Should show the task being received and executed.
+
+Step 7: Check Timezone and Clock Sync
+Celery Beat uses the system clock and timezone. Ensure your server’s clock is correct and timezones match:
+
+• Settings:
+TIME_ZONE = 'UTC'  # Or your preferred timezone
+
+Step 8: Inspect Celery Beat Database
+Sometimes, Beat’s internal state gets stuck. Check the PeriodicTask model:
+
+# python manage.py shell
+from django_celery_beat.models import PeriodicTask
+task = PeriodicTask.objects.get(task='src.services.tasks.update_total_usd')
+print(task.last_run_at)
+
+• If last_run_at is Set: It has run at least once.
+
+Step 9: Enable Debug Logs
+Increase logging to see more details:
+
+celery -A trading beat -l debug
+celery -A trading worker -l debug
+
+• Look for:
+
+Step 10: Check for Task Name Mismatch
+Ensure the task name in PeriodicTask matches exactly:
+
+• Admin: Double-check 'src.services.tasks.update_total_usd' is correct.
+
+Final Fix
+If all else fails, try:
+
+1 Delete and Recreate the PeriodicTask:
+
+2 Restart Everything:
+
+Conclusion
+The task is registered but not running likely due to:
+
+Follow these steps, and you should pinpoint the issue. Let me know what you find or if you need further help!
+
+Let’s tackle why your periodic task (update_total_usd) is registered but not running. I’ll walk you through the debugging process step-by-step, assuming you’ve added it via the Django admin (using PeriodicTask from django-celery-beat). This should be straightforward—let’s find the issue.
+Step 1: Verify Periodic Task Setup in Admin
+First, confirm the task is correctly set up in the Django admin:
+Go to /admin/django_celery_beat/periodictask/ and find your update_total_usd task.
+
+Check Fields:
+Task (registered): Should be 'src.services.tasks.update_total_usd'.
+
+Interval: Ensure it’s set correctly (e.g., every 5 minutes).
+
+Enabled: Make sure the checkbox is ticked.
+
+Start time: If set, ensure it’s in the past or blank for immediate start.
+
+Last run at: If it’s blank, it hasn’t run yet.
+
+If everything looks good, proceed.
+Step 2: Confirm Celery Beat is Running
+Periodic tasks are managed by Celery Beat, which schedules them. Ensure Beat is running:
+bash
+
+celery -A trading beat -l info
+
+Logs: Look for lines like:
+
+[2025-03-13 12:00:00,000: INFO/MainProcess] Scheduler: Sending due task update-total-usd-every-5-minutes (src.services.tasks.update_total_usd)
+
+No Output: If Beat isn’t mentioning your task, it might not be due yet or misconfigured.
+
+If Beat isn’t running, start it. If it is, check the schedule.
+Step 3: Check Task Schedule
+Ensure the task’s schedule is correctly set:
+Interval: If set to every 5 minutes, it should run every 5 minutes from the start time.
+
+Crontab: If using crontab, verify the syntax (e.g., */5 * * * * for every 5 minutes).
+
+Start Time: If set in the future, it won’t run until then. Set to blank or a past time to start immediately.
+
+Step 4: Verify Worker is Running and Connected
+The worker must be running to execute the task when Beat schedules it:
+bash
+
+celery -A trading worker -l info
+
+Logs: After Beat schedules the task, the worker should log:
+
+[2025-03-13 12:00:00,000: INFO/MainProcess] Received task: src.services.tasks.update_total_usd[44e8f61f-0adf-40a6-916a-e11a9a1bba18]
+[2025-03-13 12:00:00,001: INFO/MainProcess] Task src.services.tasks.update_total_usd[44e8f61f-0adf-40a6-916a-e11a9a1bba18] succeeded in 0.1s: None
+
+No Logs: If the worker doesn’t acknowledge the task, it might not be connected to the broker or the task isn’t being sent.
+
+Step 5: Check Broker Connection
+Ensure your broker (e.g., Redis, RabbitMQ) is running and accessible:
+Redis:
+bash
+
+redis-cli ping  # Should return "PONG"
+
+RabbitMQ:
+bash
+
+rabbitmqctl status
+
+If the broker is down, Celery can’t send/receive tasks.
+Step 6: Test Task Manually
+Run the task manually to ensure it works outside of the schedule:
+python
+
+# python manage.py shell
+from src.services.tasks import update_total_usd
+update_total_usd.delay()
+
+Worker Logs: Should show the task being received and executed.
+
+If It Fails: Fix any errors in the task code (e.g., get_total_usd() not defined).
+
+Step 7: Check Timezone and Clock Sync
+Celery Beat uses the system clock and timezone. Ensure your server’s clock is correct and timezones match:
+Settings:
+python
+
+TIME_ZONE = 'UTC'  # Or your preferred timezone
+
+Sync: If your server’s clock is off, tasks might not trigger at the expected time.
+
+Step 8: Inspect Celery Beat Database
+Sometimes, Beat’s internal state gets stuck. Check the PeriodicTask model:
+python
+
+# python manage.py shell
+from django_celery_beat.models import PeriodicTask
+task = PeriodicTask.objects.get(task='src.services.tasks.update_total_usd')
+print(task.last_run_at)
+
+If last_run_at is Set: It has run at least once.
+
+If Blank: It hasn’t run yet—wait for the next interval or reset last_run_at to None.
+
+Step 9: Enable Debug Logs
+Increase logging to see more details:
+bash
+
+celery -A trading beat -l debug
+celery -A trading worker -l debug
+
+Look for:
+Beat: “Scheduler: Sending due task...”
+
+Worker: “Received task...”
+
+Step 10: Check for Task Name Mismatch
+Ensure the task name in PeriodicTask matches exactly:
+Admin: Double-check 'src.services.tasks.update_total_usd' is correct.
+
+Module Path: If your app structure changed, update the path.
+
+Final Fix
+If all else fails, try:
+Delete and Recreate the PeriodicTask:
+Remove the existing task in admin.
+
+Add a new one with the same settings.
+
+Restart Everything:
+Stop Celery Beat and Worker.
+
+Clear any pending tasks in the broker (e.g., redis-cli flushall for Redis).
+
+Restart Beat and Worker.
+
+Conclusion
+The task is registered but not running likely due to:
+Celery Beat not scheduling it (check logs, schedule).
+
+Worker not receiving it (check broker, worker logs).
+
+Task errors (test manually).
+
+Follow these steps, and you should pinpoint the issue. Let me know what you find or if you need further help!
+
+If you’ve added your periodic task (update_total_usd) via the Django admin and it’s showing as registered but not running, don’t worry—I’ll guide you through troubleshooting this step-by-step. Since you’re using django-celery-beat, there are a few common culprits we can check to get it working.
+1. Verify the Task Setup in Django Admin
+Since you’ve confirmed it’s registered, let’s double-check the details:
+Go to /admin/django_celery_beat/periodictask/ and locate your update_total_usd task.
+
+Task Name: Ensure it’s set to 'src.services.tasks.update_total_usd' (or the exact path to your task).
+
+Enabled: Confirm the “Enabled” checkbox is ticked.
+
+Interval or Crontab: Verify the schedule is set correctly (e.g., every 5 minutes as Interval or */5 * * * * in a Crontab).
+
+Start Time: If this is set to a future time, the task won’t run yet—leave it blank or set it to a past time.
+
+Last Run At: If this is blank, it hasn’t run yet, which aligns with your issue.
+
+If anything here is off (e.g., disabled or a future start time), fix it and save. If it all looks good, let’s move on.
+2. Ensure Celery Beat is Running
+Celery Beat is the scheduler that triggers periodic tasks. If it’s not running, your task won’t fire.
+Start Celery Beat:
+bash
+
+celery -A your_project_name beat -l info
+
+Replace your_project_name with your Django project’s name (e.g., trading).
+
+Check Logs: Look for output like:
+
+[2025-03-13 12:00:00,000: INFO/MainProcess] Scheduler: Sending due task update_total_usd (src.services.tasks.update_total_usd)
+
+If you see this, Beat is scheduling your task. If not, it’s either not due yet (check the interval) or Beat isn’t picking up the task.
+
+Not Running?: If you haven’t started Beat yet, this is likely the issue—start it now and monitor.
+
+3. Confirm the Worker is Running
+Even if Beat schedules the task, a Celery worker needs to execute it.
+Start the Worker:
+bash
+
+celery -A your_project_name worker -l info
+
+Check Logs: After Beat schedules the task, the worker should log:
+
+[2025-03-13 12:00:00,000: INFO/MainProcess] Received task: src.services.tasks.update_total_usd[some-uuid]
+[2025-03-13 12:00:00,001: INFO/MainProcess] Task src.services.tasks.update_total_usd[some-uuid] succeeded in 0.1s: None
+
+If you don’t see this, the worker isn’t picking up the task.
+
+Not Seeing Logs?: Ensure the worker is running in a separate terminal from Beat and connected to the same broker (e.g., Redis or RabbitMQ).
+
+4. Check the Message Broker
+Celery uses a broker (like Redis or RabbitMQ) to pass tasks from Beat to the worker. If the broker is down, tasks won’t run.
+For Redis:
+bash
+
+redis-cli ping
+
+Should return PONG. If not, start Redis:
+bash
+
+redis-server
+
+For RabbitMQ:
+bash
+
+rabbitmqctl status
+
+If it’s not running, start it (depends on your OS—e.g., sudo service rabbitmq-server start on Ubuntu).
+
+If the broker was down, restart Beat and the worker after fixing it.
+5. Test the Task Manually
+Let’s ensure the task itself works:
+Run in Django Shell:
+bash
+
+python manage.py shell
+
+python
+
+from src.services.tasks import update_total_usd
+update_total_usd.delay()
+
+Worker Logs: Check if the worker picks it up and runs it successfully.
+
+If It Fails: There might be an error in your task code (e.g., a function it calls isn’t defined). Fix any errors you see in the logs.
+
+If it works manually but not periodically, the issue is with the scheduler (Beat) or configuration.
+6. Check Timezone and Clock
+Celery Beat relies on the system clock and timezone:
+In settings.py:
+python
+
+TIME_ZONE = 'UTC'  # Ensure this matches your intent
+
+Server Clock: Ensure your server’s time is correct (date command on Linux). A mismatched clock can delay tasks.
+
+7. Debug with Detailed Logs
+If it’s still not running, increase logging:
+Run Beat and Worker with Debug:
+bash
+
+celery -A your_project_name beat -l debug
+celery -A your_project_name worker -l debug
+
+Look For:
+Beat: “Sending due task” messages.
+
+Worker: “Received task” messages.
+
+This will give more clues if something’s misconfigured.
+8. Final Troubleshooting
+If it’s still not working:
+Recreate the Task:
+Delete the task in the admin.
+
+Add it again with the same settings.
+
+Restart Everything:
+Stop Beat and Worker.
+
+Clear the broker if possible (e.g., redis-cli flushall for Redis—careful, this clears all data).
+
+Restart both.
+
+Why It’s Not Running
+The most likely reasons are:
+Celery Beat isn’t running: Start it as shown above.
+
+Worker isn’t running: Ensure it’s active and connected.
+
+Broker issue: Verify Redis/RabbitMQ is up.
+
+Schedule misconfigured: Double-check the interval/start time.
+
+Follow these steps, and your task should start running. Let me know what you find or if you need more help!
 
