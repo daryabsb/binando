@@ -108,6 +108,7 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
             try:
                 latest_kline = Kline.objects.filter(
                     symbol=symbol).order_by('-time').first()
+                print(f'current_time: {latest_kline.time < freshness_threshold} ')
                 if not latest_kline:
                     print(f"WARNING: No kline data for {symbol}")
                     all_fresh = False

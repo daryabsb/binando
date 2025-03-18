@@ -55,20 +55,29 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
         created = self.pk is None
         self.ticker = self.ticker.upper()
         super().save(*args, **kwargs)
-        # if created:
-        #     print('created crypto: ', self.balance)
-        #     self.send_event()  # Call send_event only on creation here
-        # elif 'update_fields' not in kwargs or kwargs['update_fields']:  # Only if fields changed
-        #     self.send_event()
 
-    # def get_content(self, event):
-    #     if event == Notification.WorkflowEvents.CREATED:
-    #         return f"New currency {self.ticker} added with balance {self.balance}"
-    #     elif event == Notification.WorkflowEvents.UPDATED:
-    #         return f"Balance of {self.ticker} updated to {self.balance}, PNL now {self.pnl}"
-    #     elif event == Notification.WorkflowEvents.DELETED:
-    #         return f"Currency {self.ticker} removed"
-    #     return f"{self.ticker} event {event} occurred"
+
+    def get_kline_data(self):
+        """Fetch the latest Kline data for this crypto's ticker."""
+        symbol = f"{self.ticker}USDT"  # e.g., 'BTCUSDT'
+        kline = Kline.objects.filter(symbol=symbol).order_by('-time').first()
+        if kline:
+            return {
+                'last_price': float(kline.close),  # Assuming 'close' is the last price in USDT
+                'change_24h': float(kline.change_24h) if hasattr(kline, 'change_24h') else None,
+                'high_24h': float(kline.high),
+                'low_24h': float(kline.low),
+                'volume_24h': float(kline.volume),
+                'current_amount_holding': float(self.balance),  # From CryptoCurency
+            }
+        return {
+            'last_price': 0.0,
+            'change_24h': 0.0,
+            'high_24h': 0.0,
+            'low_24h': 0.0,
+            'volume_24h': 0.0,
+            'current_amount_holding': float(self.balance),
+        }
 
     def to_payload(self):
         """Generate payload with USD value based on Symbol price."""
@@ -80,12 +89,20 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
 
         print('balance: ', f'{self.balance}')
 
+        kline_data = self.get_kline_data()
+
         return {
             'ticker': self.ticker,
-            'balance': f'{self.balance}',
-            'usd_value': f'{usd_value}',
+            'balance': f'{self.balance:.4f}',
+            'usd_value': f'{usd_value:.2f}',
             'pnl': f'{self.pnl}',
-            'timestamp': self.updated,
+            'timestamp': self.updated.strftime("%Y-%m-%d %H:%M"),
+            'last_price': f"{kline_data['last_price']:.2f}",
+            'change_24h': f"{kline_data['change_24h']:.2f}" if kline_data['change_24h'] is not None else 'N/A',
+            'high_24h': f"{kline_data['high_24h']:.2f}",
+            'low_24h': f"{kline_data['low_24h']:.2f}",
+            'volume_24h': f"{kline_data['volume_24h']:.2f}",
+            'current_amount_holding': f"{kline_data['current_amount_holding']:.2f}",
         }
 
     def send_event(self):

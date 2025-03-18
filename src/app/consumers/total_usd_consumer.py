@@ -13,10 +13,8 @@ class TotalsConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard('total_usd_update', self.channel_name)
     
     async def total_usd(self, event):
-        # data = json.loads(event['data'])
-        # print(f'updated updated 2')
+        data = json.loads(event['data'])
         # print(f'Event data: {event["data"]}')
-        data = {'total_usd': event['data']}
-        html = await sync_to_async(render_to_string)('partials/total-usd.html', data)
+        html = await sync_to_async(render_to_string)('partials/total-usd.html', {'total_usd':data})
 
         await self.send(text_data=html)

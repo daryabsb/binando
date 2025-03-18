@@ -12,6 +12,7 @@
     <!-- plugin css file  -->
     <link rel="stylesheet" href="{% static 'assets/plugin/datatables/responsive.dataTables.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/plugin/datatables/dataTables.bootstrap5.min.css' %}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css">
 
     <!-- project css file  -->
     <link rel="stylesheet" href="{% static 'assets/css/cryptoon.style.min.css' %}">
@@ -223,11 +224,36 @@
         <script src="{% static 'assets/bundles/libscripts.bundle.js' %}"></script>
 
         <!-- Plugin Js -->
+        
         <script src="{% static 'assets/bundles/dataTables.bundle.js' %}"></script>
         <script src="{% static 'assets/bundles/apexcharts.bundle.js' %}"></script>
-    
+        
         <!-- Jquery Page Js -->
         <script src="{% static 'assets/js/template.js' %}"></script>
         <script src="{% static 'assets/js/page/index.js' %}"></script>
+        <script src="{% static 'assets/plugin/datatable/datatables.min.js' %}"></script>
+        {% comment %} <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script> {% endcomment %}
+        <script>
+            document.addEventListener("DOMContentLoaded", (event) => {
+                console.log("DOM fully loaded and parsed");
+                new DataTable('#orders-datatable', {
+                    ajax: {
+                        url: '/balances-data/',  // URL to fetch data (update with your Django URL)
+                        dataSrc: 'data'  // Key in the JSON response containing the data
+                    },
+                    columns: [
+                        { data: 'ticker' },
+                        { data: 'balance' },
+                        { data: 'usd_value' },
+                        { data: 'last_price' },
+                        { data: 'change_24h' },
+                        { data: 'high_24h' },
+                        { data: 'low_24h' },
+                        { data: 'volume_24h' },
+                        { data: 'timestamp' },
+                    ]
+                })
+            });
+        </script>
 </body>
 </html>

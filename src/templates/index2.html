@@ -19,11 +19,11 @@
     <div class="container-xxl">
         
         <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4">
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <div class="card mb-3">
                     <div class="card-header py-3 d-flex justify-content-between bg-transparent align-items-center flex-wrap border-bottom"
                     hx-ext="ws" ws-connect="/ws/total-usd/">
-                        <h6 class="mb-0 fw-bold">Total USD Worth: <span id="total-usd" hx-get="/total_usd/" hx-trigger="load">0.00</span></h6>
+                        <h6 class="mb-0 fw-bold">Total USD Worth: <span id="total-usd" hx-get="/total-usd/" hx-trigger="load">0.00</span></h6>
                         <ul class="nav nav-tabs tab-body-header rounded d-inline-flex mt-2 mt-md-0" role="tablist">
                             <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#Pay" role="tab">Pay</a></li>
                             <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Receive" role="tab">Receive</a></li>
@@ -33,7 +33,28 @@
                     <div class="card-body basic-custome-color">
                         <div class="table-responsive">
                             
-                    <table class="table table-nowrap mb-0" hx-ext="ws" ws-connect="/ws/balances/">
+                    <table id="orders-datatable3" class="display" style="width:100%">
+
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Balance</th>
+                                <th>USD Value</th>
+                                <th>Price</th>
+                                <th>Change (24h)</th>
+                                <th>High (24h)</th>
+                                <th>Low (24h)</th>
+                                <th>Volume (24h)</th>
+                                {% comment %} <th>PNL</th> {% endcomment %}
+                                <th>Time</th>
+                                {% comment %} <th>Start date</th>
+                                <th>Salary</th> {% endcomment %}
+                            </tr>
+                        </thead>
+                        
+                    </table>
+                    </table>
+                    <table id="orders-datatable2" class="table table-nowrap mb-0" hx-ext="ws" ws-connect="/ws/balances/">
                         <thead>
                             <tr>
                                 <th><i class="fa fa-square chart-text-color1"></i></th>
@@ -47,33 +68,9 @@
                             {% include 'partials/balances.html' %}
                         </tbody>
                     </table>
-                </div>
-                </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-lg-6 col-md-12">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="p-4">
-                            
-                            <div class="fs-3 text-uppercase">WALLET: <span 
-                                id="total-usd" 
-                                hx-get="/total-usd/" 
-                                hx-trigger="load"
-                                hx-swap="innerHTML"
-                                >0.00</span>USD</div>
-                            <span>subscribe to our newsletter &amp; receive a coupon</span>
-                        </div>
-                        <div class="form-group mb-3 p-4 d-grid gap-2">
-                            <input class="form-control" type="text" placeholder="ENTER YOUR EMAIL" name="email">
-                            <button class="btn btn-light-primary btn-block" type="button">GET IT NOW!</button>
-                        </div>
-                        <div class="mt-3">
-                            <a href="#" title="">no thanks</a>
-                            <p class="mt-2">* $50 minimum purchase</p>
-                        </div>
                     
-                    </div>
+                </div>
+                </div>
                 </div>
             </div>
         <!-- Test Button -->
@@ -81,7 +78,7 @@
         hx-get="/test-websocket/" 
         hx-target="#test-websocket" 
         hx-swap="innerHTML">Test WebSocket</button>
-        <span id="test-websocket" _=""></span>
+        <span id="test-websocket"></span>
         </div>  
         <div class="row g-3 mb-3">
             <div class="col-lg-12">
@@ -724,3 +721,4 @@
     </div>
 </div>
 {% endblock content %}
+

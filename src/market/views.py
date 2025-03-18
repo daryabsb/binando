@@ -1,6 +1,6 @@
 # trading/views.py
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from src.market.models import CryptoCurency, Kline
 from .utils import send_websocket_message
@@ -46,6 +46,14 @@ def balances(request):
         'pnl': float(usdt.pnl),
     })
     return HttpResponse(render_to_string('partials/balances.html', {'balances': balances}))
+
+
+def balances_data(request):
+    balances = []
+    cryptos = CryptoCurency.objects.all()
+    for crypto in cryptos:
+        balances.append(crypto.to_payload())    
+    return JsonResponse({'data':balances}, safe=False)
 
 
 def total_usd(request):

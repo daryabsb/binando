@@ -37,6 +37,50 @@ def upload_image_file_path(instance, filename):
     return os.path.join(f'uploads/{model}/', filename)
 
 
+def get_tradingview_widget_url(symbol, interval="D", theme="light", style="1", timezone="Etc/UTC"):
+    # Base URL
+    from urllib.parse import urlencode
+    base_url = "https://s.tradingview.com/widgetembed/"
+
+    # Parameters for the URL
+    params = {
+        "hideideas": "1",
+        "overrides": "{}",
+        "enabled_features": "[]",
+        "disabled_features": "[]",
+        "locale": "in",
+    }
+
+    # Fragment (part after the #)
+    fragment = {
+        "symbol": f"BITSTAMP:{symbol}",
+        "frameElementId": "tradingview_de890",
+        "interval": interval,
+        "hide_side_toolbar": "0",
+        "allow_symbol_change": "1",
+        "save_image": "1",
+        "details": "1",
+        "calendar": "1",
+        "hotlist": "1",
+        "studies": "[]",
+        "theme": theme,
+        "style": style,
+        "timezone": timezone,
+        "withdateranges": "1",
+        "studies_overrides": "{}",
+        "utm_medium": "widget",
+        "utm_campaign": "chart",
+        "utm_term": f"BITSTAMP:{symbol}",
+        "page-uri": "__NHTTP__",
+    }
+
+    # Combine base URL, query parameters, and fragment
+    query_string = urlencode(params)
+    fragment_string = urlencode(fragment)
+    full_url = f"{base_url}?{query_string}#{fragment_string}"
+
+    return full_url
+
 def prepare_binance_time(end_time=None, days_ago=14, date_format="%Y-%m-%d %H:%M:%S"):
     if end_time is None:
         end_time = timezone.now()

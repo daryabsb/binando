@@ -138,7 +138,15 @@ def update_klines(symbols=None):
                 startTime=from_date_ms,
                 endTime=to_date_ms
             )
+        except Exception as e:
+            print(f"Error updating kline for {symbol_full}: {e.code}")
+            
 
+            if not klines:
+                print(f"No klines returned for {symbol_full}")
+                continue
+        # if klines:
+        try:  
             if not klines:
                 print(f"No klines returned for {symbol_full}")
                 continue
