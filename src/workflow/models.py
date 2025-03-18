@@ -31,12 +31,10 @@ class WorkflowInstance(models.Model):
         return f"{self._meta.model_name} {self.pk} - Event {event}"
 
 
-
 class WorkflowMixin:
     def notify(self, event, group_name, message_type, data=None, exception_id=None):
         """Base method to send a workflow event to WebSocket clients."""
         from src.market.models import Notification
-        from src.market.tasks import update_total_usd
         logger = logging.getLogger(__name__)
         content_type = ContentType.objects.get_for_model(self.__class__)
 
@@ -61,7 +59,8 @@ class WorkflowMixin:
             group_name,
             {
                 'type': message_type,
-                'data': json.dumps(payload, default=str),  # Convert datetime to string
+                # Convert datetime to string
+                'data': json.dumps(payload, default=str),
             }
         )
 
@@ -92,10 +91,10 @@ class WorkflowMixin:
             group_name,
             {
                 'type': message_type,
-                'data': json.dumps(payload, default=str),  # Convert datetime to string
+                # Convert datetime to string
+                'data': json.dumps(payload, default=str),
             }
         )
-
 
     def create_data(self):
         """Default method to prepare data for creation events (e.g., adding rows)."""
