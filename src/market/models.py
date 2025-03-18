@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from src.workflow.models import WorkflowInstance, WorkflowMixin
 from src.market.utils import upload_image_file_path
+from .managers import SymbolManager
 
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
@@ -224,10 +225,13 @@ class Symbol(models.Model):
         max_digits=30, decimal_places=17, default=0.00)
     precision = models.IntegerField(default=8)  # Add this
     active = models.BooleanField(default=True)
+    enabled = models.BooleanField(default=True)
     logo = models.ImageField(null=True, blank=True, default='coins/XTVCUSDT.svg',
                              upload_to=upload_image_file_path)  # e.g., "coins\XTVCBTC.svg"
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    objects = SymbolManager()
 
     def __str__(self):
         return self.pair

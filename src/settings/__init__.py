@@ -8,6 +8,7 @@ base_settings = [
     'components/common.py',
     'components/secretes.py',
     'components/redis.py',
+    'components/binance.py',
 ]
 
 include(*base_settings)

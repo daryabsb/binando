@@ -93,104 +93,66 @@ def update_klines(symbols=None):
     import zoneinfo
     from tzlocal import get_localzone
     from datetime import timezone as dt_timezone
+    from django.conf import settings
+
+    KLINE_FETCH_INTERVAL = settings.KLINE_FETCH_INTERVAL
+    KLINE_FETCH_PERIOD = settings.KLINE_FETCH_PERIOD
+
+    interval = KLINE_FETCH_INTERVAL
 
     Symbol = apps.get_model("market", "Symbol")
     Kline = apps.get_model("market", "Kline")
     if symbols is None:
-        symbols = Symbol.objects.filter(active=True).values_list(
-            "ticker", flat=True)
+        symbols = Symbol.objects.sorted_symbols()
 
     client = get_client()
     now = timezone.now()
 
-    last_kline = Kline.objects.last()
+    start_date = now - KLINE_FETCH_PERIOD
 
-    # if last_kline and (now - last_kline.time).total_seconds() > timedelta(minutes=150).total_seconds():
-    #     start = (now - last_kline.time).total_seconds()
-    #     start_date = now - timedelta(seconds=start)
-    # else:
-    start_date = now - timedelta(minutes=60 * 24)
+    start_time = now - timedelta(hours=24)
 
-    now_utc = now.astimezone(dt_timezone.utc)
-    start_utc = start_date.astimezone(dt_timezone.utc)
+    local_start = start_date.astimezone(dt_timezone.utc)
+    local_now = now.astimezone(dt_timezone.utc)
 
-    tz_name = str(get_localzone())
-    user_tz = zoneinfo.ZoneInfo(tz_name)
-
-    local_now = now_utc.astimezone(dt_timezone.utc)
-    local_start = start_utc.astimezone(dt_timezone.utc)
-
+    from_date_ms = int(local_start.timestamp() * 1000)  # Correct order
     to_date_ms = int(local_now.timestamp() * 1000)
-    from_date_ms = int(local_start.timestamp() * 1000)
 
     for symbol in symbols:
-        symbol_full = symbol + "USDT"
         try:
-            # print(
-            #     f"Fetching last 15min klines for {symbol_full} from {local_now} to {local_start}")
+            print(
+                f"Fetching last 15min klines for {symbol} from {local_start} to {local_now}")
 
-            klines = client.get_klines(
-                symbol=symbol_full,
-                interval="5m",
-                startTime=from_date_ms,
-                endTime=to_date_ms
-            )
-        except Exception as e:
-            print(f"INVALID SYMBOL: {symbol_full}: {e.code}")
+            klines = client.get_historical_klines(
+                symbol, interval, from_date_ms, to_date_ms)
 
-            if abs(e.code) == (1121):
-                symbol_obj = Symbol.objects.get(pair=symbol_full)
-                symbol_obj.active = False
-                symbol_obj.save()
+            if not klines:
+                print(f"No klines returned for {symbol}")
                 continue
-        # if klines:
-        # try:
-            # if not klines:
-            #     print(f"No klines returned for {symbol_full}")
-            #     continue
 
-        Kline = apps.get_model("market", "Kline")
-        batch = []
-        for kline in klines:
-            # open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
-            close_time = datetime.fromtimestamp(
-                int(kline[6]) / 1000, tz=dt_timezone.utc)
+            batch = []
+            for kline in klines:
+                close_time = datetime.fromtimestamp(
+                    int(kline[6]) / 1000, tz=dt_timezone.utc)
 
-            obj = Kline(
-                # Store full symbol (e.g., 'BURGERUSDT')
-                symbol=symbol_full,
-                # timestamp=open_time,  # Opening time
-                time=close_time,      # Closing time
-                open=Decimal(kline[1]),
-                high=Decimal(kline[2]),
-                low=Decimal(kline[3]),
-                close=Decimal(kline[4]),
-                volume=Decimal(kline[5])
-            )
-            batch.append(obj)
+                obj = Kline(
+                    symbol=symbol,
+                    time=close_time,
+                    open=Decimal(kline[1]),
+                    high=Decimal(kline[2]),
+                    low=Decimal(kline[3]),
+                    close=Decimal(kline[4]),
+                    volume=Decimal(kline[5])
+                )
+                batch.append(obj)
 
-        if batch:
-            created_batch = Kline.objects.bulk_create(
-                batch, ignore_conflicts=True)
-            # print(
-            #     f"Inserted {len(created_batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
+            if batch:
+                Kline.objects.bulk_create(batch, ignore_conflicts=True)
+                print(f"Inserted {len(batch)} klines for {symbol}")
 
-            # Verify insertion
-            # latest = Kline.objects.filter(
-            #     symbol=symbol_full).order_by('-time').first()
-            # if latest:
-            #     print(
-            #         f"DB verification for {symbol_full}: latest close {latest.time}")
-            # else:
-            #     print(
-            #         f"WARNING: No klines found in DB for {symbol_full} after insert")
-        else:
-            print(f"No valid klines to insert for {symbol_full}")
-            continue
+        except Exception as e:
+            print(f"Error fetching klines for {symbol}: {e}")
 
-        # except Exception as e:
-        #     print(f"No klines returned for {symbol_full}: {e}")
-        #     continue
     print('Symbols updated!')
     return True
 

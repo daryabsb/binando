@@ -105,12 +105,15 @@ def update_symbols():
 
     # run_trading()
     from src.market.models import Symbol
-    symbols = Symbol.objects.filter(active=True)
-    print(symbols.count())
-    # for symbol in symbols:
-    #     # symbol.active = False if symbol.ticker not in currencies else True
-    #     symbol.active = True
-    #     symbol.save()
+    # symbols = Symbol.objects.filter(active=True)
+    symbols = Symbol.objects.filter(enabled=True)
+    # print(symbols.count())
+    for symbol in symbols:
+        # symbol.active = False if symbol.ticker not in currencies else True
+        if symbol.ticker not in currencies:
+            symbol.active = False
+            symbol.save()
+
     # print("Symbols updated successfully!")
     # from django.utils import timezone
     # from datetime import datetime, timedelta, timezone as dt_timezone
@@ -176,11 +179,11 @@ def run():
     # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
     # update_total_usd()
     # update_symbols()
-    update_system_data()
+    # update_system_data()
     # while True:
     # update_klines()
     # reset_cryptos()
-    # while True:
-    #     run_trading()
-    #     sleep(3)
+    while True:
+        run_trading()
+        sleep(3)
     # update_symbols()

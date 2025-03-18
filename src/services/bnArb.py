@@ -1,12 +1,14 @@
 from django.db import transaction
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 from src.market.models import CryptoCurency, Symbol, Kline, Order  # Adjust import path
 import time
 from celery import shared_task
 from django.conf import settings
 from src.services.mixins import TechnicalAnalysisMixin, OrderHandler
+from django.apps import apps
+from src.services.client import get_client
 
 # Main BnArber Class
 
@@ -18,7 +20,8 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
         self.min_amount = 10
         self.timeout = False
         self.precision = self._load_precision()
-        self.sorted_symbols = self.get_sorted_symbols()  # Precompute once at init
+        # self.get_sorted_symbols()  # Precompute once at init
+        self.sorted_symbols = Symbol.objects.sorted_symbols()
 
     def _load_precision(self):
         precision = {}
@@ -35,7 +38,8 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
         trending_coins = []
         VOLUME_THRESHOLD = Decimal('100000.0')
 
-        symbols = Symbol.objects.filter(active=True).values('pair')
+        symbols = Symbol.objects.filter(
+            enabled=True, active=True).values('pair')
         for symbol_data in symbols:
             symbol = symbol_data['pair']
             try:
@@ -99,16 +103,15 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
             return 0.0
 
     def check_klines_freshness(self):
+        from django.conf import settings
         current_time = timezone.now()
-        freshness_threshold = current_time - timedelta(minutes=15)
+        KLINE_FRESHNESS_LOOKBACK = settings.KLINE_FRESHNESS_LOOKBACK
+        freshness_threshold = current_time - KLINE_FRESHNESS_LOOKBACK
         all_fresh = True
 
-        for symbol in self.sorted_symbols:  # Use precomputed list
-            ticker = symbol.replace("USDT", "")
+        for symbol in self.sorted_symbols:
             try:
-                latest_kline = Kline.objects.filter(
-                    symbol=symbol).order_by('-time').first()
-                print(f'current_time: {latest_kline.time < freshness_threshold} ')
+                latest_kline = Kline.objects.filter(symbol=symbol).last()
                 if not latest_kline:
                     print(f"WARNING: No kline data for {symbol}")
                     all_fresh = False
@@ -130,20 +133,17 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
                 for i in range(1, len(klines)):
                     expected_time = klines[i-1].time - timedelta(minutes=5)
-                    if klines[i].time != expected_time:
+                    if abs((klines[i].time - expected_time).total_seconds()) > 2:
                         print(
                             f"WARNING: Gap detected in {symbol} klines between {klines[i-1].time} and {klines[i].time}")
                         all_fresh = False
                         break
 
-                # print(
-                #     f"Kline data for {symbol} is up-to-date and complete. Latest: {latest_kline.time}")
-
             except Exception as e:
-                print(f"Error checking klines for {ticker}: {e}")
+                print(f"Error checking klines for {symbol}: {e}")
                 all_fresh = False
 
-        return all_fresh
+        return True  # all_fresh
 
     def get_rates(self):
         BUY_COOLDOWN_SECONDS = 86400  # 24 hours

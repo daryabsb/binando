@@ -32,13 +32,14 @@ count = 0
 
 class SymbolAdmin(admin.ModelAdmin):
     list_display = ['rank', 'ticker', 'pair', 'get_24_hour_volume',
-                    'active', 'timestamp', 'updated']
+                    'active', 'enabled', 'timestamp', 'updated']
     list_filter = [
         'ticker',
         ('timestamp', DateTimeRangeFilterBuilder()),
         'timestamp',
         'active',
         'pair',
+        'enabled',
     ]
 
     @staticmethod
@@ -119,7 +120,9 @@ class SymbolAdmin(admin.ModelAdmin):
             symbol=OuterRef('pair'),
             time__gte=last_24_hours
         ).order_by('time').values('volume')[:1]
-        return qs.annotate(last_24_volume=Subquery(kline_subquery))
+        # return qs.annotate(last_24_volume=Subquery(kline_subquery))
+        queryset = qs.annotate(last_24_volume=Subquery(kline_subquery))
+        return queryset
 
 
 class KlineAdmin(admin.ModelAdmin):
