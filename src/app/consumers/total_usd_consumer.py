@@ -14,8 +14,8 @@ class TotalsConsumer(AsyncWebsocketConsumer):
     
     async def total_usd(self, event):
         # data = json.loads(event['data'])
-        print(f'updated updated 2')
-        print(f'Event data: {event["data"]}')
+        # print(f'updated updated 2')
+        # print(f'Event data: {event["data"]}')
         data = {'total_usd': event['data']}
         html = await sync_to_async(render_to_string)('partials/total-usd.html', data)
 

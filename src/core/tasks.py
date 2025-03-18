@@ -95,17 +95,27 @@ def update_klines(symbols=None):
     from datetime import timezone as dt_timezone
 
     Symbol = apps.get_model("market", "Symbol")
+    Kline = apps.get_model("market", "Kline")
     if symbols is None:
         symbols = Symbol.objects.filter(active=True).values_list(
             "ticker", flat=True)
 
     client = get_client()
-
     now = timezone.now()
-    start_date = now - timedelta(minutes=150)
+
+    last_kline = Kline.objects.last()
+
+    if last_kline and (now - last_kline.time).total_seconds() > timedelta(minutes=150).total_seconds():
+        start = (now - last_kline.time).total_seconds()
+        start_date = now - timedelta(seconds=start)
+    else:
+        start_date = now - timedelta(minutes=150)
 
     now_utc = now.astimezone(dt_timezone.utc)
     start_utc = start_date.astimezone(dt_timezone.utc)
+    
+    print(f'both times: now: {now_utc} || start: {start_utc}')
+
 
     tz_name = str(get_localzone())
     user_tz = zoneinfo.ZoneInfo(tz_name)
