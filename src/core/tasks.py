@@ -105,17 +105,14 @@ def update_klines(symbols=None):
 
     last_kline = Kline.objects.last()
 
-    if last_kline and (now - last_kline.time).total_seconds() > timedelta(minutes=150).total_seconds():
-        start = (now - last_kline.time).total_seconds()
-        start_date = now - timedelta(seconds=start)
-    else:
-        start_date = now - timedelta(minutes=150)
+    # if last_kline and (now - last_kline.time).total_seconds() > timedelta(minutes=150).total_seconds():
+    #     start = (now - last_kline.time).total_seconds()
+    #     start_date = now - timedelta(seconds=start)
+    # else:
+    start_date = now - timedelta(minutes=60 * 24)
 
     now_utc = now.astimezone(dt_timezone.utc)
     start_utc = start_date.astimezone(dt_timezone.utc)
-    
-    print(f'both times: now: {now_utc} || start: {start_utc}')
-
 
     tz_name = str(get_localzone())
     user_tz = zoneinfo.ZoneInfo(tz_name)
@@ -140,61 +137,60 @@ def update_klines(symbols=None):
             )
         except Exception as e:
             print(f"INVALID SYMBOL: {symbol_full}: {e.code}")
-            
+
             if abs(e.code) == (1121):
                 symbol_obj = Symbol.objects.get(pair=symbol_full)
                 symbol_obj.active = False
                 symbol_obj.save()
                 continue
-            if not klines:
-                print(f"No klines returned for {symbol_full}")
-                continue
         # if klines:
-        try:  
-            if not klines:
-                print(f"No klines returned for {symbol_full}")
-                continue
+        # try:
+            # if not klines:
+            #     print(f"No klines returned for {symbol_full}")
+            #     continue
 
-            Kline = apps.get_model("market", "Kline")
-            batch = []
-            for kline in klines:
-                # open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
-                close_time = datetime.fromtimestamp(
-                    int(kline[6]) / 1000, tz=dt_timezone.utc)
+        Kline = apps.get_model("market", "Kline")
+        batch = []
+        for kline in klines:
+            # open_time = datetime.fromtimestamp(int(kline[0]) / 1000, tz=dt_timezone.utc)
+            close_time = datetime.fromtimestamp(
+                int(kline[6]) / 1000, tz=dt_timezone.utc)
 
-                obj = Kline(
-                    # Store full symbol (e.g., 'BURGERUSDT')
-                    symbol=symbol_full,
-                    # timestamp=open_time,  # Opening time
-                    time=close_time,      # Closing time
-                    open=Decimal(kline[1]),
-                    high=Decimal(kline[2]),
-                    low=Decimal(kline[3]),
-                    close=Decimal(kline[4]),
-                    volume=Decimal(kline[5])
-                )
-                batch.append(obj)
+            obj = Kline(
+                # Store full symbol (e.g., 'BURGERUSDT')
+                symbol=symbol_full,
+                # timestamp=open_time,  # Opening time
+                time=close_time,      # Closing time
+                open=Decimal(kline[1]),
+                high=Decimal(kline[2]),
+                low=Decimal(kline[3]),
+                close=Decimal(kline[4]),
+                volume=Decimal(kline[5])
+            )
+            batch.append(obj)
 
-            if batch:
-                created_batch = Kline.objects.bulk_create(
-                    batch, ignore_conflicts=True)
-                print(
-                    f"Inserted {len(created_batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
+        if batch:
+            created_batch = Kline.objects.bulk_create(
+                batch, ignore_conflicts=True)
+            # print(
+            #     f"Inserted {len(created_batch)} klines for {symbol_full}, latest close: {batch[-1].time}")
 
-                # Verify insertion
-                # latest = Kline.objects.filter(
-                #     symbol=symbol_full).order_by('-time').first()
-                # if latest:
-                #     print(
-                #         f"DB verification for {symbol_full}: latest close {latest.time}")
-                # else:
-                #     print(
-                #         f"WARNING: No klines found in DB for {symbol_full} after insert")
-            else:
-                print(f"No valid klines to insert for {symbol_full}")
+            # Verify insertion
+            # latest = Kline.objects.filter(
+            #     symbol=symbol_full).order_by('-time').first()
+            # if latest:
+            #     print(
+            #         f"DB verification for {symbol_full}: latest close {latest.time}")
+            # else:
+            #     print(
+            #         f"WARNING: No klines found in DB for {symbol_full} after insert")
+        else:
+            print(f"No valid klines to insert for {symbol_full}")
+            continue
 
-        except Exception as e:
-            print(f"Error updating kline for {symbol_full}: {e}")
+        # except Exception as e:
+        #     print(f"No klines returned for {symbol_full}: {e}")
+        #     continue
     print('Symbols updated!')
     return True
 

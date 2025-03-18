@@ -56,19 +56,20 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
         self.ticker = self.ticker.upper()
         super().save(*args, **kwargs)
 
-
     def get_kline_data(self):
         """Fetch the latest Kline data for this crypto's ticker."""
         symbol = f"{self.ticker}USDT"  # e.g., 'BTCUSDT'
         kline = Kline.objects.filter(symbol=symbol).order_by('-time').first()
         if kline:
             return {
-                'last_price': float(kline.close),  # Assuming 'close' is the last price in USDT
+                # Assuming 'close' is the last price in USDT
+                'last_price': float(kline.close),
                 'change_24h': float(kline.change_24h) if hasattr(kline, 'change_24h') else None,
                 'high_24h': float(kline.high),
                 'low_24h': float(kline.low),
                 'volume_24h': float(kline.volume),
-                'current_amount_holding': float(self.balance),  # From CryptoCurency
+                # From CryptoCurency
+                'current_amount_holding': float(self.balance),
             }
         return {
             'last_price': 0.0,
@@ -232,7 +233,7 @@ class Symbol(models.Model):
         return self.pair
 
     class Meta:
-        ordering = ['rank', 'ticker']
+        ordering = ('rank', '-active', 'ticker',)
 
 
 class Kline(models.Model):

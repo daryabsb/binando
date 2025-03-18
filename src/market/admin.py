@@ -26,15 +26,19 @@ class CryptoCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'rank')
     ordering = ('rank', 'name')
 
+
 count = 0
+
+
 class SymbolAdmin(admin.ModelAdmin):
-    list_display = ['ticker', 'pair', 'get_24_hour_volume',
+    list_display = ['rank', 'ticker', 'pair', 'get_24_hour_volume',
                     'active', 'timestamp', 'updated']
     list_filter = [
         'ticker',
         ('timestamp', DateTimeRangeFilterBuilder()),
         'timestamp',
         'active',
+        'pair',
     ]
 
     @staticmethod

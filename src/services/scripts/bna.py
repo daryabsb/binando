@@ -1,4 +1,6 @@
 
+from src.market.utils import get_tradingview_widget_url
+import requests
 from time import sleep
 from src.services.tasks import run_trading
 from datetime import datetime, timedelta, timezone as dt_timezone
@@ -89,25 +91,26 @@ currencies = ["BURGER", "1MBABYDOGE", "DOGE", "PEPE", "TFUEL", "TRUMP", "SHIB", 
               "SUI", "LTC", "BNX", "TRX", "DOT", "CAKE", "STPT", "SCR", "NEAR", "AUDIO", "WLD", "ETHFI", "DGB", "WING", "AI", "BTTC", "JTO", "SFP", "DIA", "JUP", "BEL", "JUV", "WOO", "BLUR",
               ]
 
-import requests
-from src.market.utils import get_tradingview_widget_url
 # Use with requests
 # response = requests.get(url)
 # if response.status_code == 200:
 #     print("Request successful!")
 # else:
 #     print(f"Request failed with status code: {response.status_code}")
+
+
 def update_symbols():
     from src.services.tasks import run_trading
     from src.market.models import CryptoCurency
 
     # run_trading()
     from src.market.models import Symbol
-    symbols = Symbol.objects.all()
-    for symbol in symbols:
-        # symbol.active = False if symbol.ticker not in currencies else True
-        symbol.active = True
-        symbol.save()
+    symbols = Symbol.objects.filter(active=True)
+    print(symbols.count())
+    # for symbol in symbols:
+    #     # symbol.active = False if symbol.ticker not in currencies else True
+    #     symbol.active = True
+    #     symbol.save()
     # print("Symbols updated successfully!")
     # from django.utils import timezone
     # from datetime import datetime, timedelta, timezone as dt_timezone
@@ -152,6 +155,7 @@ def reset_cryptos():
 
 def run():
     from urllib.parse import unquote
+    from src.core.tasks import update_system_data
     # import requests
     # Example usage
     # symbol = "BTCUSD"
@@ -164,21 +168,19 @@ def run():
     # print(unquote(url))
     # print(url)
 
-
-
     # url = f'https://s.tradingview.com/widgetembed/?hideideas=1&overrides={}&enabled_features=[]&disabled_features=[]&locale=in#{"symbol":"BITSTAMP:BTCUSD","frameElementId":"tradingview_de890","interval":"D","hide_side_toolbar":"0","allow_symbol_change":"1","save_image":"1","details":"1","calendar":"1","hotlist":"1","studies":"[]","theme":"light","style":"1","timezone":"Etc/UTC","withdateranges":"1","studies_overrides":"{}","utm_medium":"widget","utm_campaign":"chart","utm_term":"BITSTAMP:BTCUSD","page-uri":"__NHTTP__"}'
-    
+
     # data = requests.get(url)
     # print(data.content)
     # usdt_obj = CryptoCurency.objects.get(ticker="USDT")
     # print(f'INITIAL USD BALANCE: {usdt_obj.balance}')
     # update_total_usd()
-    update_symbols()
+    # update_symbols()
+    update_system_data()
     # while True:
-        # update_klines()
+    # update_klines()
     # reset_cryptos()
     # while True:
     #     run_trading()
     #     sleep(3)
     # update_symbols()
-
