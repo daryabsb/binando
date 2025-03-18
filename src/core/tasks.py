@@ -139,9 +139,13 @@ def update_klines(symbols=None):
                 endTime=to_date_ms
             )
         except Exception as e:
-            print(f"Error updating kline for {symbol_full}: {e.code}")
+            print(f"INVALID SYMBOL: {symbol_full}: {e.code}")
             
-
+            if abs(e.code) == (1121):
+                symbol_obj = Symbol.objects.get(pair=symbol_full)
+                symbol_obj.active = False
+                symbol_obj.save()
+                continue
             if not klines:
                 print(f"No klines returned for {symbol_full}")
                 continue
