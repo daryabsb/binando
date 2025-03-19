@@ -11,8 +11,8 @@ from rangefilter.filters import (
 )
 from django.db.models import OuterRef, Subquery
 from src.market.models import (
-    Company, CryptoCurency, Kline, Symbol, Order, Notification,
-    CryptoCategory
+    Company, CryptoCurency, Symbol, Order, Notification,
+    CryptoCategory, Kline
 )
 
 admin.site.register(Company)
@@ -126,7 +126,7 @@ class SymbolAdmin(admin.ModelAdmin):
 
 
 class KlineAdmin(admin.ModelAdmin):
-    list_display = ['symbol', 'close', 'localized_time', 'time']
+    list_display = ['id', 'symbol', 'close', 'localized_time', 'time']
     list_filter = [
         'symbol',
         ('time', DateTimeRangeFilterBuilder()),

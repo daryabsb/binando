@@ -115,33 +115,33 @@ def update_symbols():
             symbol.save()
 
     # print("Symbols updated successfully!")
-    # from django.utils import timezone
-    # from datetime import datetime, timedelta, timezone as dt_timezone
-    # end_time = timezone.now()  # Current UTC time
-    # end_time = datetime.now()  # Current UTC time
-    # from_time = end_time - timedelta(minutes=150)  # 15 minutes prior
-    # to_date_ms = int(end_time.timestamp())
-    # from_date_ms = int(from_time.timestamp())
+        # from django.utils import timezone
+        # from datetime import datetime, timedelta, timezone as dt_timezone
+        # end_time = timezone.now()  # Current UTC time
+        # end_time = datetime.now()  # Current UTC time
+        # from_time = end_time - timedelta(minutes=150)  # 15 minutes prior
+        # to_date_ms = int(end_time.timestamp())
+        # from_date_ms = int(from_time.timestamp())
 
-    # print(f"Datetime now: {datetime.now()}")
-    # print(f"End time: {end_time}")
-    # # print(f"From time: {from_time}")
+        # print(f"Datetime now: {datetime.now()}")
+        # print(f"End time: {end_time}")
+        # # print(f"From time: {from_time}")
 
-    # client = get_client(testnet=True)
-    # symbol_full = "DOGEUSDT"
-    # print(
-    #     f"Fetching last 15min klines for {symbol_full} from {from_time} to {end_time}")
+        # client = get_client(testnet=True)
+        # symbol_full = "DOGEUSDT"
+        # print(
+        #     f"Fetching last 15min klines for {symbol_full} from {from_time} to {end_time}")
 
-    # klines = client.get_klines(
-    #     symbol=symbol_full,
-    #     interval="5m",
-    #     # startTime=from_date_ms,
-    #     # endTime=to_date_ms
-    # )
+        # klines = client.get_klines(
+        #     symbol=symbol_full,
+        #     interval="5m",
+        #     # startTime=from_date_ms,
+        #     # endTime=to_date_ms
+        # )
 
-    # print(f"Klines: {len(klines)}")
+        # print(f"Klines: {len(klines)}")
 
-    # update_klines()
+        # update_klines()
 
 
 def reset_cryptos():
@@ -154,6 +154,123 @@ def reset_cryptos():
             symbol.save()
         else:
             symbol.delete()
+
+def batch_delete_kline_data():
+    Kline = apps.get_model('market', 'Kline')
+    dataset = Kline.objects.all()
+    batch_size = 2500
+
+    for i in range(50):
+        try:
+            queryset = dataset[:batch_size]
+            for kline in queryset:
+                kline.delete()
+
+            print(i)
+            sleep(5)
+        except Exception as e:
+            print(f'Error deleting queryset: {e}')
+    
+
+    
+
+
+    # for i in range(0, len(dataset), batch_size):
+    #     if verbose:
+    #         print("Doing chunk", i)
+    #     batch_chunk = dataset[i:i+batch_size]
+    #     chunked_quotes = []
+
+    #     for data in batch_chunk:
+    #         chunked_quotes.append(
+    #             StockQuote(company=company_obj, **data)
+    #         )
+    #     StockQuote.objects.bulk_create(chunked_quotes, ignore_conflicts=True)
+    #     if verbose:
+    #         print("finished chunk", i)
+    # return len(dataset)
+    
+
+from binance.client import Client
+from decouple import config
+from src.market.models import Symbol, Kline
+from django.utils import timezone
+from datetime import timedelta, timezone as dt_timezone
+import time
+from decimal import Decimal
+
+PUBLIC = config('api_key')
+SECRET = config('secret_key')
+client = Client(PUBLIC, SECRET)
+
+def fetch_historical_klines(days=8, interval='5m', batch_size=10):
+    """
+    Fetch historical Kline data for the last 8 days for all symbols and insert into the database.
+    
+    Args:
+        days (int): Number of days to fetch (default: 8).
+        interval (str): Kline interval, e.g., '5m' for 5 minutes (default: '5m').
+        batch_size (int): Number of symbols to process per batch (default: 10).
+    """
+    # Calculate time range: last 8 days
+    print('fetching 8 days started')
+    end_time = timezone.now()
+    start_time = end_time - timedelta(days=days)
+    
+    # Get all symbols (assumes sorted_symbols() returns a list like ['BTC', 'ETH', ...])
+    symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True) #sorted_symbols()
+    
+    # print(symbols)
+
+    # Process symbols in batches to avoid overwhelming the API
+    for i in range(0, len(symbols), batch_size):
+        batch_symbols = symbols[i:i + batch_size]
+        for symbol in batch_symbols:
+            kline_exists = Kline.objects.filter(symbol=symbol).exists()
+
+            if not kline_exists:
+                continue
+            # Fetch historical Kline data from Binance
+            print(f"Fetching data for {symbol}...")
+            klines = client.get_historical_klines(
+                symbol=f"{symbol}",
+                interval=interval,
+                start_str=int(start_time.timestamp() * 1000),
+                end_str=int(end_time.timestamp() * 1000)
+            )
+            
+            # Prepare Kline objects for database insertion
+            kline_objects = []
+            for kline in klines:
+                kline_objects.append(Kline(
+                    symbol=f"{symbol}USDT",
+                    interval=interval,
+                    start_time=timezone.datetime.fromtimestamp(kline[0] / 1000, tz=dt_timezone.utc),
+                    end_time=timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc),
+                    open=Decimal(kline[1]),
+                    close=Decimal(kline[4]),
+                    high=Decimal(kline[2]),
+                    low=Decimal(kline[3]),
+                    volume=Decimal(kline[5]),
+                    quote_volume=Decimal(kline[7]),
+                    taker_buy_base_volume=Decimal(kline[9]),
+                    taker_buy_quote_volume=Decimal(kline[10]),
+                    trade_count=int(kline[8]),
+                    is_closed=True,  # Historical data is always closed
+                    time=timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc)
+                ))
+            
+            # Insert all Klines for this symbol into the database efficiently
+            Kline.objects.bulk_create(kline_objects, ignore_conflicts=True)
+            print(f"Inserted {len(kline_objects)} Klines for {symbol}")
+        
+        # Small delay to respect Binance API rate limits
+        time.sleep(1)
+    print('fetching 8 days finished')
+
+# Example usage:
+# fetch_historical_klines(days=8, interval='5m')
+
 
 
 def run():
@@ -183,7 +300,9 @@ def run():
     # while True:
     # update_klines()
     # reset_cryptos()
-    while True:
-        run_trading()
-        sleep(3)
+    # while True:
+    #     run_trading()
+    #     sleep(3)
     # update_symbols()
+    # batch_delete_kline_data()
+    fetch_historical_klines()
