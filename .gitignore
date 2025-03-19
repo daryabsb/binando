@@ -67,6 +67,8 @@ testnet_account3.db
 testnet_account5.db
 db.sqlite3-journal
 
+src/backups/
+
 # Flask stuff:
 instance/
 .webassets-cache
