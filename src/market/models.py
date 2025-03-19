@@ -20,7 +20,7 @@ from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 # trading/models.py
-from . import tasks
+# from ...archive import tasks_market
 # Create your models here.
 
 
@@ -35,7 +35,7 @@ class Company(models.Model):
     def save(self, *args, **kwargs):
         self.ticker = f"{self.ticker}".upper()
         super().save(*args, **kwargs)
-        tasks.sync_company_stock_quotes.delay(self.pk)
+        # tasks_market.sync_company_stock_quotes.delay(self.pk)
 
 
 class CryptoCurency(WorkflowInstance, WorkflowMixin):
@@ -242,24 +242,32 @@ class Symbol(models.Model):
 
 class Kline(models.Model):
     symbol = models.CharField(max_length=20, db_index=True)
-    time = TimescaleDateTimeField(interval="2 week")
+    interval = models.CharField(max_length=10, default='5m')  # e.g., '5m'
+    start_time = models.DateTimeField()  # Kline start time
+    end_time = models.DateTimeField()  # Kline end time
     # timestamp = TimescaleDateTimeField(interval="2 week")
-    open = models.DecimalField(max_digits=30, decimal_places=17)
-    high = models.DecimalField(max_digits=30, decimal_places=17)
-    low = models.DecimalField(max_digits=30, decimal_places=17)
-    close = models.DecimalField(max_digits=30, decimal_places=17)
-    volume = models.DecimalField(max_digits=30, decimal_places=17)
-    num_of_trades = models.BigIntegerField(default=0)
-    # time = TimescaleDateTimeField(interval="1 week")
+    open = models.DecimalField(max_digits=20, decimal_places=8)
+    close = models.DecimalField(max_digits=20, decimal_places=8)
+    high = models.DecimalField(max_digits=20, decimal_places=8)
+    low = models.DecimalField(max_digits=20, decimal_places=8)
+    # Volume fields: increase max_digits to handle large numbers
+    volume = models.DecimalField(max_digits=30, decimal_places=8)
+    quote_volume = models.DecimalField(max_digits=30, decimal_places=8)
+    taker_buy_base_volume = models.DecimalField(max_digits=30, decimal_places=8)
+    taker_buy_quote_volume = models.DecimalField(max_digits=30, decimal_places=8)
+    trade_count = models.IntegerField()
+    is_closed = models.BooleanField(default=False)
+    time = TimescaleDateTimeField(interval="2 week")
 
     objects = models.Manager()
     timescale = TimescaleManager()
 
     class Meta:
-        indexes = [
-            models.Index(fields=['symbol', 'time']),
-        ]
-        unique_together = ['symbol', 'time']
+
+        # indexes = [
+        #     models.Index(fields=['symbol', 'time']),
+        # ]
+        unique_together = ('symbol', 'start_time', 'interval')
 
     def __str__(self):
         return f"{self.symbol}||{self.time}: {self.close}|{self.volume}"

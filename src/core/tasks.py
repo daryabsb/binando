@@ -10,7 +10,7 @@ from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.apps import apps  # .models import Symbol, CryptoCategory
 from django.utils.text import slugify
-
+from binance import ThreadedWebsocketManager
 
 # @shared_task
 def test_tasks():
@@ -167,3 +167,4 @@ def update_system_data():
 
             if total_usd:
                 print('System updated successfully with the latest data!')
+
