@@ -209,7 +209,7 @@ def fetch_historical_klines(days=8, interval='5m', batch_size=10):
     """
     # Calculate time range: last 8 days
     print('fetching 8 days started')
-    minutes = 405
+    minutes = 10
     days = 8
     end_time = timezone.now()
     # start_time = end_time - timedelta(days=days)

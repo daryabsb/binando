@@ -1,4 +1,4 @@
-from .utils import update_symbols
+from .utils import fetch_historical_klines
 
 
 def run():
@@ -34,11 +34,11 @@ def run():
     # batch_delete_kline_data()
     # from django.utils import timezone
     # from datetime import timedelta
-    # minutes = 400
+    # minutes = 500
     # end_time = timezone.now()
     # start_time = end_time - timedelta(minutes=minutes)
     # print(start_time)
     # print(end_time)
 
-    update_symbols()
+    fetch_historical_klines()
     # update_klines()
