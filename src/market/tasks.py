@@ -14,6 +14,7 @@ import time
 from django.db import transaction
 from django.utils.timezone import make_aware
 from asgiref.sync import sync_to_async
+from src.services.client import get_client
 
 PUBLIC = config('api_key')
 SECRET = config('secret_key')
@@ -26,6 +27,55 @@ batch_inserted = False
 
 BATCH_SIZE = 100  # Maximum Klines before immediate flush
 FLUSH_INTERVAL = 60  # Seconds between periodic flushes
+
+client = get_client()
+
+
+def fill_kline_gaps(symbol, interval='5m', days_back=7):
+    """
+    Fill missing Kline data for a symbol before starting the stream.
+    """
+    # Get the most recent Kline for the symbol
+    last_kline = Kline.objects.filter(
+        symbol=symbol).order_by('-start_time').first()
+
+    # Determine the start time for fetching missing data
+    if last_kline:
+        start_time = last_kline.end_time  # Start from the end of the last Kline
+    else:
+        start_time = timezone.now() - timedelta(days=days_back)  # Default to 7 days ago
+
+    end_time = timezone.now()  # Fetch up to the current time
+
+    # Fetch historical Klines from Binance REST API
+    klines = client.get_historical_klines(
+        symbol=symbol,
+        interval=interval,
+        # Convert to milliseconds
+        start_str=int(start_time.timestamp() * 1000),
+        end_str=int(end_time.timestamp() * 1000)
+    )
+
+    # Save the fetched Klines to the database
+    for kline in klines:
+        Kline.objects.create(
+            symbol=symbol,
+            interval=interval,
+            start_time=timezone.datetime.fromtimestamp(
+                kline[0] / 1000, tz=timezone.utc),
+            end_time=timezone.datetime.fromtimestamp(
+                kline[6] / 1000, tz=timezone.utc),
+            open=kline[1],
+            close=kline[4],
+            high=kline[2],
+            low=kline[3],
+            volume=kline[5],
+            quote_volume=kline[7],
+            taker_buy_base_volume=kline[9],
+            taker_buy_quote_volume=kline[10],
+            trade_count=kline[8],
+            is_closed=True
+        )
 
 
 @shared_task
