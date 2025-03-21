@@ -12,7 +12,7 @@
     <!-- plugin css file  -->
     <link rel="stylesheet" href="{% static 'assets/plugin/datatables/responsive.dataTables.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/plugin/datatables/dataTables.bootstrap5.min.css' %}">
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css">
+    {% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css"> {% endcomment %}
 
     <!-- project css file  -->
     <link rel="stylesheet" href="{% static 'assets/css/cryptoon.style.min.css' %}">
@@ -231,9 +231,9 @@
         <!-- Jquery Page Js -->
         <script src="{% static 'assets/js/template.js' %}"></script>
         <script src="{% static 'assets/js/page/index.js' %}"></script>
-        <script src="{% static 'assets/plugin/datatable/datatables.min.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/plugin/datatable/datatables.min.js' %}"></script> {% endcomment %}
         {% comment %} <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script> {% endcomment %}
-        <script>
+        {% comment %} <script>
             document.addEventListener("DOMContentLoaded", (event) => {
                 console.log("DOM fully loaded and parsed");
                 new DataTable('#orders-datatable', {
@@ -254,6 +254,6 @@
                     ]
                 })
             });
-        </script>
+        </script> {% endcomment %}
 </body>
 </html>

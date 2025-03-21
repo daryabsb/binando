@@ -29,8 +29,10 @@ def test_websocket(request):
 def balances(request):
     balances = []
     for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-        latest_price = float(Kline.objects.filter(
+        close_price = float(Kline.objects.filter(
             symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
+
+        latest_price = close_price if close_price else 0.00
         usd_value = float(crypto.balance) * latest_price
         balances.append({
             'ticker': crypto.ticker,
@@ -52,8 +54,8 @@ def balances_data(request):
     balances = []
     cryptos = CryptoCurency.objects.all()
     for crypto in cryptos:
-        balances.append(crypto.to_payload())    
-    return JsonResponse({'data':balances}, safe=False)
+        balances.append(crypto.to_payload())
+    return JsonResponse({'data': balances}, safe=False)
 
 
 def total_usd(request):

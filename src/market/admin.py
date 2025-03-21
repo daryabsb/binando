@@ -126,7 +126,7 @@ class SymbolAdmin(admin.ModelAdmin):
 
 
 class KlineAdmin(admin.ModelAdmin):
-    list_display = ['id', 'symbol', 'close', 'localized_time', 'time']
+    list_display = ['id', 'symbol', 'volume', 'localized_time', 'time']
     list_filter = [
         'symbol',
         ('time', DateTimeRangeFilterBuilder()),
@@ -143,14 +143,14 @@ class KlineAdmin(admin.ModelAdmin):
         tz_name = str(get_localzone())
         user_tz = zoneinfo.ZoneInfo(tz_name)
         local_time = utc_time.astimezone(timezone.utc)
-        return local_time.strftime("%b %d, %Y, %I:%M %p (%Z)")
+        return local_time.strftime("%b %d, %Y, %I:%M:%S %p (%Z)")
 
     def get_queryset(self, request):
         tz_name = "US/Eastern"
         # tz_name = "UTC"
         user_tz = zoneinfo.ZoneInfo(tz_name)
         timezone.activate(user_tz)
-        return super().get_queryset(request).order_by('-time')
+        return super().get_queryset(request)  # .order_by('-time')
 
 
 admin.site.register(Kline, KlineAdmin)

@@ -41,7 +41,7 @@ def test_websocket2(request):
 urlpatterns = [
     path('', views.index, name='index'),
     path('test-websocket/', views.test_websocket, name='test_websocket'),
-    # path('balances/', views.balances, name='balances'),
+    path('balances/', views.balances, name='balances'),
     path('balances-data/', views.balances_data, name='balances-data'),
     path('total-usd/', views.total_usd, name='total_usd'),
     path('notifications/', views.notifications, name='notifications'),

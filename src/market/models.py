@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 from timescale.db.models.fields import TimescaleDateTimeField
+from timescale.db.models.models import TimescaleModel
 from timescale.db.models.managers import TimescaleManager
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -240,6 +241,16 @@ class Symbol(models.Model):
         ordering = ('rank', '-active', 'ticker',)
 
 
+# class Kline(models.Model):
+#     symbol = models.CharField(max_length=20, db_index=True)
+#     open = models.DecimalField(max_digits=20, decimal_places=8)
+#     close = models.DecimalField(max_digits=20, decimal_places=8)
+#     high = models.DecimalField(max_digits=20, decimal_places=8)
+#     low = models.DecimalField(max_digits=20, decimal_places=8)
+#     # Volume fields: increase max_digits to handle large numbers
+#     volume = models.DecimalField(max_digits=30, decimal_places=8)
+
+
 class Kline(models.Model):
     symbol = models.CharField(max_length=20, db_index=True)
     interval = models.CharField(max_length=10, default='5m')  # e.g., '5m'
@@ -253,21 +264,24 @@ class Kline(models.Model):
     # Volume fields: increase max_digits to handle large numbers
     volume = models.DecimalField(max_digits=30, decimal_places=8)
     quote_volume = models.DecimalField(max_digits=30, decimal_places=8)
-    taker_buy_base_volume = models.DecimalField(max_digits=30, decimal_places=8)
-    taker_buy_quote_volume = models.DecimalField(max_digits=30, decimal_places=8)
+    taker_buy_base_volume = models.DecimalField(
+        max_digits=30, decimal_places=8)
+    taker_buy_quote_volume = models.DecimalField(
+        max_digits=30, decimal_places=8)
     trade_count = models.IntegerField()
     is_closed = models.BooleanField(default=False)
+    # timestamp = models.BooleanField(default=False)
     time = TimescaleDateTimeField(interval="2 week")
 
     objects = models.Manager()
     timescale = TimescaleManager()
 
-    class Meta:
+    # class Meta:
 
-        # indexes = [
-        #     models.Index(fields=['symbol', 'time']),
-        # ]
-        unique_together = ('symbol', 'start_time', 'interval')
+    indexes = [
+        models.Index(fields=['symbol', 'time']),
+    ]
+    # unique_together = ('symbol', 'start_time', 'interval')
 
     def __str__(self):
         return f"{self.symbol}||{self.time}: {self.close}|{self.volume}"
