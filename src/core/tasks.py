@@ -13,6 +13,8 @@ from django.utils.text import slugify
 from binance import ThreadedWebsocketManager
 
 # @shared_task
+
+
 def test_tasks():
     print('test_works')
     return 'Bravo!!'
@@ -159,12 +161,11 @@ def update_klines(symbols=None):
 
 @shared_task
 def update_system_data():
-    klines_updated = update_klines()
-    if klines_updated:
-        symbols_updated = update_symbols()
-        if symbols_updated:
-            total_usd = update_usd_value()
+    # klines_updated = update_klines()
+    # if klines_updated:
+    symbols_updated = update_symbols()
+    if symbols_updated:
+        total_usd = update_usd_value()
 
-            if total_usd:
-                print('System updated successfully with the latest data!')
-
+        if total_usd:
+            print('System updated successfully with the latest data!')
