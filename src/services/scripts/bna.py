@@ -1,4 +1,5 @@
-from .utils import fetch_historical_klines
+from .utils import fetch_historical_klines, update_symbols
+
 
 
 def run():
@@ -40,5 +41,5 @@ def run():
     # print(start_time)
     # print(end_time)
 
-    fetch_historical_klines()
-    # update_klines()
+    # fetch_historical_klines()
+    update_symbols()

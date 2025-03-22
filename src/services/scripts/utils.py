@@ -212,19 +212,26 @@ def fetch_historical_klines(days=8, interval='5m', batch_size=10):
     minutes = 10
     days = 8
     end_time = timezone.now()
-    # start_time = end_time - timedelta(days=days)
-    start_time = end_time - timedelta(minutes=minutes)
+
+
+    start_time = end_time - timedelta(days=days)
+    # start_time = end_time - timedelta(minutes=minutes)
 
     # Get all symbols (assumes sorted_symbols() returns a list like ['BTC', 'ETH', ...])
     symbols = Symbol.objects.filter(active=True, enabled=True).values_list(
         'pair', flat=True)  # sorted_symbols()
 
+    
     # Process symbols in batches to avoid overwhelming the API
     for i in range(0, len(symbols), batch_size):
         batch_symbols = symbols[i:i + batch_size]
         for symbol in batch_symbols:
-            kline_exists = Kline.objects.filter(symbol=symbol).exists()
-
+            # kline_exists = Kline.objects.filter(symbol=symbol).exists()
+            # last_kline = Kline.objects.filter(
+            #     symbol=symbol).order_by('-start_time').first()
+            # # Determine the start time for fetching missing data
+            # if last_kline:
+            #     start_time = last_kline.end_time  # Start from the end of the last Kline
             # if not kline_exists:
             #     continue
             # Fetch historical Kline data from Binance

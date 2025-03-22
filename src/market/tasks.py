@@ -31,51 +31,83 @@ FLUSH_INTERVAL = 60  # Seconds between periodic flushes
 client = get_client()
 
 
-def fill_kline_gaps(symbol, interval='5m', days_back=7):
+def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
     """
-    Fill missing Kline data for a symbol before starting the stream.
+    Fetch historical Kline data for the last 8 days for all symbols and insert into the database.
+
+    Args:
+        days (int): Number of days to fetch (default: 8).
+        interval (str): Kline interval, e.g., '5m' for 5 minutes (default: '5m').
+        batch_size (int): Number of symbols to process per batch (default: 10).
     """
-    # Get the most recent Kline for the symbol
-    last_kline = Kline.objects.filter(
-        symbol=symbol).order_by('-start_time').first()
+    # Calculate time range: last 8 days
+    print('fetching 8 days started')
+    minutes = 10
+    days = 8
+    end_time = timezone.now()
 
-    # Determine the start time for fetching missing data
-    if last_kline:
-        start_time = last_kline.end_time  # Start from the end of the last Kline
-    else:
-        start_time = timezone.now() - timedelta(days=days_back)  # Default to 7 days ago
 
-    end_time = timezone.now()  # Fetch up to the current time
+    start_time = end_time - timedelta(days=days)
+    # start_time = end_time - timedelta(minutes=minutes)
 
-    # Fetch historical Klines from Binance REST API
-    klines = client.get_historical_klines(
-        symbol=symbol,
-        interval=interval,
-        # Convert to milliseconds
-        start_str=int(start_time.timestamp() * 1000),
-        end_str=int(end_time.timestamp() * 1000)
-    )
+    # Get all symbols (assumes sorted_symbols() returns a list like ['BTC', 'ETH', ...])
+    symbols = Symbol.objects.filter(active=True, enabled=True).values_list(
+        'pair', flat=True)  # sorted_symbols()
 
-    # Save the fetched Klines to the database
-    for kline in klines:
-        Kline.objects.create(
-            symbol=symbol,
-            interval=interval,
-            start_time=timezone.datetime.fromtimestamp(
-                kline[0] / 1000, tz=timezone.utc),
-            end_time=timezone.datetime.fromtimestamp(
-                kline[6] / 1000, tz=timezone.utc),
-            open=kline[1],
-            close=kline[4],
-            high=kline[2],
-            low=kline[3],
-            volume=kline[5],
-            quote_volume=kline[7],
-            taker_buy_base_volume=kline[9],
-            taker_buy_quote_volume=kline[10],
-            trade_count=kline[8],
-            is_closed=True
-        )
+    
+    # Process symbols in batches to avoid overwhelming the API
+    for i in range(0, len(symbols), batch_size):
+        batch_symbols = symbols[i:i + batch_size]
+        for symbol in batch_symbols:
+            # kline_exists = Kline.objects.filter(symbol=symbol).exists()
+            last_kline = Kline.objects.filter(
+                symbol=symbol).order_by('-start_time').first()
+            # Determine the start time for fetching missing data
+            if last_kline:
+                start_time = last_kline.end_time  # Start from the end of the last Kline
+            # if not kline_exists:
+            #     continue
+            # Fetch historical Kline data from Binance
+            print(f"Fetching data for {symbol}...")
+            klines = client.get_historical_klines(
+                symbol=f"{symbol}",
+                interval=interval,
+                start_str=int(start_time.timestamp() * 1000),
+                end_str=int(end_time.timestamp() * 1000)
+            )
+
+            # Prepare Kline objects for database insertion
+            kline_objects = []
+            for kline in klines:
+                kline_objects.append(Kline(
+                    symbol=f"{symbol}",
+                    interval=interval,
+                    start_time=timezone.datetime.fromtimestamp(
+                        kline[0] / 1000, tz=dt_timezone.utc),
+                    end_time=timezone.datetime.fromtimestamp(
+                        kline[6] / 1000, tz=dt_timezone.utc),
+                    open=Decimal(kline[1]),
+                    close=Decimal(kline[4]),
+                    high=Decimal(kline[2]),
+                    low=Decimal(kline[3]),
+                    volume=Decimal(kline[5]),
+                    quote_volume=Decimal(kline[7]),
+                    taker_buy_base_volume=Decimal(kline[9]),
+                    taker_buy_quote_volume=Decimal(kline[10]),
+                    trade_count=int(kline[8]),
+                    is_closed=True,  # Historical data is always closed
+                    time=timezone.datetime.fromtimestamp(
+                        kline[6] / 1000, tz=dt_timezone.utc)
+                ))
+
+            # Insert all Klines for this symbol into the database efficiently
+            Kline.objects.bulk_create(kline_objects, ignore_conflicts=True)
+            print(f"Inserted {len(kline_objects)} Klines for {symbol}")
+
+        # Small delay to respect Binance API rate limits
+        time.sleep(1)
+    print('fetching 8 days finished')
+    return True
 
 
 @shared_task
