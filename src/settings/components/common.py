@@ -47,6 +47,7 @@ DJANGO_APPS = [
     "django_htmx",
     'django.contrib.staticfiles',
     'channels',
+    "corsheaders",
 ]
 THIRD_PARTY_APPS = [
     'django_celery_beat',
@@ -82,6 +83,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     "django_htmx.middleware.HtmxMiddleware",

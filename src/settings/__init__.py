@@ -9,6 +9,7 @@ base_settings = [
     'components/secretes.py',
     'components/redis.py',
     'components/binance.py',
+    'components/cors.py',
 ]
 
 include(*base_settings)
