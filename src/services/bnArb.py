@@ -124,26 +124,28 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                     continue
 
                 klines = Kline.objects.filter(
-                    symbol=symbol).order_by('-time')[:18]
-                if len(klines) < 18:
+                    symbol=symbol).order_by('-time')[:15]
+                if len(klines) < 15:
                     print(
                         f"WARNING: Insufficient klines for {symbol} ({len(klines)} found, expected 18)")
                     all_fresh = False
                     continue
 
-                for i in range(1, len(klines)):
-                    expected_time = klines[i-1].time - timedelta(minutes=5)
-                    if abs((klines[i].time - expected_time).total_seconds()) > 2:
-                        print(
-                            f"WARNING: Gap detected in {symbol} klines between {klines[i-1].time} and {klines[i].time}")
-                        all_fresh = False
-                        break
+                # for i in range(1, len(klines)):
+
+
+                #     expected_time = klines[i].time - timedelta(minutes=5)
+                #     if abs((klines[i].time - expected_time).total_seconds()) > 2:
+                #         print(
+                #             f"WARNING: Gap detected in {symbol} klines between {klines[i-1].time} and {klines[i].time}")
+                #         all_fresh = False
+                #         break
 
             except Exception as e:
                 print(f"Error checking klines for {symbol}: {e}")
                 all_fresh = False
 
-        return True  # all_fresh
+        return all_fresh
 
     def get_rates(self):
         BUY_COOLDOWN_SECONDS = 86400  # 24 hours

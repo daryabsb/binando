@@ -15,7 +15,7 @@ class SymbolManager(models.Manager):
         for symbol in symbols:
             try:
                 klines = Kline.objects.filter(symbol=symbol).order_by(
-                    '-time')[:4032]  # ~14 days (5-min intervals)
+                    '-time')[:2016]  # ~14 days (5-min intervals)
                 if not klines:
                     continue
 

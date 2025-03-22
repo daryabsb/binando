@@ -1,4 +1,6 @@
 from .utils import fetch_historical_klines, update_symbols
+from src.services.tasks import run_trading
+from time import sleep
 
 
 
@@ -28,9 +30,9 @@ def run():
     # while True:
     # update_klines()
     # reset_cryptos()
-    # while True:
-    #     run_trading()
-    #     sleep(3)
+    while True:
+        run_trading()
+        sleep(3)
     # update_symbols()
     # batch_delete_kline_data()
     # from django.utils import timezone
