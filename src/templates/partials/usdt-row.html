@@ -1,0 +1,9 @@
+<tfoot id="usdt-balance" hx-swap-oob="innerHTML">
+    <tr>
+        <td><i class="fa fa-square chart-text-color1"></i></td>
+        <td>{{ usdt.ticker }}</td>
+        <td>{{ usdt.balance|floatformat:4 }}</td>
+        <td>{{ usdt.usd_value|floatformat:2 }}</td>
+        <td>{{ usdt.pnl|floatformat:2 }}</td>
+    </tr>
+</tfoot>

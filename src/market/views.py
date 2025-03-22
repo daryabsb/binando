@@ -40,15 +40,24 @@ def balances(request):
             'usd_value': usd_value,
             'pnl': float(crypto.pnl),
         })
+    # usdt = CryptoCurency.objects.get(ticker='USDT')
+    # balances.append({
+    #     'ticker': 'USDT',
+    #     'balance': float(usdt.balance),
+    #     'usd_value': float(usdt.balance),
+    #     'pnl': float(usdt.pnl),
+    # })
+    return HttpResponse(render_to_string('partials/balances.html', {'balances': balances}))
+
+def update_usdt(request):
     usdt = CryptoCurency.objects.get(ticker='USDT')
-    balances.append({
+    usdt_dict = {
         'ticker': 'USDT',
         'balance': float(usdt.balance),
         'usd_value': float(usdt.balance),
         'pnl': float(usdt.pnl),
-    })
-    return HttpResponse(render_to_string('partials/balances.html', {'balances': balances}))
-
+    }
+    return HttpResponse(render_to_string('partials/usdt-balance.html', {'usdt': usdt_dict}))
 
 def balances_data(request):
     balances = []

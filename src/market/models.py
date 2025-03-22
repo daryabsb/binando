@@ -107,6 +107,24 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
             'volume_24h': f"{kline_data['volume_24h']:.2f}",
             'current_amount_holding': f"{kline_data['current_amount_holding']:.2f}",
         }
+    
+    def update_usdt(self):
+        from django.apps import apps
+
+        group_name = 'usdt_notifications'
+        message_type = 'usdt_update'
+        if self.ticker == 'USDT':
+            data = self.to_payload()
+
+            self.update(
+                # event=event,
+                group_name=group_name,
+                message_type=message_type,
+                data=data
+            )
+        else:
+            pass
+
 
     def send_event(self):
         """Send event with total USD calculated from all CryptoCurency instances."""
@@ -370,3 +388,8 @@ def notify_on_save(sender, instance, created, **kwargs):
         instance.send_event()
         crypto = instance.crypto
         crypto.send_event()
+
+@receiver(post_save, sender=CryptoCurency)
+def update_usdt_on_save(sender, instance, created, **kwargs):
+    if not created and instance.ticker == 'USDT':
+        instance.update_usdt()
