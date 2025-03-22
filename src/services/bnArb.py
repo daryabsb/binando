@@ -242,7 +242,7 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                             print(
                                 f"USDT Balance: {self.get_balance('USDT')}, Spent This Run: {spent_this_run:.2f}")
 
-                    elif sell_signals >= 3:
+                    elif sell_signals >= 2:
                         try:
                             crypto = CryptoCurency.objects.get(ticker=ticker)
                             available_balance = float(crypto.balance)
