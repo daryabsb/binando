@@ -3,7 +3,6 @@ from src.services.tasks import run_trading
 from time import sleep
 
 
-
 def run():
 
     # import requests
@@ -44,4 +43,4 @@ def run():
     # print(end_time)
 
     # fetch_historical_klines()
-    update_symbols()
+    # update_symbols()
