@@ -17,4 +17,8 @@ class TotalsConsumer(AsyncWebsocketConsumer):
         # print(f'Event data: {event["data"]}')
         html = await sync_to_async(render_to_string)('partials/total-usd.html', {'total_usd':data})
 
-        await self.send(text_data=html)
+        await self.send(text_data=str(html))
+        # await self.send(text_data=str(data))
+        # await self.channel_layer.group_send(
+        #     self.room_group_name, {"type": "total_usd", "total_usd": data}
+        # )

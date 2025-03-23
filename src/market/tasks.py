@@ -60,11 +60,11 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
         batch_symbols = symbols[i:i + batch_size]
         for symbol in batch_symbols:
             # kline_exists = Kline.objects.filter(symbol=symbol).exists()
-            last_kline = Kline.objects.filter(
-                symbol=symbol).order_by('-start_time').first()
+            # last_kline = Kline.objects.filter(
+            #     symbol=symbol).order_by('-start_time').first()
             # Determine the start time for fetching missing data
-            if last_kline:
-                start_time = last_kline.end_time  # Start from the end of the last Kline
+            # if last_kline:
+            #     start_time = last_kline.end_time  # Start from the end of the last Kline
             # if not kline_exists:
             #     continue
             # Fetch historical Kline data from Binance

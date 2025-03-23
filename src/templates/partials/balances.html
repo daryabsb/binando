@@ -1,6 +1,7 @@
 {% for balance in balances %}
-<tr>
-    <td><i class="fa fa-square chart-text-color1"></i></td>
+<tr hx-on:htmx:load="getKlineChart('apexspark0'); htmx.find('#{{balance.ticker}}').innerHTML = '{{balance.ticker}}';">
+    {% comment %} <td><i class="fa fa-square chart-text-color1"></i></td> {% endcomment %}
+    <td id="{{ balance.ticker }}"></td>
     <td>{{ balance.ticker }}</td>
     <td>{{ balance.balance|floatformat:4 }}</td>
     <td>{{ balance.usd_value|floatformat:2 }}</td>
@@ -11,3 +12,4 @@
 {% endfor %}
 
 
+{% comment %} hx-on:htmx:load="getApexChartSpark({{balance}})" {% endcomment %}

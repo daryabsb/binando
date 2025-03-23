@@ -153,6 +153,19 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
             data=data
         )
 
+    def send_queryset_data(self, queryset=None):
+        print('called send queryset data')
+        if queryset is None:
+            queryset = self.__class__.objects.filter(balance__gt=0.00)
+        to_list = [item.to_payload() for item in queryset]
+
+        self.updated_list(
+            # event=event,
+            group_name='balances_notifications',
+            message_type='cryptos_update',
+            data=to_list
+        )
+
 
 class Order(WorkflowInstance, WorkflowMixin):
     ORDER_TYPES = (
@@ -257,16 +270,6 @@ class Symbol(models.Model):
 
     class Meta:
         ordering = ('rank', '-active', 'ticker',)
-
-
-# class Kline(models.Model):
-#     symbol = models.CharField(max_length=20, db_index=True)
-#     open = models.DecimalField(max_digits=20, decimal_places=8)
-#     close = models.DecimalField(max_digits=20, decimal_places=8)
-#     high = models.DecimalField(max_digits=20, decimal_places=8)
-#     low = models.DecimalField(max_digits=20, decimal_places=8)
-#     # Volume fields: increase max_digits to handle large numbers
-#     volume = models.DecimalField(max_digits=30, decimal_places=8)
 
 
 class Kline(models.Model):
@@ -387,7 +390,13 @@ def notify_on_save(sender, instance, created, **kwargs):
     if created:
         instance.send_event()
         crypto = instance.crypto
+        queryset = CryptoCurency.objects.all()
+        crypto.send_queryset_data(queryset)
         crypto.send_event()
+
+
+
+        # print(queryset.count())
 
 @receiver(post_save, sender=CryptoCurency)
 def update_usdt_on_save(sender, instance, created, **kwargs):

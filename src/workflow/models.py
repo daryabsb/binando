@@ -96,6 +96,19 @@ class WorkflowMixin:
             }
         )
 
+    def updated_list(self, group_name, message_type, data=None, exception_id=None):
+        payload = data
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': message_type,
+                # Convert datetime to string
+                'data': json.dumps(payload, default=str),
+            }
+        )
+
     def create_data(self):
         """Default method to prepare data for creation events (e.g., adding rows)."""
         return self.to_payload()
