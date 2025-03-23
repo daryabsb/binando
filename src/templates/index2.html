@@ -89,8 +89,12 @@
         hx-swap="innerHTML">Test WebSocket</button>
         <span id="test-websocket"></span>
         </div>  
-        
-        {% include 'partials/cryptos.html' %}
+        <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4" 
+            hx-get="/cryptos/" 
+            hx-trigger="load" 
+            >
+            {% include 'partials/cryptos.html' %}
+        </div>
         
         
         <div class="row g-3 mb-3">

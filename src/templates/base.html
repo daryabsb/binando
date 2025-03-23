@@ -261,8 +261,8 @@
         console.log(data.ticker)
     }
 
-    var getKlineChart = function(elementId){
-        console.log('Element_id = ', elementId)
+    var getKlineChart = function(elementId, data=null){
+        console.log('klines= ', data)
         var klineData = [{
             x: new Date(1538839800000),
             y: [6589.3, 6598.89, 6589.1, 6596.08]
@@ -296,6 +296,10 @@
             },{
             x: new Date(1538857800000),
             y: [6593.86, 6604.28, 6586.57, 6600.01]
+            //y: [6593.86, Open
+            //y: [6604.28, High
+            //y: [6586.57, Low
+            //y: [6600.01, Close
             },{
             x: new Date(1538859600000),
             y: [6601.81, 6603.21, 6592.78, 6596.25]
@@ -365,7 +369,7 @@
             },
     
             series: [{
-                data: klineData
+                data: data
             }],
     
             xaxis: {

@@ -43,9 +43,8 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
     # Calculate time range: last 8 days
     print('fetching 8 days started')
     minutes = 10
-    days = 8
+    days = 2
     end_time = timezone.now()
-
 
     start_time = end_time - timedelta(days=days)
     # start_time = end_time - timedelta(minutes=minutes)
@@ -54,7 +53,6 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
     symbols = Symbol.objects.filter(active=True, enabled=True).values_list(
         'pair', flat=True)  # sorted_symbols()
 
-    
     # Process symbols in batches to avoid overwhelming the API
     for i in range(0, len(symbols), batch_size):
         batch_symbols = symbols[i:i + batch_size]
