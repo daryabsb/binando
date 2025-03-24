@@ -17,19 +17,19 @@
 </div>
 <div class="body d-flex py-3">
     <div class="container-xxl">
-        <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4"
+        {% comment %} <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4"
             id="cryptos-card"
             hx-get="/cryptos/" 
             hx-trigger="load" 
             >
             {% include 'partials/cryptos.html' %}
-        </div>
+        </div> {% endcomment %}
         
         <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4">
             <div class="col-lg-12">
                 <div class="card mb-3">
                     <div class="card-header py-3 d-flex justify-content-between bg-transparent align-items-center flex-wrap border-bottom"
-                    hx-ext="ws" ws-connect="/ws/total-usd/">
+                        hx-ext="ws" ws-connect="/ws/total-usd/">
                         <h6 class="mb-0 fw-bold">Total USD Worth: 
                             <span id="total-usd" 
                             hx-get="/total-usd/" 
@@ -42,63 +42,54 @@
                     </div>
                     <!-- Balances Table -->
                     <div class="card-body basic-custome-color">
-                        <div class="table-responsive">
-                            
-                    <table id="orders-datatable3" class="display" style="width:100%">
-
-                        <thead>
-                            <tr>
-                                <th>Ticker</th>
-                                <th>Balance</th>
-                                <th>USD Value</th>
-                                <th>Price</th>
-                                <th>Change (24h)</th>
-                                <th>High (24h)</th>
-                                <th>Low (24h)</th>
-                                <th>Volume (24h)</th>
-                                {% comment %} <th>PNL</th> {% endcomment %}
-                                <th>Time</th>
-                                {% comment %} <th>Start date</th>
-                                <th>Salary</th> {% endcomment %}
-                            </tr>
-                        </thead>
-                        
-                    </table>
-                    </table>
-                    <table id="orders-datatable2" class="table table-nowrap mb-0"
-                    
-                    >
-                        <thead>
-                            <tr>
-                                <th><i class="fa fa-square chart-text-color1"></i></th>
-                                <th>Ticker</th>
-                                <th>Balance</th>
-                                <th>USD Value</th>
-                                <th>PNL</th>
-                            </tr>
-                        </thead>
-                        <tbody id="balances" hx-get="/balances/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/balances/">
-                            {% include 'partials/balances.html' %}
-                        </tbody>
-                        <tfoot id="usdt-balance" hx-get="/usdt-update/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/usdt-update/">
-                        {% include 'partials/usdt-balance.html' %}
-                        </tfoot>
-                    </table>
-                    
-                </div>
-                </div>
+                        <div class="table-responsive">        
+                            <table id="orders-datatable3" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th>Balance</th>
+                                        <th>USD Value</th>
+                                        <th>Price</th>
+                                        <th>Change (24h)</th>
+                                        <th>High (24h)</th>
+                                        <th>Low (24h)</th>
+                                        <th>Volume (24h)</th>
+                                        {% comment %} <th>PNL</th> {% endcomment %}
+                                        <th>Time</th>
+                                        {% comment %} <th>Start date</th>
+                                        <th>Salary</th> {% endcomment %}
+                                    </tr>
+                                </thead>
+                            </table>
+                            <table id="orders-datatable2" class="table table-nowrap mb-0">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fa fa-square chart-text-color1"></i></th>
+                                        <th>Ticker</th>
+                                        <th>Balance</th>
+                                        <th>USD Value</th>
+                                        <th>PNL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="balances" hx-get="/balances/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/balances/">
+                                    {% include 'partials/balances.html' %}
+                                </tbody>
+                                <tfoot id="usdt-balance" hx-get="/usdt-update/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/usdt-update/">
+                                {% include 'partials/usdt-balance.html' %}
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         <!-- Test Button -->
-        <button 
-        hx-get="/test-websocket/" 
-        hx-target="#test-websocket" 
-        hx-swap="innerHTML">Test WebSocket</button>
-        <span id="test-websocket"></span>
+            <button 
+            hx-get="/test-websocket/" 
+            hx-target="#test-websocket" 
+            hx-swap="innerHTML">Test WebSocket</button>
+            <span id="test-websocket"></span>
         </div>  
-       
-        
-        
+        {% include 'partials/orders/list-datatable.html' %}
         <div class="row g-3 mb-3">
             <div class="col-lg-12">
                 <div class="card">

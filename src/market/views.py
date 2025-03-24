@@ -56,7 +56,7 @@ def cryptos(request):
     for crypto in cryptos:
         last_kline = Kline.objects.filter(
             symbol=f"{crypto.ticker}USDT").order_by('-time').first()
-        
+
         close_price = float(last_kline.close) if last_kline else float(1)
 
         # klines_list = Kline.objects.get_klines_spark_list(crypto.ticker, 25)
@@ -85,6 +85,15 @@ def balances_data(request):
     for crypto in cryptos:
         balances.append(crypto.to_payload())
     return JsonResponse({'data': balances}, safe=False)
+
+
+def orders_data(request):
+    from src.market.models import Order
+    orders_list = []
+    orders = Order.objects.all()
+    for order in orders:
+        orders_list.append(order.to_payload())
+    return JsonResponse({'data': orders_list}, safe=False)
 
 
 def total_usd(request):

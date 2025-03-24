@@ -45,6 +45,7 @@ urlpatterns = [
     path('cryptos/', views.cryptos, name='cryptos'),
     path('usdt-update/', views.update_usdt, name='usdt-update'),
     path('balances-data/', views.balances_data, name='balances-data'),
+    path('orders-data/', views.orders_data, name='orders-data'),
     path('total-usd/', views.total_usd, name='total_usd'),
     path('notifications/', views.notifications, name='notifications'),
 ]

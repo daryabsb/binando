@@ -12,7 +12,7 @@
     <!-- plugin css file  -->
     <link rel="stylesheet" href="{% static 'assets/plugin/datatables/responsive.dataTables.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/plugin/datatables/dataTables.bootstrap5.min.css' %}">
-    {% comment %} <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css"> {% endcomment %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css"> 
 
     <!-- project css file  -->
     <link rel="stylesheet" href="{% static 'assets/css/cryptoon.style.min.css' %}">
@@ -225,21 +225,24 @@
 
         <!-- Plugin Js -->
         
-        <script src="{% static 'assets/bundles/dataTables.bundle.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/bundles/dataTables.bundle.js' %}"></script> {% endcomment %}
+        <script src="{% static 'assets/plugin/datatable/datatables.min.js' %}"></script>
         <script src="{% static 'assets/bundles/apexcharts.bundle.js' %}"></script>
         
         <!-- Jquery Page Js -->
         <script src="{% static 'assets/js/template.js' %}"></script>
         <script src="{% static 'assets/js/page/index.js' %}"></script>
-        {% comment %} <script src="{% static 'assets/plugin/datatable/datatables.min.js' %}"></script> {% endcomment %}
+
         {% comment %} <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script> {% endcomment %}
-        {% comment %} <script>
+        <script>
             document.addEventListener("DOMContentLoaded", (event) => {
                 console.log("DOM fully loaded and parsed");
-                new DataTable('#orders-datatable', {
+                renderDataTable('#orders-table-1', '/orders-data/');
+              /*  
+           new DataTable('#orders-datatable', {
                     ajax: {
-                        url: '/balances-data/',  // URL to fetch data (update with your Django URL)
-                        dataSrc: 'data'  // Key in the JSON response containing the data
+                        url: '/balances-data/',  
+                        dataSrc: 'data'  
                     },
                     columns: [
                         { data: 'ticker' },
@@ -253,17 +256,20 @@
                         { data: 'timestamp' },
                     ]
                 })
+                */
             });
-        </script> {% endcomment %}
+        </script> 
 <script>
+
+    
+
+
     var getApexChartSpark = function (data){
         console.log(data)
         console.log(data.ticker)
     }
 
     var getKlineChart = function(elementId, data=null){
-        console.log('klines= ', data)
-
         var options = {
             chart: {
                 height: 180,
@@ -348,28 +354,6 @@
 {% block additional_js %}
 {% endblock additional_js %}
     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     var klineData = [{
         x: new Date(1538839800000),
@@ -458,7 +442,49 @@
 
 
 
+var renderDataTable = function(elementId, url) {
+        var table = new DataTable(elementId, {
+            ajax: {
+                url: url,  // URL to fetch data (update with your Django URL)
+                dataSrc: 'data'  // Key in the JSON response containing the data
+            },
+            columnDefs: [{ width: '20%', targets: 0 }],
+            columns: [
+                { data: 'timestamp' },
+                { data: 'ticker',
+                    render: function(data, type) {
+                        return `<img src="/static/assets/images/coin/${data}.png" alt="" class="img-fluid avatar mx-1"> ${data}/USDT`
+                    }
 
+                 },
+                {
+                    data: 'order_type',
+                    
+                    render: function (data, type) {
+                        if (type === 'display') {
+                            let color = 'green';
+                            if (data === 'SELL') {
+                                color = 'green';
+                            }        
+                            return `<span style="color:${color}">${data}</span>`;
+                        }
+        
+                       return data; 
+                    }
+                    
+                },
+                { data: 'quantity' },
+                { data: 'price' },
+                { data: 'value' },
+                // { data: 'content' },
+                { data: 'content_type' },
+                //{ data: 'object_id' },
+                //{ data: 'event' },
+                //{ data: 'exception_id' },
+            ]
+
+        })
+    }
 
 
 
