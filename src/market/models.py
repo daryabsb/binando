@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from src.workflow.models import WorkflowInstance, WorkflowMixin
 from src.market.utils import upload_image_file_path
-from .managers import SymbolManager
+from .managers import SymbolManager, KlineManager, CryptoCurrencyManager
 
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
@@ -49,6 +49,8 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    objects = CryptoCurrencyManager()
 
     def __str__(self):
         return f'{self.ticker} ||| Balance: {self.balance:.4f} ||| PNL: {self.pnl:.4f}'
@@ -154,16 +156,28 @@ class CryptoCurency(WorkflowInstance, WorkflowMixin):
         )
 
     def send_queryset_data(self, queryset=None):
-        print('called send queryset data')
         if queryset is None:
-            queryset = self.__class__.objects.filter(balance__gt=0.00)
-        to_list = [item.to_payload() for item in queryset]
+            # queryset = self.__class__.objects.filter(balance__gt=0.00)
+            queryset = self.__class__.objects.get_cryptos_with_sparkline(kline_amount=25)
+        # cryptos = []
+
+        for crypto in queryset:
+            last_kline = Kline.objects.filter(
+                symbol=f"{crypto.ticker}USDT").order_by('-time').first()
+            
+            close_price = float(last_kline.close) if last_kline else float(1)
+
+            # klines_list = Kline.objects.get_klines_spark_list(crypto.ticker, 25)
+
+            latest_price = close_price if close_price else float(1)
+            usd_value = float(crypto.balance) * latest_price
+            crypto.usd_value = usd_value
 
         self.updated_list(
             # event=event,
-            group_name='balances_notifications',
+            group_name='receive_balances',
             message_type='cryptos_update',
-            data=to_list
+            data=queryset
         )
 
 
@@ -294,7 +308,7 @@ class Kline(models.Model):
     # timestamp = models.BooleanField(default=False)
     time = TimescaleDateTimeField(interval="2 week")
 
-    objects = models.Manager()
+    objects = KlineManager()
     timescale = TimescaleManager()
 
     # class Meta:
@@ -390,9 +404,10 @@ def notify_on_save(sender, instance, created, **kwargs):
     if created:
         instance.send_event()
         crypto = instance.crypto
-        queryset = CryptoCurency.objects.all()
-        crypto.send_queryset_data(queryset)
-        crypto.send_event()
+        # queryset = CryptoCurency.objects.all()
+        cryptos = CryptoCurency.objects.get_cryptos_with_sparkline(kline_amount=25)
+        crypto.send_queryset_data(cryptos)
+        # crypto.send_event()
 
 
 
@@ -402,3 +417,4 @@ def notify_on_save(sender, instance, created, **kwargs):
 def update_usdt_on_save(sender, instance, created, **kwargs):
     if not created and instance.ticker == 'USDT':
         instance.update_usdt()
+

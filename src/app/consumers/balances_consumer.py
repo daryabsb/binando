@@ -43,3 +43,6 @@ class BalancesConsumer(AsyncWebsocketConsumer):
         data = event['data']
         received_data = json.loads(data)
         print('received_list = ', received_data)
+        
+        html = await sync_to_async(render_to_string)("partials/render-cryptos.html", {"cryptos": received_data})
+        await self.send(text_data=html)

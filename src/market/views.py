@@ -51,41 +51,20 @@ def balances(request):
 
 
 def cryptos(request):
-    import json
-    from datetime import datetime
-    cryptos = []
-    for crypto in CryptoCurency.objects.exclude(ticker='USDT'):
-        close_price = float(Kline.objects.filter(
-            symbol=f"{crypto.ticker}USDT").order_by('-time').first().close)
-        klines = Kline.objects.filter(
-            symbol=f"{crypto.ticker}USDT").values_list(
-                'open', 'high', 'low', 'close', 'time'
-        )[:25]
-        klines_list = [{
-            'x': (kline[4].timestamp() * 1000),
-            'y': [
-                float(kline[0]),
-                float(kline[1]),
-                float(kline[2]),
-                float(kline[3])
-            ]} for kline in klines]
 
-        latest_price = close_price if close_price else 0.00
+    cryptos = CryptoCurency.objects.get_cryptos_with_sparkline(kline_amount=25)
+    for crypto in cryptos:
+        last_kline = Kline.objects.filter(
+            symbol=f"{crypto.ticker}USDT").order_by('-time').first()
+        
+        close_price = float(last_kline.close) if last_kline else float(1)
+
+        # klines_list = Kline.objects.get_klines_spark_list(crypto.ticker, 25)
+
+        latest_price = close_price if close_price else float(1)
         usd_value = float(crypto.balance) * latest_price
-        cryptos.append({
-            'ticker': crypto.ticker,
-            'balance': float(crypto.balance),
-            'usd_value': usd_value,
-            'pnl': float(crypto.pnl),
-            'klines': klines_list,
-        })
-    # usdt = CryptoCurency.objects.get(ticker='USDT')
-    # cryptos.append({
-    #     'ticker': 'USDT',
-    #     'balance': float(usdt.balance),
-    #     'usd_value': float(usdt.balance),
-    #     'pnl': float(usdt.pnl),
-    # })
+        crypto.usd_value = usd_value
+
     return render(request, 'partials/cryptos.html', {'cryptos': cryptos})
 
 
