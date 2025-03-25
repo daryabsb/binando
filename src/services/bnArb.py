@@ -102,8 +102,9 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
             print(f"Error fetching balance for {cur}: {e}")
             return 0.0
 
-    def check_klines_freshness(self):
+    def check_klines_freshness(self, n_klines=28):
         from django.conf import settings
+
         current_time = timezone.now()
         KLINE_FRESHNESS_LOOKBACK = settings.KLINE_FRESHNESS_LOOKBACK
         freshness_threshold = current_time - KLINE_FRESHNESS_LOOKBACK
@@ -111,40 +112,51 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
         for symbol in self.sorted_symbols:
             try:
-                latest_kline = Kline.objects.filter(symbol=symbol).last()
+                # Get the latest Kline
+                latest_kline = Kline.objects.filter(symbol=symbol).order_by('-end_time').first()
                 if not latest_kline:
-                    print(f"WARNING: No kline data for {symbol}")
+                    print(f"WARNING: No Kline data for {symbol}")
                     all_fresh = False
                     continue
 
-                if latest_kline.time < freshness_threshold:
-                    print(
-                        f"WARNING: Kline data for {symbol} is outdated. Latest: {latest_kline.time}, Expected: >{freshness_threshold}")
+                # Check freshness
+                if latest_kline.end_time < freshness_threshold:
+                    print(f"WARNING: Kline data for {symbol} is outdated. Latest: {latest_kline.time}, Expected: >{freshness_threshold}")
                     all_fresh = False
                     continue
 
-                klines = Kline.objects.filter(
-                    symbol=symbol).order_by('-time')[:15]
-                if len(klines) < 15:
-                    print(
-                        f"WARNING: Insufficient klines for {symbol} ({len(klines)} found, expected 18)")
+                # Fetch the last n_klines, ordered by time descending
+                klines = Kline.objects.filter(symbol=symbol).order_by('-end_time')[:n_klines]
+
+                if len(klines) < n_klines:
+                    print(f"WARNING: Insufficient Klines for {symbol} ({len(klines)} found, expected {n_klines})")
                     all_fresh = False
                     continue
 
+                # Check total time span (earliest to latest should be (n_klines - 1) * 5 minutes)
+                earliest_time = klines[n_klines - 1].end_time.astimezone(dt_timezone.utc)
+                latest_time = klines[0].end_time.astimezone(dt_timezone.utc)
+                expected_span = (n_klines - 1) * 5 * 60  # Total seconds expected
+                actual_span = (latest_time - earliest_time).total_seconds()
+                if abs(actual_span - expected_span) > 2:  # Allow 2-second tolerance
+                    print(f"WARNING: Incorrect time span for {symbol}. Expected: {expected_span}s, Actual: {actual_span}s")
+                    all_fresh = False
+                    continue
+
+                # Check for gaps between consecutive Klines
                 for i in range(1, len(klines)):
-
-                    expected_time = klines[i].time - timedelta(minutes=5)
-                    if abs((klines[i].time - expected_time).total_seconds()) > 2:
-                        print(
-                            f"WARNING: Gap detected in {symbol} klines between {klines[i-1].time} and {klines[i].time}")
+                    expected_time = klines[i].time + timedelta(minutes=5)  # Since descending, next should be +5 min
+                    time_diff = (klines[i - 1].time - klines[i].time).total_seconds()
+                    if abs(time_diff - 300) > 2:  # 300 seconds = 5 minutes, with 2-second tolerance
+                        print(f"WARNING: Gap detected in {symbol} Klines between {klines[i - 1].time} and {klines[i].time}")
                         all_fresh = False
                         break
 
             except Exception as e:
-                print(f"Error checking klines for {symbol}: {e}")
+                print(f"Error checking Klines for {symbol}: {e}")
                 all_fresh = False
 
-        return True  # all_fresh
+        return all_fresh
 
     def get_rates(self):
         BUY_COOLDOWN_SECONDS = 86400  # 24 hours

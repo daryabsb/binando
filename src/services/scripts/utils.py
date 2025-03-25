@@ -166,9 +166,9 @@ def reset_cryptos():
 def batch_delete_kline_data():
     Kline = apps.get_model('market', 'Kline')
     dataset = Kline.objects.all()
-    batch_size = 2500
+    batch_size = 5000
 
-    for i in range(50):
+    for i in range(150):
         try:
             queryset = dataset[:batch_size]
             for kline in queryset:

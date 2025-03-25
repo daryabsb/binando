@@ -34,7 +34,7 @@
     {% comment %} <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script> {% endcomment %}
 </head>
-<body>
+<body hx-on:htmx:beforeOnload="initializeFunctions();">
     <div id="cryptoon-layout" class="theme-orange">
         {% include 'partials/sidebar.html' %}
         <div class="main px-lg-4 px-md-4">
@@ -238,7 +238,7 @@
             document.addEventListener("DOMContentLoaded", (event) => {
                 console.log("DOM fully loaded and parsed");
                 renderDataTable('#orders-table-1', '/orders-data/');
-              /*  
+            /*  
            new DataTable('#orders-datatable', {
                     ajax: {
                         url: '/balances-data/',  
@@ -329,15 +329,17 @@
             }  
             return array;
         }
-    document.addEventListener("DOMContentLoaded", (event) => {
-        var sparklineData = [0.00000756, 0.00000856, 0.00000910, 0.00000620, 0.00000500, 0.000012, 0.00000780, 
+    
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            var sparklineData = [0.00000756, 0.00000856, 0.00000910, 0.00000620, 0.00000500, 0.000012, 0.00000780, 
         0.00000430, 0.000015, 0.00000645, 0.00000890, 0.00000975, 0.00000398, 0.00000612, 0.00000570];
         
         // topb big chart    
         var spark0 = {
             chart: {
                 type: 'area',
-                height: 50,
+                height: 25,
                 sparkline: {
                 enabled: true
                 },
@@ -443,12 +445,17 @@
 
 
 var renderDataTable = function(elementId, url) {
+        let toolbar = document.createElement('div');
+            toolbar.innerHTML = '<h5 class="mb-0 fw-bold">Recent Transactions</h5>';
         var table = new DataTable(elementId, {
             ajax: {
                 url: url,  // URL to fetch data (update with your Django URL)
                 dataSrc: 'data'  // Key in the JSON response containing the data
             },
-            columnDefs: [{ width: '20%', targets: 0 }],
+            layout: {
+                top2Start: toolbar
+            },
+            columnDefs: [{ width: '25%', targets: 0 }],
             columns: [
                 { data: 'timestamp' },
                 { data: 'ticker',

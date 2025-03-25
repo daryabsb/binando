@@ -311,7 +311,10 @@ class Kline(models.Model):
     objects = KlineManager()
     timescale = TimescaleManager()
 
-    # class Meta:
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['symbol', 'start_time', 'interval', 'time'], name='unique_kline'),
+        ]
 
     indexes = [
         models.Index(fields=['symbol', 'time']),
