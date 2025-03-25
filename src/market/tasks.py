@@ -43,10 +43,9 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
     # Calculate time range: last 8 days
     print('fetching 8 days started')
     minutes = 10
-    days = 2
     end_time = timezone.now()
 
-    start_time = end_time - timedelta(days_back=days)
+    start_time = end_time - timedelta(days=days_back)
     # start_time = end_time - timedelta(minutes=minutes)
 
     # Get all symbols (assumes sorted_symbols() returns a list like ['BTC', 'ETH', ...])
