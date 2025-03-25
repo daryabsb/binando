@@ -34,7 +34,7 @@
     {% comment %} <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
     <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script> {% endcomment %}
 </head>
-<body hx-on:htmx:beforeOnload="initializeFunctions();">
+<body>
     <div id="cryptoon-layout" class="theme-orange">
         {% include 'partials/sidebar.html' %}
         <div class="main px-lg-4 px-md-4">
@@ -234,11 +234,114 @@
         <script src="{% static 'assets/js/page/index.js' %}"></script>
 
         {% comment %} <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script> {% endcomment %}
-        <script>
-            document.addEventListener("DOMContentLoaded", (event) => {
-                console.log("DOM fully loaded and parsed");
-                renderDataTable('#orders-table-1', '/orders-data/');
-            /*  
+
+<script>
+
+    
+
+
+
+
+    
+    var randomizeArray = function (arg) {
+            var array = arg.slice();
+            var currentIndex = array.length,
+            temporaryValue, randomIndex;
+    
+            while (0 !== currentIndex) {  
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+        
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }  
+            return array;
+        }
+    
+        var getKlineChart = function(elementId, data=null){
+            console.log('called!! ', elementId, data)
+            var options = {
+                chart: {
+                    height: 180,
+                    type: 'candlestick',
+                    toolbar: {
+                        show: false,
+                    },
+                },
+                plotOptions: {
+                    candlestick: {
+                        colors: {
+                            upward: 'var(--chart-color2)',
+                            downward: 'var(--chart-color4)',
+                        },
+                        wick: {
+                            useFillColor: true
+                        }
+                    }
+                },
+        
+                series: [{
+                    data: data
+                }],
+        
+                xaxis: {
+                    type: 'datetime'
+                },
+                yaxis: {
+                    tooltip: {
+                        enabled: true
+                    }
+                }
+            }
+            var getApexChartSpark = function (data){
+                console.log(data)
+                console.log(data.ticker)
+            }
+        
+        
+        
+                
+            
+                var chart = new ApexCharts(
+                    document.querySelector(`#${elementId}`),
+                    options
+                );
+            
+                chart.render();
+        }
+        
+        document.addEventListener("DOMContentLoaded", (event) => {
+            console.log("DOM fully loaded and parsed");
+            var orderTable;
+                orderTable = renderDataTable('#orders-table-1', '/orders-data/');
+
+            var sparklineData = [0.00000756, 0.00000856, 0.00000910, 0.00000620, 0.00000500, 0.000012, 0.00000780, 
+            0.00000430, 0.000015, 0.00000645, 0.00000890, 0.00000975, 0.00000398, 0.00000612, 0.00000570];
+            
+            // topb big chart    
+            var spark0 = {
+                chart: {
+                    type: 'area',
+                    height: 25,
+                    sparkline: {
+                    enabled: true
+                    },
+                },
+                stroke: {
+                    width: 1
+                },
+                series: [{
+                    data: randomizeArray(sparklineData)
+                }],
+                colors: ['#f8921a'],
+            }
+                var spark0 = new ApexCharts(document.querySelector("#apexspark1"), spark0); spark0.render();
+            {% block additional_js %}
+            {% endblock additional_js %}
+
+
+                        /*  
            new DataTable('#orders-datatable', {
                     ajax: {
                         url: '/balances-data/',  
@@ -257,105 +360,7 @@
                     ]
                 })
                 */
-            });
-        </script> 
-<script>
-
-    
-
-
-    var getApexChartSpark = function (data){
-        console.log(data)
-        console.log(data.ticker)
-    }
-
-    var getKlineChart = function(elementId, data=null){
-        var options = {
-            chart: {
-                height: 180,
-                type: 'candlestick',
-                toolbar: {
-                    show: false,
-                },
-            },
-            plotOptions: {
-                candlestick: {
-                    colors: {
-                        upward: 'var(--chart-color2)',
-                        downward: 'var(--chart-color4)',
-                    },
-                    wick: {
-                        useFillColor: true
-                    }
-                }
-            },
-    
-            series: [{
-                data: data
-            }],
-    
-            xaxis: {
-                type: 'datetime'
-            },
-            yaxis: {
-                tooltip: {
-                    enabled: true
-                }
-            }
-        }
-
-        
-    
-        var chart = new ApexCharts(
-            document.querySelector(`#${elementId}`),
-            options
-        );
-    
-        chart.render();
-    }
-    
-    var randomizeArray = function (arg) {
-            var array = arg.slice();
-            var currentIndex = array.length,
-            temporaryValue, randomIndex;
-    
-            while (0 !== currentIndex) {  
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex -= 1;
-        
-                temporaryValue = array[currentIndex];
-                array[currentIndex] = array[randomIndex];
-                array[randomIndex] = temporaryValue;
-            }  
-            return array;
-        }
-    
-
-        document.addEventListener("DOMContentLoaded", (event) => {
-            var sparklineData = [0.00000756, 0.00000856, 0.00000910, 0.00000620, 0.00000500, 0.000012, 0.00000780, 
-        0.00000430, 0.000015, 0.00000645, 0.00000890, 0.00000975, 0.00000398, 0.00000612, 0.00000570];
-        
-        // topb big chart    
-        var spark0 = {
-            chart: {
-                type: 'area',
-                height: 25,
-                sparkline: {
-                enabled: true
-                },
-            },
-            stroke: {
-                width: 1
-            },
-            series: [{
-                data: randomizeArray(sparklineData)
-            }],
-            colors: ['#f8921a'],
-        }
-            var spark0 = new ApexCharts(document.querySelector("#apexspark1"), spark0); spark0.render();
-{% block additional_js %}
-{% endblock additional_js %}
-    });
+        });
 
     var klineData = [{
         x: new Date(1538839800000),
@@ -444,6 +449,7 @@
 
 
 
+
 var renderDataTable = function(elementId, url) {
         let toolbar = document.createElement('div');
             toolbar.innerHTML = '<h5 class="mb-0 fw-bold">Recent Transactions</h5>';
@@ -463,7 +469,7 @@ var renderDataTable = function(elementId, url) {
                         return `<img src="/static/assets/images/coin/${data}.png" alt="" class="img-fluid avatar mx-1"> ${data}/USDT`
                     }
 
-                 },
+                },
                 {
                     data: 'order_type',
                     
@@ -476,7 +482,7 @@ var renderDataTable = function(elementId, url) {
                             return `<span style="color:${color}">${data}</span>`;
                         }
         
-                       return data; 
+                    return data; 
                     }
                     
                 },
@@ -491,6 +497,8 @@ var renderDataTable = function(elementId, url) {
             ]
 
         })
+    orderTable = table;
+    return table;
     }
 
 

@@ -3,9 +3,12 @@ id="cryptos-card"
 class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4" 
 hx-swap-oob="innerHTML"
 >
+{% comment %} hx-on:after-request="getKlineChart('{{ crypto.ticker }}', {{ crypto.klines }});" {% endcomment %}
 
     {% for crypto in cryptos %}
-    <div class="col"  hx-on:htmx:load="getKlineChart('{{ crypto.ticker }}', {{ crypto.klines }});">
+    <div class="col"  
+    >
+    {% comment %} hx-on:htmx:load="getKlineChart('{{ crypto.ticker }}', {{ crypto.klines }});" {% endcomment %}
         <div class="card">
             <div class="card-body d-flex align-items-center">
                 <div class="flex-fill text-truncate">
@@ -26,4 +29,7 @@ hx-swap-oob="innerHTML"
             <div id="{{ crypto.ticker }}"></div>
         </div>
     </div>
+    <script>
+        getKlineChart('{{ crypto.ticker }}', '{{ crypto.klines }}');
+    </script>
 {% endfor %}

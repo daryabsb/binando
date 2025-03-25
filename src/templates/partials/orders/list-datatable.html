@@ -1,6 +1,8 @@
 {% load static %}
 
-<table id="orders-table-1" class="hover row-border" style="width:100%">
+<table id="orders-table-1" class="hover row-border" style="width:100%"
+    hx-on:htmx:load="console.log('Order table: ', orderTable);"
+>
     <thead>
         <tr>
             <th>Date</th>
@@ -13,3 +15,6 @@
         </tr>
     </thead>
 </table>
+<script>
+
+</script>

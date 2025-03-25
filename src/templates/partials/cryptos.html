@@ -1,6 +1,8 @@
 
 {% for crypto in cryptos %}
-    <div class="col"  hx-on:htmx:load="getKlineChart('{{ crypto.ticker }}', {{ crypto.klines }});">
+{% comment %} hx-on:htmx:before-request="getKlineChart('{{ crypto.ticker }}', {{ crypto.klines }});" {% endcomment %}
+    <div class="col"  
+    >
         <div class="card">
             <div class="card-body d-flex align-items-center">
                 <div class="flex-fill text-truncate">
@@ -21,4 +23,10 @@
             <div id="{{ crypto.ticker }}"></div>
         </div>
     </div>
+    {{ crypto.klines|json_script:"crypto_klines" }}
+    <script>
+        var current_crypto = '{{ crypto.ticker }}-klines';
+        var current_crypto = JSON.parse(document.getElementById('crypto_klines').textContent);
+        getKlineChart('{{ crypto.ticker }}', current_crypto);
+    </script>
 {% endfor %}
