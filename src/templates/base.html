@@ -260,7 +260,6 @@
         }
     
         var getKlineChart = function(elementId, data=null){
-            console.log('called!! ', elementId, data)
             var options = {
                 chart: {
                     height: 180,
@@ -301,16 +300,39 @@
         
         
         
-                
             
                 var chart = new ApexCharts(
-                    document.querySelector(`#${elementId}`),
+                    document.getElementById(elementId),
                     options
                 );
             
                 chart.render();
         }
+
+        var getSparklineChart = function(elementId, data=null){
+
         
+            var spark = {
+                chart: {
+                    type: 'line',
+                    height: 30,
+                    sparkline: {
+                    enabled: true
+                    },
+                },
+                stroke: {
+                    width: 1
+                },
+                series: [{
+                    // data: randomizeArray(sparklineData)
+                    data: randomizeArray(data)
+                }],
+                colors: ['#f8921a'],
+            }
+                var spark = new ApexCharts(document.getElementById(elementId), spark); 
+                spark.render();
+        }
+
         document.addEventListener("DOMContentLoaded", (event) => {
             console.log("DOM fully loaded and parsed");
             var orderTable;
@@ -320,23 +342,6 @@
             0.00000430, 0.000015, 0.00000645, 0.00000890, 0.00000975, 0.00000398, 0.00000612, 0.00000570];
             
             // topb big chart    
-            var spark0 = {
-                chart: {
-                    type: 'area',
-                    height: 25,
-                    sparkline: {
-                    enabled: true
-                    },
-                },
-                stroke: {
-                    width: 1
-                },
-                series: [{
-                    data: randomizeArray(sparklineData)
-                }],
-                colors: ['#f8921a'],
-            }
-                var spark0 = new ApexCharts(document.querySelector("#apexspark1"), spark0); spark0.render();
             {% block additional_js %}
             {% endblock additional_js %}
 
@@ -500,7 +505,6 @@ var renderDataTable = function(elementId, url) {
     orderTable = table;
     return table;
     }
-
 
 
 </script>

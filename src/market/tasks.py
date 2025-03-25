@@ -47,10 +47,12 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
     print('Fetching 8 days of Kline data started')
     end_time = timezone.now()
     start_time = end_time - timedelta(days=days_back)
+    start_time = end_time - timedelta(minutes=30)
 
     # Fetch all active and enabled symbols if none provided
     if symbols is None:
-        symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
+        symbols = Symbol.objects.filter(
+            active=True, enabled=True).values_list('pair', flat=True)
 
     # Process symbols in batches
     for i in range(0, len(symbols), batch_size):
@@ -65,15 +67,17 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
                     start_str=int(start_time.timestamp() * 1000),
                     end_str=int(end_time.timestamp() * 1000)
                 )
-                
+
                 # Create Kline objects
                 kline_objects = []
                 for kline in klines:
                     kline_objects.append(Kline(
                         symbol=symbol,
                         interval=interval,
-                        start_time=timezone.datetime.fromtimestamp(kline[0] / 1000, tz=dt_timezone.utc),
-                        end_time=timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc),
+                        start_time=timezone.datetime.fromtimestamp(
+                            kline[0] / 1000, tz=dt_timezone.utc),
+                        end_time=timezone.datetime.fromtimestamp(
+                            kline[6] / 1000, tz=dt_timezone.utc),
                         open=Decimal(kline[1]),
                         close=Decimal(kline[4]),
                         high=Decimal(kline[2]),
@@ -84,13 +88,14 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
                         taker_buy_quote_volume=Decimal(kline[10]),
                         trade_count=int(kline[8]),
                         is_closed=True,  # Historical data is always closed
-                        time=timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc)  # Close time
+                        time=timezone.datetime.fromtimestamp(
+                            kline[6] / 1000, tz=dt_timezone.utc)  # Close time
                     ))
 
                 # Bulk insert into database, ignoring duplicates
                 Kline.objects.bulk_create(kline_objects, ignore_conflicts=True)
                 print(f"Inserted {len(kline_objects)} Klines for {symbol}")
-            
+
             except Exception as e:
                 print(f"Error fetching or saving Klines for {symbol}: {e}")
                 return False  # Return False on error

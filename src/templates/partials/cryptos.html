@@ -23,10 +23,12 @@
             <div id="{{ crypto.ticker }}"></div>
         </div>
     </div>
-    {{ crypto.klines|json_script:"crypto_klines" }}
+    {% comment %} {{ crypto.klines|json_script:"crypto_klines" }} {% endcomment %}
     <script>
-        var current_crypto = '{{ crypto.ticker }}-klines';
-        var current_crypto = JSON.parse(document.getElementById('crypto_klines').textContent);
-        getKlineChart('{{ crypto.ticker }}', current_crypto);
+        
+        //getKlineChart('{{crypto.ticker}}', {{ crypto.klines|safe}});
+        getSparklineChart('{{crypto.ticker}}', {{ crypto.klines|safe}});
+
+
     </script>
 {% endfor %}

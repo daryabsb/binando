@@ -86,7 +86,13 @@
                         </ul>
                     </div>
                     <div class="tab-pane fade show active" id="cryptos-grid-views">
-                        
+                    <div class="row g-3 mb-3 row-cols-1 row-cols-md-3 row-cols-lg-5"
+                        id="cryptos-card"
+                        hx-get="/cryptos/" 
+                        hx-trigger="load" 
+                        >
+                        {% include 'partials/cryptos.html' %}
+                        </div>
                     </div>
                 </div>
             </div>

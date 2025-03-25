@@ -18,13 +18,9 @@
 <div class="body d-flex py-3">
     <div class="container-xxl">
         {% include 'partials/tabs/cryptos/cryptos.html' %}
-        <div class="row g-3 mb-3 row-cols-1 row-cols-md-2 row-cols-lg-4"
-            id="cryptos-card"
-            hx-get="/cryptos/" 
-            hx-trigger="load" 
-            >
-            {% include 'partials/cryptos.html' %}
-        </div>
+        
+            {% comment %} {% include 'partials/cryptos.html' %} {% endcomment %}
+       
         <div class="row g-3 mb-3 row-deck">
             <div class="col-xl-12">
                 <div class="card">

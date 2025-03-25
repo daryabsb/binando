@@ -4,15 +4,16 @@ from decimal import Decimal
 from django.db import models
 from collections import defaultdict
 
+
 class CryptoCurrencyManager(models.Manager):
-    def get_cryptos_with_sparkline(self, kline_amount=25):
+    def get_cryptos_with_sparkline(self, kline_amount=28):
         """
         Fetches all cryptocurrencies with their latest klines formatted for sparkline charts.
         Optimized to use only 2 queries (1 for cryptos, 1 for klines).
-        
+
         Args:
             kline_amount (int): Number of klines to fetch per crypto (default: 25).
-        
+
         Returns:
             QuerySet: CryptoCurency objects with `.sparkline_data` attached.
         """
@@ -41,14 +42,22 @@ class CryptoCurrencyManager(models.Manager):
         for crypto in cryptos:
             symbol = f"{crypto.ticker}USDT"
             crypto_klines = klines_by_symbol.get(symbol, [])
-            
+
             # Use your existing formatting logic
-            crypto.klines = Kline.objects.get_klines_spark_list(
+            # crypto.klines = Kline.objects.get_klines_spark_list(
+            #     symbol=symbol,
+            #     # Ensure <= kline_amount
+            #     amount=min(len(crypto_klines), kline_amount)
+            # )
+            # Use your existing formatting logic
+            crypto.klines = Kline.objects.get_klines_sparkline_list(
                 symbol=symbol,
-                amount=min(len(crypto_klines), kline_amount)  # Ensure <= kline_amount
+                # Ensure <= kline_amount
+                amount=min(len(crypto_klines), kline_amount)
             )
 
         return cryptos
+
 
 class SymbolManager(models.Manager):
     def sorted_symbols(self):
@@ -89,20 +98,27 @@ class KlineManager(models.Manager):
             return []
         elif 'USDT' not in symbol:
             symbol = f"{symbol}USDT"
-        
+
         klines = self.filter(symbol=symbol).values_list(
-                    'open', 'high', 'low', 'close', 'time'
-            )[:amount]
-        
+            'open', 'high', 'low', 'close', 'end_time'
+        )[:amount]
+
         return klines
-    
+
     def get_klines_spark_list(self, symbol, amount):
         klines = self.get_klines(symbol, amount)
-        return [{
-                'x': (kline[4].timestamp() * 1000),
-                'y': [
-                    float(kline[0]),
-                    float(kline[1]),
-                    float(kline[2]),
-                    float(kline[3])
-                ]} for kline in klines]
+        klines_data = [{
+            'x': (kline[4].timestamp() * 1000),
+            'y': [
+                float(kline[0]),
+                float(kline[1]),
+                float(kline[2]),
+                float(kline[3])
+            ],
+        } for kline in klines]
+        return klines_data
+
+    def get_klines_sparkline_list(self, symbol, amount):
+        klines = self.get_klines(symbol, amount)
+        klines_data = [float(kline[3]) for kline in klines]
+        return klines_data
