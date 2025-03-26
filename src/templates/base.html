@@ -315,7 +315,7 @@
             var spark = {
                 chart: {
                     type: 'line',
-                    height: 30,
+                    height: 25,
                     sparkline: {
                     enabled: true
                     },
@@ -338,8 +338,23 @@
             var orderTable;
                 orderTable = renderDataTable('#orders-table-1', '/orders-data/');
 
-            var sparklineData = [0.00000756, 0.00000856, 0.00000910, 0.00000620, 0.00000500, 0.000012, 0.00000780, 
-            0.00000430, 0.000015, 0.00000645, 0.00000890, 0.00000975, 0.00000398, 0.00000612, 0.00000570];
+            var sparklineData = [
+                {x:'09:00', y:0.00000756}, 
+                {x:'09:05', y:0.00000856}, 
+                {x:'09:10', y:0.00000910}, 
+                {x:'09:15', y:0.00000620}, 
+                {x:'09:20', y:0.00000500}, 
+                {x:'09:25', y:0.000012}, 
+                {x:'09:30', y:0.00000780}, 
+                {x:'09:35', y:0.00000430}, 
+                {x:'09:40', y:0.000015}, 
+                {x:'09:45', y:0.00000645}, 
+                {x:'09:50', y:0.00000890}, 
+                {x:'10:00', y:0.00000975}, 
+                {x:'10:05', y:0.00000398}, 
+                {x:'10:10', y:0.00000612}, 
+                {x:'10:15', y:0.00000570}
+                ];
             
             // topb big chart    
             {% block additional_js %}
@@ -365,6 +380,24 @@
                     ]
                 })
                 */
+                    // topb big chart    
+        var spark1 = {
+            chart: {
+                type: 'area',
+                height: 30,
+                sparkline: {
+                enabled: true
+                },
+            },
+            stroke: {
+                width: 1
+            },
+            series: [{
+                data: randomizeArray(sparklineData)
+            }],
+            colors: ['#f8921a'],
+        }
+        var spark1 = new ApexCharts(document.querySelector("#apexspark0"), spark1); spark1.render();
         });
 
     var klineData = [{
