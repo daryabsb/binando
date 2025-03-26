@@ -2,8 +2,14 @@
     <div class="col-xl-12">
         <div class="card">
             <div
-                class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom align-items-center flex-wrap">
-                <h6 class="mb-0 fw-bold">Login Activity</h6>
+                class="card-header py-3 d-flex justify-content-between bg-transparent border-bottom align-items-center flex-wrap"
+                hx-ext="ws" ws-connect="/ws/total-usd/"
+                >
+                <h6 class="mb-0 fw-bold">Total USD Worth: 
+                            <span id="total-usd" 
+                            hx-get="/total-usd/" 
+                            hx-trigger="load"
+                            >0.00</span></h6>
                 <ul class="nav nav-tabs tab-body-header rounded d-inline-flex mt-2 mt-md-0"
                     role="tablist">
                     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Activity"
@@ -17,73 +23,43 @@
             <div class="card-body">
                 <div class="tab-content">
                     <div class="tab-pane fade" id="Activity">
-                        <ul class="list-unstyled list mb-0">
-                            <li class="d-flex align-items-center py-2">
-                                <div class="avatar rounded no-thumbnail chart-text-color1"><i
-                                        class="fa fa-globe" aria-hidden="true"></i></div>
-                                <div class="flex-fill ms-3">
-                                    <div class="h6 mb-0">web</div>
-                                    <small class="text-muted">Mumbai India</small>
-                                </div>
-                                <div class="flex-end">
-                                    <span class="d-block text-end">122.170.109.22</span>
-                                    <span class="text-muted d-block small">2021-09-30
-                                        11:00:52</span>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center py-2">
-                                <div class="avatar rounded no-thumbnail chart-text-color2"><i
-                                        class="fa fa-globe" aria-hidden="true"></i></div>
-                                <div class="flex-fill ms-3">
-                                    <div class="h6 mb-0">web</div>
-                                    <small class="text-muted">Mumbai India</small>
-                                </div>
-                                <div class="flex-end">
-                                    <span class="d-block text-end">122.170.109.22</span>
-                                    <span class="text-muted d-block small">2021-09-30
-                                        11:00:20</span>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center py-2">
-                                <div class="avatar rounded no-thumbnail chart-text-color3"><i
-                                        class="fa fa-globe" aria-hidden="true"></i></div>
-                                <div class="flex-fill ms-3">
-                                    <div class="h6 mb-0">web</div>
-                                    <small class="text-muted">Mumbai India</small>
-                                </div>
-                                <div class="flex-end">
-                                    <span class="d-block text-end">122.170.109.21</span>
-                                    <span class="text-muted d-block small">2021-09-29
-                                        10:56:22</span>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center py-2">
-                                <div class="avatar rounded no-thumbnail chart-text-color4"><i
-                                        class="fa fa-globe" aria-hidden="true"></i></div>
-                                <div class="flex-fill ms-3">
-                                    <div class="h6 mb-0">web</div>
-                                    <small class="text-muted">Pune India</small>
-                                </div>
-                                <div class="flex-end">
-                                    <span class="d-block text-end">198.182.109.22</span>
-                                    <span class="text-muted d-block small">2021-09-30
-                                        12:50:52</span>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center py-2">
-                                <div class="avatar rounded no-thumbnail chart-text-color2"><i
-                                        class="fa fa-globe" aria-hidden="true"></i></div>
-                                <div class="flex-fill ms-3">
-                                    <div class="h6 mb-0">web</div>
-                                    <small class="text-muted">Banglor India</small>
-                                </div>
-                                <div class="flex-end">
-                                    <span class="d-block text-end">126.150.109.22</span>
-                                    <span class="text-muted d-block small">2021-09-30
-                                        10:00:20</span>
-                                </div>
-                            </li>
-                        </ul>
+                       <div class="table-responsive">        
+                            <table id="orders-datatable3" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th>Balance</th>
+                                        <th>USD Value</th>
+                                        <th>Price</th>
+                                        <th>Change (24h)</th>
+                                        <th>High (24h)</th>
+                                        <th>Low (24h)</th>
+                                        <th>Volume (24h)</th>
+                                        {% comment %} <th>PNL</th> {% endcomment %}
+                                        <th>Time</th>
+                                        {% comment %} <th>Start date</th>
+                                        <th>Salary</th> {% endcomment %}
+                                    </tr>
+                                </thead>
+                            </table>
+                            <table id="orders-datatable2" class="table table-nowrap mb-0">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fa fa-square chart-text-color1"></i></th>
+                                        <th>Ticker</th>
+                                        <th>Balance</th>
+                                        <th>USD Value</th>
+                                        <th>PNL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="balances" hx-get="/balances/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/balances/">
+                                    {% include 'partials/balances.html' %}
+                                </tbody>
+                                <tfoot id="usdt-balance" hx-get="/usdt-update/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/usdt-update/">
+                                {% include 'partials/usdt-balance.html' %}
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                     <div class="tab-pane fade show active" id="cryptos-grid-views">
                     <div class="row g-3 mb-3 row-cols-1 row-cols-md-3 row-cols-lg-5"
