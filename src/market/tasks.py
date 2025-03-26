@@ -31,7 +31,7 @@ FLUSH_INTERVAL = 60  # Seconds between periodic flushes
 client = get_client()
 
 
-def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
+def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, batch_size=10):
     """
     Fetch historical Kline data for the last 8 days for specified symbols and insert into the database.
 
@@ -47,7 +47,10 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
     print('Fetching 8 days of Kline data started')
     end_time = timezone.now()
     # start_time = end_time - timedelta(days=days_back)
-    start_time = end_time - timedelta(minutes=135)
+    if period_type == 'days':
+        start_time = end_time - timedelta(days=period)
+    else:
+        start_time = end_time - timedelta(minutes=period)
 
     # Fetch all active and enabled symbols if none provided
     if symbols is None:
@@ -71,7 +74,7 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
                 # Create Kline objects
                 kline_objects = []
                 for kline in klines:
-                    
+
                     kline_objects.append(Kline(
                         symbol=symbol,
                         interval=interval,
@@ -146,7 +149,8 @@ def stream_kline_data():
         if batch:
             Kline.objects.bulk_create([Kline(**data)
                                       for data in batch], ignore_conflicts=True)
-            print(f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
+            print(
+                f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
             batch.clear()
 
     def periodic_flush():
