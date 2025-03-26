@@ -262,7 +262,7 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                                 crypto.updated = timezone.now()
                                 crypto.save()
 
-                                Order.objects.create(
+                                order = Order.objects.create(
                                     ticker=ticker,
                                     order_type='SELL',
                                     quantity=Decimal(str(sell_amount)),
@@ -278,7 +278,7 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
                                 self.order(symbol, "SELL", sell_amount)
                                 print(
-                                    f"SELL {sell_amount} {symbol} at {current_price} (Value: {trade_value:.2f})")
+                                    f"Order no.:{order.id} || SELL  {sell_amount} {symbol} at {current_price} (Value: {trade_value:.2f})")
                                 print("USDT Balance:", self.get_balance("USDT"))
                         except CryptoCurency.DoesNotExist:
                             print(f"No position to sell for {symbol}")

@@ -9,7 +9,7 @@ import pandas_ta
 
 class TechnicalAnalysisMixin:
 
-    def get_sma(self, symbol, closes, period=8):
+    def get_sma(self, symbol, closes, period=28):
         """Fetch historical prices and calculate SMA."""
         try:
             # return 0
@@ -27,7 +27,7 @@ class TechnicalAnalysisMixin:
             return None
 
     def get_signals(self, symbol, current_price):
-        klines = Kline.objects.filter(symbol=symbol).order_by('-time')[:14]
+        klines = Kline.objects.filter(symbol=symbol).order_by('-time')[:28]
         if len(klines) < 14:
             print(
                 f"Skipping {symbol}: Insufficient kline data ({len(klines)} klines)")
@@ -48,13 +48,13 @@ class TechnicalAnalysisMixin:
 
         buy_signals = sum([
             current_price > sma,
-            rsi < 30,
+            rsi < 20,
             macd > macd_signal,
             current_price < bb_lower * 1.01
         ])
         sell_signals = sum([
             current_price < sma,
-            rsi > 70,
+            rsi > 80,
             macd < macd_signal,
             current_price > bb_upper * 0.99
         ])
