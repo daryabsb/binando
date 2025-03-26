@@ -1,0 +1,37 @@
+<div class="table-responsive">        
+    <table id="orders-datatable3" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>Price</th>
+                <th>Change (24h)</th>
+                <th>High (24h)</th>
+                <th>Low (24h)</th>
+                <th>Volume (24h)</th>
+                {% comment %} <th>PNL</th> {% endcomment %}
+                <th>Time</th>
+                {% comment %} <th>Start date</th>
+                <th>Salary</th> {% endcomment %}
+            </tr>
+        </thead>
+    </table>
+    <table id="orders-datatable2" class="table table-nowrap mb-0">
+        <thead>
+            <tr>
+                <th><i class="fa fa-square chart-text-color1"></i></th>
+                <th>Ticker</th>
+                <th>Balance</th>
+                <th>USD Value</th>
+                <th>PNL</th>
+            </tr>
+        </thead>
+        <tbody id="balances" hx-get="/balances/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/balances/">
+            {% include 'partials/balances.html' %}
+        </tbody>
+        <tfoot id="usdt-balance" hx-get="/usdt-update/" hx-trigger="load" hx-ext="ws" ws-connect="/ws/usdt-update/">
+        {% include 'partials/usdt-balance.html' %}
+        </tfoot>
+    </table>
+</div>
