@@ -120,10 +120,10 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                     continue
 
                 # Check freshness
-                # if latest_kline.end_time < freshness_threshold:
-                #     print(f"WARNING: Kline data for {symbol} is outdated. Latest: {latest_kline.time}, Expected: >{freshness_threshold}")
-                #     all_fresh = False
-                #     continue
+                if latest_kline.end_time < freshness_threshold:
+                    print(f"WARNING: Kline data for {symbol} is outdated. Latest: {latest_kline.time}, Expected: >{freshness_threshold}")
+                    all_fresh = False
+                    continue
 
                 # Fetch the last n_klines, ordered by time descending
                 klines = Kline.objects.filter(symbol=symbol).order_by('-end_time')[:n_klines]
