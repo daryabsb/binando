@@ -109,6 +109,7 @@ def fill_kline_gaps(symbols=None, interval='5m', days_back=8, batch_size=10):
 
 @shared_task
 def stream_kline_data():
+    print(f'streaming started for 5m klines @{timezone.now().time()}')
     kline_batch = []
     lock = threading.Lock()
 
@@ -145,7 +146,7 @@ def stream_kline_data():
         if batch:
             Kline.objects.bulk_create([Kline(**data)
                                       for data in batch], ignore_conflicts=True)
-            print(f"Bulk inserted {len(batch)} Klines")
+            print(f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
             batch.clear()
 
     def periodic_flush():
