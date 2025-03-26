@@ -186,8 +186,9 @@ class Order(WorkflowInstance, WorkflowMixin):
         ('BUY', 'Buy'),
         ('SELL', 'Sell'),
     )
+    symbol = models.CharField(max_length=35, null=True, blank=True)
     crypto = models.ForeignKey(
-        CryptoCurency, on_delete=models.CASCADE, related_name='orders')
+        CryptoCurency, on_delete=models.SET_NULL, related_name='orders', null=True, blank=True)
     ticker = models.CharField(max_length=10)
     order_type = models.CharField(max_length=4, choices=ORDER_TYPES)
     quantity = models.DecimalField(max_digits=30, decimal_places=8)

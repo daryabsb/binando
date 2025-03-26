@@ -264,6 +264,7 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
                                 order = Order.objects.create(
                                     ticker=ticker,
+                                    symbol=symbol,
                                     order_type='SELL',
                                     quantity=Decimal(str(sell_amount)),
                                     price=Decimal(str(current_price)),
