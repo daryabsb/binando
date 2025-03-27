@@ -43,7 +43,8 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
         start_time = end_time - timedelta(minutes=period)
 
     if symbols is None:
-        symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
+        symbols = Symbol.objects.filter(
+            active=True, enabled=True).values_list('pair', flat=True)
 
     def normalize_to_5m(dt):
         """Round a datetime to the nearest 5-minute boundary."""
@@ -66,8 +67,10 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
                 kline_objects = []
                 for kline in klines:
                     # Normalize timestamps to 5-minute boundaries
-                    start_dt = timezone.datetime.fromtimestamp(kline[0] / 1000, tz=dt_timezone.utc)
-                    end_dt = timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc)
+                    start_dt = timezone.datetime.fromtimestamp(
+                        kline[0] / 1000, tz=dt_timezone.utc)
+                    end_dt = timezone.datetime.fromtimestamp(
+                        kline[6] / 1000, tz=dt_timezone.utc)
                     normalized_start = normalize_to_5m(start_dt)
                     normalized_end = normalize_to_5m(end_dt)
 
@@ -99,7 +102,7 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
 
     print('Fetching 8 days of Kline data finished')
     return True
-   
+
 
 def stream_kline_data():
     print(f'streaming started for 5m klines @{timezone.now().time()}')
@@ -117,39 +120,41 @@ def stream_kline_data():
             data = msg['data']
             kline = data['k']
             if kline['x']:  # Finalized Kline
-                start_dt = timezone.datetime.fromtimestamp(kline['t'] / 1000, tz=dt_timezone.utc)
-                end_dt = timezone.datetime.fromtimestamp(kline['T'] / 1000, tz=dt_timezone.utc)
+                start_dt = timezone.datetime.fromtimestamp(
+                    kline['t'] / 1000, tz=dt_timezone.utc)
+                end_dt = timezone.datetime.fromtimestamp(
+                    kline['T'] / 1000, tz=dt_timezone.utc)
                 normalized_start = normalize_to_5m(start_dt)
                 normalized_end = normalize_to_5m(end_dt)
 
-            with lock:
-                kline_batch.append({
-                    'symbol': kline['s'],
-                    'interval': kline['i'],
-                    'start_time': normalized_start,
-                    'end_time': normalized_end,
-                    'open': Decimal(kline['o']),
-                    'close': Decimal(kline['c']),
-                    'high': Decimal(kline['h']),
-                    'low': Decimal(kline['l']),
-                    'volume': Decimal(kline['v']),
-                    'quote_volume': Decimal(kline['q']),
-                    'taker_buy_base_volume': Decimal(kline['V']),
-                    'taker_buy_quote_volume': Decimal(kline['Q']),
-                    'trade_count': kline['n'],
-                    'is_closed': True,
-                    'time': normalized_end
-                })
-                # Flush immediately if batch size is reached
-                if len(kline_batch) >= BATCH_SIZE:
-                    bulk_insert(kline_batch)
+                with lock:
+                    kline_batch.append({
+                        'symbol': kline['s'],
+                        'interval': kline['i'],
+                        'start_time': normalized_start,
+                        'end_time': normalized_end,
+                        'open': Decimal(kline['o']),
+                        'close': Decimal(kline['c']),
+                        'high': Decimal(kline['h']),
+                        'low': Decimal(kline['l']),
+                        'volume': Decimal(kline['v']),
+                        'quote_volume': Decimal(kline['q']),
+                        'taker_buy_base_volume': Decimal(kline['V']),
+                        'taker_buy_quote_volume': Decimal(kline['Q']),
+                        'trade_count': kline['n'],
+                        'is_closed': True,
+                        'time': normalized_end
+                    })
+                    # Flush immediately if batch size is reached
+                    if len(kline_batch) >= BATCH_SIZE:
+                        bulk_insert(kline_batch)
         except Exception as e:
             print(f"Error processing message: {e}")
 
     def bulk_insert(batch):
         if batch:
             Kline.objects.bulk_create([Kline(**data)
-                                    for data in batch], ignore_conflicts=True)
+                                       for data in batch], ignore_conflicts=True)
             print(
                 f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
             batch.clear()
@@ -174,9 +179,6 @@ def stream_kline_data():
     flush_thread.start()
 
     twm.join()  # Keeps the task running
-
-
-
 
 
 @shared_task
