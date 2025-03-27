@@ -33,37 +33,29 @@ client = get_client()
 
 def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, batch_size=10):
     """
-    Fetch historical Kline data for the last 8 days for specified symbols and insert into the database.
-
-    Args:
-        symbols (list, optional): List of symbols to fetch (e.g., ['BTCUSDT']). If None, fetches all active and enabled symbols.
-        interval (str): Kline interval, e.g., '5m' for 5 minutes (default: '5m').
-        days_back (int): Number of days to fetch (default: 8).
-        batch_size (int): Number of symbols to process per batch (default: 10).
-
-    Returns:
-        bool: True if successful, False if an error occurs.
+    Fetch historical Kline data for the last 8 days and insert into the database with normalized timestamps.
     """
     print('Fetching 8 days of Kline data started')
     end_time = timezone.now()
-    # start_time = end_time - timedelta(days=days_back)
     if period_type == 'days':
         start_time = end_time - timedelta(days=period)
     else:
         start_time = end_time - timedelta(minutes=period)
 
-    # Fetch all active and enabled symbols if none provided
     if symbols is None:
-        symbols = Symbol.objects.filter(
-            active=True, enabled=True).values_list('pair', flat=True)
+        symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
 
-    # Process symbols in batches
+    def normalize_to_5m(dt):
+        """Round a datetime to the nearest 5-minute boundary."""
+        epoch = dt.timestamp()
+        rounded_epoch = (epoch // 300) * 300  # 300 seconds = 5 minutes
+        return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
+
     for i in range(0, len(symbols), batch_size):
         batch_symbols = symbols[i:i + batch_size]
         for symbol in batch_symbols:
             print(f"Fetching data for {symbol}...")
             try:
-                # Fetch historical Klines from Binance API
                 klines = client.get_historical_klines(
                     symbol=symbol,
                     interval=interval,
@@ -71,17 +63,19 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
                     end_str=int(end_time.timestamp() * 1000)
                 )
 
-                # Create Kline objects
                 kline_objects = []
                 for kline in klines:
+                    # Normalize timestamps to 5-minute boundaries
+                    start_dt = timezone.datetime.fromtimestamp(kline[0] / 1000, tz=dt_timezone.utc)
+                    end_dt = timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc)
+                    normalized_start = normalize_to_5m(start_dt)
+                    normalized_end = normalize_to_5m(end_dt)
 
                     kline_objects.append(Kline(
                         symbol=symbol,
                         interval=interval,
-                        start_time=timezone.datetime.fromtimestamp(
-                            kline[0] / 1000, tz=dt_timezone.utc),
-                        end_time=timezone.datetime.fromtimestamp(
-                            kline[6] / 1000, tz=dt_timezone.utc),
+                        start_time=normalized_start,
+                        end_time=normalized_end,
                         open=Decimal(kline[1]),
                         close=Decimal(kline[4]),
                         high=Decimal(kline[2]),
@@ -91,42 +85,51 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
                         taker_buy_base_volume=Decimal(kline[9]),
                         taker_buy_quote_volume=Decimal(kline[10]),
                         trade_count=int(kline[8]),
-                        is_closed=True,  # Historical data is always closed
-                        time=timezone.datetime.fromtimestamp(
-                            kline[6] / 1000, tz=dt_timezone.utc)  # Close time
+                        is_closed=True,
+                        time=normalized_end  # Use normalized end time as 'time'
                     ))
 
-                # Bulk insert into database, ignoring duplicates
                 Kline.objects.bulk_create(kline_objects, ignore_conflicts=True)
                 print(f"Inserted {len(kline_objects)} Klines for {symbol}")
             except Exception as e:
                 print(f"Error fetching or saving Klines for {symbol}: {e}")
-                return False  # Return False on error
+                return False
 
-        # Delay to respect API rate limits
         time.sleep(1)
 
     print('Fetching 8 days of Kline data finished')
     return True
-
 
 @shared_task
 def stream_kline_data():
     print(f'streaming started for 5m klines @{timezone.now().time()}')
     kline_batch = []
     lock = threading.Lock()
+    BATCH_SIZE = 100  # Define your batch size
+    FLUSH_INTERVAL = 60  # Define your flush interval in seconds
+
+    def normalize_to_5m(dt):
+        """Round a datetime to the nearest 5-minute boundary."""
+        epoch = dt.timestamp()
+        rounded_epoch = (epoch // 300) * 300  # 300 seconds = 5 minutes
+        return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
 
     def handle_socket_message(msg):
         try:
             data = msg['data']
             kline = data['k']
-            if kline['x']:  # Only process finalized Klines
+            if kline['x']:  # Finalized Kline
+                start_dt = timezone.datetime.fromtimestamp(kline['t'] / 1000, tz=dt_timezone.utc)
+                end_dt = timezone.datetime.fromtimestamp(kline['T'] / 1000, tz=dt_timezone.utc)
+                normalized_start = normalize_to_5m(start_dt)
+                normalized_end = normalize_to_5m(end_dt)
+
                 with lock:
                     kline_batch.append({
                         'symbol': kline['s'],
                         'interval': kline['i'],
-                        'start_time': timezone.datetime.fromtimestamp(kline['t'] / 1000, tz=dt_timezone.utc),
-                        'end_time': timezone.datetime.fromtimestamp(kline['T'] / 1000, tz=dt_timezone.utc),
+                        'start_time': normalized_start,
+                        'end_time': normalized_end,
                         'open': Decimal(kline['o']),
                         'close': Decimal(kline['c']),
                         'high': Decimal(kline['h']),
@@ -137,9 +140,8 @@ def stream_kline_data():
                         'taker_buy_quote_volume': Decimal(kline['Q']),
                         'trade_count': kline['n'],
                         'is_closed': True,
-                        'time': timezone.datetime.fromtimestamp(data['E'] / 1000, tz=dt_timezone.utc),
+                        'time': normalized_end  # Use normalized end time as 'time'
                     })
-                    # Flush immediately if batch size is reached
                     if len(kline_batch) >= BATCH_SIZE:
                         bulk_insert(kline_batch)
         except Exception as e:
@@ -147,33 +149,28 @@ def stream_kline_data():
 
     def bulk_insert(batch):
         if batch:
-            Kline.objects.bulk_create([Kline(**data)
-                                      for data in batch], ignore_conflicts=True)
-            print(
-                f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
-            batch.clear()
+            with lock:
+                Kline.objects.bulk_create([Kline(**data) for data in batch], ignore_conflicts=True)
+                print(f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
+                batch.clear()
 
     def periodic_flush():
         while True:
             time.sleep(FLUSH_INTERVAL)
-            with lock:
-                bulk_insert(kline_batch)
+            bulk_insert(kline_batch)
 
     twm = ThreadedWebsocketManager(api_key=PUBLIC, api_secret=SECRET)
     twm.start()
 
-    symbols = Symbol.objects.filter(
-        active=True, enabled=True).values_list('pair', flat=True)
+    symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
     streams = [f"{symbol.lower()}@kline_5m" for symbol in symbols]
 
     twm.start_multiplex_socket(callback=handle_socket_message, streams=streams)
 
-    # Start a background thread for periodic flushing
     flush_thread = threading.Thread(target=periodic_flush, daemon=True)
     flush_thread.start()
 
-    twm.join()  # Keeps the task running
-
+    twm.join()
 
 @shared_task
 def cleanup_old_klines():

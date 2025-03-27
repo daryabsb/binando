@@ -184,6 +184,7 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                     print(f"Skipping {symbol}: Invalid price")
                     continue
 
+                # =========================================
                 current_time = time.time()
                 usdt_balance = self.get_balance("USDT")
                 trade_amount = self.get_trade_amount(symbol, current_price)
@@ -193,9 +194,10 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                 print(
                     f"{symbol} ||| current_price: {current_price} || buy_signals: {buy_signals} | sell_signals: {sell_signals}")
 
-                if trade_amount <= 0:
-                    print(f"Skipping {symbol}: Invalid trade amount")
-                    continue
+                # if trade_amount <= 0:
+                #     print(f"Skipping {symbol}: Invalid trade amount")
+                #     continue
+                # =========================================
 
                 with transaction.atomic():
                     # Only check/create crypto object when buying or selling
