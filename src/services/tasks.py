@@ -36,7 +36,7 @@ def run_trading(symbols=None):
     return 'Done running the bot'
 
 
-@shared_task
+# @shared_task
 def flush_stagnant_positions():
     from src.services.bnArb import BnArber
     HOLD_TIME_SECONDS = 48 * 3600  # 48 hours

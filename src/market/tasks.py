@@ -100,7 +100,7 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
     print('Fetching 8 days of Kline data finished')
     return True
 
-@shared_task
+# @shared_task
 def stream_kline_data():
     print(f'streaming started for 5m klines @{timezone.now().time()}')
     kline_batch = []
