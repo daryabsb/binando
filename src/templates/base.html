@@ -499,6 +499,8 @@ var renderDataTable = function(elementId, url) {
             layout: {
                 top2Start: toolbar
             },
+            ordering: false,
+            //order: [[0, 'desc']]
             columnDefs: [{ width: '25%', targets: 0 }],
             columns: [
                 { data: 'timestamp' },

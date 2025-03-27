@@ -90,7 +90,7 @@ def balances_data(request):
 def orders_data(request):
     from src.market.models import Order
     orders_list = []
-    orders = Order.objects.all()
+    orders = Order.objects.all().order_by('-id')
     for order in orders:
         orders_list.append(order.to_payload())
     return JsonResponse({'data': orders_list}, safe=False)
