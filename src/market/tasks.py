@@ -99,14 +99,12 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
 
     print('Fetching 8 days of Kline data finished')
     return True
+   
 
-# @shared_task
 def stream_kline_data():
     print(f'streaming started for 5m klines @{timezone.now().time()}')
     kline_batch = []
     lock = threading.Lock()
-    BATCH_SIZE = 100  # Define your batch size
-    FLUSH_INTERVAL = 60  # Define your flush interval in seconds
 
     def normalize_to_5m(dt):
         """Round a datetime to the nearest 5-minute boundary."""
@@ -124,53 +122,62 @@ def stream_kline_data():
                 normalized_start = normalize_to_5m(start_dt)
                 normalized_end = normalize_to_5m(end_dt)
 
-                with lock:
-                    kline_batch.append({
-                        'symbol': kline['s'],
-                        'interval': kline['i'],
-                        'start_time': normalized_start,
-                        'end_time': normalized_end,
-                        'open': Decimal(kline['o']),
-                        'close': Decimal(kline['c']),
-                        'high': Decimal(kline['h']),
-                        'low': Decimal(kline['l']),
-                        'volume': Decimal(kline['v']),
-                        'quote_volume': Decimal(kline['q']),
-                        'taker_buy_base_volume': Decimal(kline['V']),
-                        'taker_buy_quote_volume': Decimal(kline['Q']),
-                        'trade_count': kline['n'],
-                        'is_closed': True,
-                        'time': normalized_end  # Use normalized end time as 'time'
-                    })
-                    if len(kline_batch) >= BATCH_SIZE:
-                        bulk_insert(kline_batch)
+            with lock:
+                kline_batch.append({
+                    'symbol': kline['s'],
+                    'interval': kline['i'],
+                    'start_time': normalized_start,
+                    'end_time': normalized_end,
+                    'open': Decimal(kline['o']),
+                    'close': Decimal(kline['c']),
+                    'high': Decimal(kline['h']),
+                    'low': Decimal(kline['l']),
+                    'volume': Decimal(kline['v']),
+                    'quote_volume': Decimal(kline['q']),
+                    'taker_buy_base_volume': Decimal(kline['V']),
+                    'taker_buy_quote_volume': Decimal(kline['Q']),
+                    'trade_count': kline['n'],
+                    'is_closed': True,
+                    'time': normalized_end
+                })
+                # Flush immediately if batch size is reached
+                if len(kline_batch) >= BATCH_SIZE:
+                    bulk_insert(kline_batch)
         except Exception as e:
             print(f"Error processing message: {e}")
 
     def bulk_insert(batch):
         if batch:
-            with lock:
-                Kline.objects.bulk_create([Kline(**data) for data in batch], ignore_conflicts=True)
-                print(f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
-                batch.clear()
+            Kline.objects.bulk_create([Kline(**data)
+                                    for data in batch], ignore_conflicts=True)
+            print(
+                f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
+            batch.clear()
 
     def periodic_flush():
         while True:
             time.sleep(FLUSH_INTERVAL)
-            bulk_insert(kline_batch)
+            with lock:
+                bulk_insert(kline_batch)
 
     twm = ThreadedWebsocketManager(api_key=PUBLIC, api_secret=SECRET)
     twm.start()
 
-    symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
+    symbols = Symbol.objects.filter(
+        active=True, enabled=True).values_list('pair', flat=True)
     streams = [f"{symbol.lower()}@kline_5m" for symbol in symbols]
 
     twm.start_multiplex_socket(callback=handle_socket_message, streams=streams)
 
+    # Start a background thread for periodic flushing
     flush_thread = threading.Thread(target=periodic_flush, daemon=True)
     flush_thread.start()
 
-    twm.join()
+    twm.join()  # Keeps the task running
+
+
+
+
 
 @shared_task
 def cleanup_old_klines():
