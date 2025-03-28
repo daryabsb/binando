@@ -5,5 +5,5 @@ from django.utils import timezone
 
 
 def run():
-    # fill_kline_gaps(period_type='minutes', period=600)
+    # fill_kline_gaps(period_type='minutes', period=1000)
     stream_kline_data()

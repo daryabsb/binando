@@ -40,10 +40,9 @@ def normalize_to_5m(dt):
 
 def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, batch_size=10):
     """
-    Fetch historical Kline data with dynamic interval support.
+    Fetch historical Kline data up to the latest closed Kline, rounding times to seconds.
     """
-    print(
-        f'Fetching {period} {period_type} of Kline data started for {interval}')
+    print(f'Fetching {period} {period_type} of Kline data started for {interval}')
     end_time = timezone.now()
     if period_type == 'days':
         start_time = end_time - timedelta(days=period)
@@ -51,38 +50,37 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
         start_time = end_time - timedelta(minutes=period)
 
     if symbols is None:
-        symbols = Symbol.objects.filter(
-            active=True, enabled=True).values_list('pair', flat=True)
+        symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
 
-    def get_interval_duration(interval_str):
-        """Convert Binance interval string to timedelta."""
+    def get_interval_seconds(interval_str):
+        """Convert Binance interval string to seconds."""
         unit = interval_str[-1]
         value = int(interval_str[:-1])
         if unit == 'm':
-            return timedelta(minutes=value)
+            return value * 60
         elif unit == 'h':
-            return timedelta(hours=value)
+            return value * 3600
         elif unit == 'd':
-            return timedelta(days=value)
+            return value * 86400
         elif unit == 'w':
-            return timedelta(weeks=value)
+            return value * 604800
         else:
             raise ValueError(f"Unsupported interval: {interval_str}")
 
-    def normalize_start(dt, interval_duration):
-        """Round down to the nearest interval boundary."""
+    def round_to_second(dt):
+        """Round datetime to the nearest second."""
         epoch = dt.timestamp()
-        seconds_per_interval = interval_duration.total_seconds()
-        rounded_epoch = (epoch // seconds_per_interval) * seconds_per_interval
+        rounded_epoch = round(epoch)
         return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
 
-    interval_duration = get_interval_duration(interval)
+    interval_seconds = get_interval_seconds(interval)
 
     for i in range(0, len(symbols), batch_size):
         batch_symbols = symbols[i:i + batch_size]
         for symbol in batch_symbols:
             print(f"Fetching data for {symbol}...")
             try:
+                # Fetch up to the current time
                 klines = client.get_historical_klines(
                     symbol=symbol,
                     interval=interval,
@@ -92,20 +90,26 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
 
                 kline_objects = []
                 for kline in klines:
-                    start_dt = timezone.datetime.fromtimestamp(
-                        kline[0] / 1000, tz=dt_timezone.utc)
-                    end_dt = timezone.datetime.fromtimestamp(
-                        kline[6] / 1000, tz=dt_timezone.utc)
+                    start_dt = timezone.datetime.fromtimestamp(kline[0] / 1000, tz=dt_timezone.utc)
+                    end_dt = timezone.datetime.fromtimestamp(kline[6] / 1000, tz=dt_timezone.utc)
 
-                    # Normalize start time and derive end time dynamically
-                    normalized_start = normalize_start(
-                        start_dt, interval_duration)
-                    normalized_end = normalized_start + interval_duration
+                    # Allow recently closed Klines, block future ones
+                    now = timezone.now()
+                    if end_dt > now + timedelta(seconds=interval_seconds):
+                        print(f"Skipping future Kline for {symbol}: end_time={end_dt}")
+                        continue
 
-                    # Debug: Verify timestamps
+                    normalized_start = round_to_second(start_dt)
+                    normalized_end = round_to_second(end_dt)
+
+                    # Check for gaps
+                    actual_diff = (normalized_end - normalized_start).total_seconds()
+                    if abs(actual_diff - interval_seconds) > 5:
+                        print(f"Gap detected for {symbol}: diff={actual_diff}s, expected={interval_seconds}s")
+
+                    # Debug
                     print(f"{symbol} Raw: start={start_dt}, end={end_dt}")
-                    print(
-                        f"{symbol} Normalized: start={normalized_start}, end={normalized_end}")
+                    print(f"{symbol} Normalized: start={normalized_start}, end={normalized_end}")
 
                     kline_objects.append(Kline(
                         symbol=symbol,
@@ -121,8 +125,8 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
                         taker_buy_base_volume=Decimal(kline[9]),
                         taker_buy_quote_volume=Decimal(kline[10]),
                         trade_count=int(kline[8]),
-                        is_closed=True,
-                        time=normalized_end  # Use normalized end time as 'time'
+                        is_closed=True,  # Historical data is always closed
+                        time=normalized_end
                     ))
 
                 Kline.objects.bulk_create(kline_objects, ignore_conflicts=True)
@@ -136,99 +140,105 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
     print(f'Fetching {period} {period_type} of Kline data finished')
     return True
 
-
 def stream_kline_data(interval='5m'):
     print(f'streaming started for {interval} klines @{timezone.now().time()}')
     kline_batch = []
     lock = threading.Lock()
-    BATCH_SIZE = 100  # Adjust as needed
-    FLUSH_INTERVAL = 60  # Adjust as needed
+    BATCH_SIZE = 100
+    FLUSH_INTERVAL = 5
 
-    def get_interval_duration(interval_str):
-        """Convert Binance interval string to timedelta."""
+    def get_interval_seconds(interval_str):
+        """Convert Binance interval string to seconds."""
         unit = interval_str[-1]
         value = int(interval_str[:-1])
         if unit == 'm':
-            return timedelta(minutes=value)
+            return value * 60
         elif unit == 'h':
-            return timedelta(hours=value)
+            return value * 3600
         elif unit == 'd':
-            return timedelta(days=value)
+            return value * 86400
         elif unit == 'w':
-            return timedelta(weeks=value)
+            return value * 604800
         else:
             raise ValueError(f"Unsupported interval: {interval_str}")
 
-    def normalize_start(dt, interval_duration):
-        """Round down to the nearest interval boundary."""
+    def round_to_second(dt):
+        """Round datetime to the nearest second."""
         epoch = dt.timestamp()
-        seconds_per_interval = interval_duration.total_seconds()
-        rounded_epoch = (epoch // seconds_per_interval) * seconds_per_interval
+        rounded_epoch = round(epoch)
         return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
 
-    interval_duration = get_interval_duration(interval)
+    interval_seconds = get_interval_seconds(interval)
 
     def handle_socket_message(msg):
         try:
             data = msg['data']
             kline = data['k']
-            if kline['x']:  # Finalized Kline
-                start_dt = timezone.datetime.fromtimestamp(
-                    kline['t'] / 1000, tz=dt_timezone.utc)
-                end_dt = timezone.datetime.fromtimestamp(
-                    kline['T'] / 1000, tz=dt_timezone.utc)
+            if not kline['x']:  # Skip unclosed Klines
+                return
 
-                # Normalize start time and derive end time dynamically
-                normalized_start = normalize_start(start_dt, interval_duration)
-                normalized_end = normalized_start + interval_duration
+            start_dt = timezone.datetime.fromtimestamp(kline['t'] / 1000, tz=dt_timezone.utc)
+            end_dt = timezone.datetime.fromtimestamp(kline['T'] / 1000, tz=dt_timezone.utc)
 
-                # Debug: Verify timestamps
-                # print(f"{kline['s']} Raw: start={start_dt}, end={end_dt}")
-                # print(
-                #     f"{kline['s']} Normalized: start={normalized_start}, end={normalized_end}")
+            # Allow recently closed Klines with a 5-second buffer
+            now = timezone.now()
+            if end_dt > now + timedelta(seconds=5):  # Relaxed from interval_seconds
+                print(f"Skipping future Kline for {kline['s']}: end_time={end_dt}, now={now}")
+                return
 
-                with lock:
-                    kline_batch.append({
-                        'symbol': kline['s'],
-                        'interval': kline['i'],
-                        'start_time': normalized_start,
-                        'end_time': normalized_end,
-                        'open': Decimal(kline['o']),
-                        'close': Decimal(kline['c']),
-                        'high': Decimal(kline['h']),
-                        'low': Decimal(kline['l']),
-                        'volume': Decimal(kline['v']),
-                        'quote_volume': Decimal(kline['q']),
-                        'taker_buy_base_volume': Decimal(kline['V']),
-                        'taker_buy_quote_volume': Decimal(kline['Q']),
-                        'trade_count': kline['n'],
-                        'is_closed': True,
-                        'time': normalized_end  # Use normalized end time as 'time'
-                    })
-                    if len(kline_batch) >= BATCH_SIZE:
-                        bulk_insert(kline_batch)
+            normalized_start = round_to_second(start_dt)
+            normalized_end = round_to_second(end_dt)
+
+            # Check for gaps
+            actual_diff = (normalized_end - normalized_start).total_seconds()
+            if abs(actual_diff - interval_seconds) > 5:
+                print(f"Gap detected for {kline['s']}: diff={actual_diff}s, expected={interval_seconds}s")
+
+            # Debug with current time
+            print(f"{kline['s']} Raw: start={start_dt}, end={end_dt}, now={now}")
+            print(f"{kline['s']} Normalized: start={normalized_start}, end={normalized_end}")
+
+            with lock:
+                kline_batch.append({
+                    'symbol': kline['s'],
+                    'interval': kline['i'],
+                    'start_time': normalized_start,
+                    'end_time': normalized_end,
+                    'open': Decimal(kline['o']),
+                    'close': Decimal(kline['c']),
+                    'high': Decimal(kline['h']),
+                    'low': Decimal(kline['l']),
+                    'volume': Decimal(kline['v']),
+                    'quote_volume': Decimal(kline['q']),
+                    'taker_buy_base_volume': Decimal(kline['V']),
+                    'taker_buy_quote_volume': Decimal(kline['Q']),
+                    'trade_count': kline['n'],
+                    'is_closed': True,
+                    'time': normalized_end
+                })
+                # Flush immediately for each closed Kline
+                bulk_insert(kline_batch)
         except Exception as e:
             print(f"Error processing message: {e}")
 
     def bulk_insert(batch):
         if batch:
             with lock:
-                Kline.objects.bulk_create(
-                    [Kline(**data) for data in batch], ignore_conflicts=True)
-                print(
-                    f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
+                Kline.objects.bulk_create([Kline(**data) for data in batch], ignore_conflicts=True)
+                print(f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
                 batch.clear()
 
     def periodic_flush():
         while True:
             time.sleep(FLUSH_INTERVAL)
-            bulk_insert(kline_batch)
+            with lock:
+                if kline_batch:
+                    bulk_insert(kline_batch)
 
     twm = ThreadedWebsocketManager(api_key=PUBLIC, api_secret=SECRET)
     twm.start()
 
-    symbols = Symbol.objects.filter(
-        active=True, enabled=True).values_list('pair', flat=True)
+    symbols = Symbol.objects.filter(active=True, enabled=True).values_list('pair', flat=True)
     streams = [f"{symbol.lower()}@kline_{interval}" for symbol in symbols]
 
     twm.start_multiplex_socket(callback=handle_socket_message, streams=streams)
