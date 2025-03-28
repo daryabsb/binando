@@ -31,11 +31,19 @@ FLUSH_INTERVAL = 60  # Seconds between periodic flushes
 client = get_client()
 
 
+def normalize_to_5m(dt):
+    """Round a datetime to the nearest 5-minute boundary."""
+    epoch = dt.timestamp()
+    rounded_epoch = (epoch // 300) * 300  # 300 seconds = 5 minutes
+    return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
+
+
 def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, batch_size=10):
     """
-    Fetch historical Kline data for the last 8 days and insert into the database with normalized timestamps.
+    Fetch historical Kline data with dynamic interval support.
     """
-    print('Fetching 8 days of Kline data started')
+    print(
+        f'Fetching {period} {period_type} of Kline data started for {interval}')
     end_time = timezone.now()
     if period_type == 'days':
         start_time = end_time - timedelta(days=period)
@@ -46,11 +54,29 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
         symbols = Symbol.objects.filter(
             active=True, enabled=True).values_list('pair', flat=True)
 
-    def normalize_to_5m(dt):
-        """Round a datetime to the nearest 5-minute boundary."""
+    def get_interval_duration(interval_str):
+        """Convert Binance interval string to timedelta."""
+        unit = interval_str[-1]
+        value = int(interval_str[:-1])
+        if unit == 'm':
+            return timedelta(minutes=value)
+        elif unit == 'h':
+            return timedelta(hours=value)
+        elif unit == 'd':
+            return timedelta(days=value)
+        elif unit == 'w':
+            return timedelta(weeks=value)
+        else:
+            raise ValueError(f"Unsupported interval: {interval_str}")
+
+    def normalize_start(dt, interval_duration):
+        """Round down to the nearest interval boundary."""
         epoch = dt.timestamp()
-        rounded_epoch = (epoch // 300) * 300  # 300 seconds = 5 minutes
+        seconds_per_interval = interval_duration.total_seconds()
+        rounded_epoch = (epoch // seconds_per_interval) * seconds_per_interval
         return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
+
+    interval_duration = get_interval_duration(interval)
 
     for i in range(0, len(symbols), batch_size):
         batch_symbols = symbols[i:i + batch_size]
@@ -66,13 +92,20 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
 
                 kline_objects = []
                 for kline in klines:
-                    # Normalize timestamps to 5-minute boundaries
                     start_dt = timezone.datetime.fromtimestamp(
                         kline[0] / 1000, tz=dt_timezone.utc)
                     end_dt = timezone.datetime.fromtimestamp(
                         kline[6] / 1000, tz=dt_timezone.utc)
-                    normalized_start = normalize_to_5m(start_dt)
-                    normalized_end = normalize_to_5m(end_dt)
+
+                    # Normalize start time and derive end time dynamically
+                    normalized_start = normalize_start(
+                        start_dt, interval_duration)
+                    normalized_end = normalized_start + interval_duration
+
+                    # Debug: Verify timestamps
+                    print(f"{symbol} Raw: start={start_dt}, end={end_dt}")
+                    print(
+                        f"{symbol} Normalized: start={normalized_start}, end={normalized_end}")
 
                     kline_objects.append(Kline(
                         symbol=symbol,
@@ -100,20 +133,40 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
 
         time.sleep(1)
 
-    print('Fetching 8 days of Kline data finished')
+    print(f'Fetching {period} {period_type} of Kline data finished')
     return True
 
 
-def stream_kline_data():
-    print(f'streaming started for 5m klines @{timezone.now().time()}')
+def stream_kline_data(interval='5m'):
+    print(f'streaming started for {interval} klines @{timezone.now().time()}')
     kline_batch = []
     lock = threading.Lock()
+    BATCH_SIZE = 100  # Adjust as needed
+    FLUSH_INTERVAL = 60  # Adjust as needed
 
-    def normalize_to_5m(dt):
-        """Round a datetime to the nearest 5-minute boundary."""
+    def get_interval_duration(interval_str):
+        """Convert Binance interval string to timedelta."""
+        unit = interval_str[-1]
+        value = int(interval_str[:-1])
+        if unit == 'm':
+            return timedelta(minutes=value)
+        elif unit == 'h':
+            return timedelta(hours=value)
+        elif unit == 'd':
+            return timedelta(days=value)
+        elif unit == 'w':
+            return timedelta(weeks=value)
+        else:
+            raise ValueError(f"Unsupported interval: {interval_str}")
+
+    def normalize_start(dt, interval_duration):
+        """Round down to the nearest interval boundary."""
         epoch = dt.timestamp()
-        rounded_epoch = (epoch // 300) * 300  # 300 seconds = 5 minutes
+        seconds_per_interval = interval_duration.total_seconds()
+        rounded_epoch = (epoch // seconds_per_interval) * seconds_per_interval
         return timezone.datetime.fromtimestamp(rounded_epoch, tz=dt_timezone.utc)
+
+    interval_duration = get_interval_duration(interval)
 
     def handle_socket_message(msg):
         try:
@@ -124,8 +177,15 @@ def stream_kline_data():
                     kline['t'] / 1000, tz=dt_timezone.utc)
                 end_dt = timezone.datetime.fromtimestamp(
                     kline['T'] / 1000, tz=dt_timezone.utc)
-                normalized_start = normalize_to_5m(start_dt)
-                normalized_end = normalize_to_5m(end_dt)
+
+                # Normalize start time and derive end time dynamically
+                normalized_start = normalize_start(start_dt, interval_duration)
+                normalized_end = normalized_start + interval_duration
+
+                # Debug: Verify timestamps
+                # print(f"{kline['s']} Raw: start={start_dt}, end={end_dt}")
+                # print(
+                #     f"{kline['s']} Normalized: start={normalized_start}, end={normalized_end}")
 
                 with lock:
                     kline_batch.append({
@@ -143,9 +203,8 @@ def stream_kline_data():
                         'taker_buy_quote_volume': Decimal(kline['Q']),
                         'trade_count': kline['n'],
                         'is_closed': True,
-                        'time': normalized_end
+                        'time': normalized_end  # Use normalized end time as 'time'
                     })
-                    # Flush immediately if batch size is reached
                     if len(kline_batch) >= BATCH_SIZE:
                         bulk_insert(kline_batch)
         except Exception as e:
@@ -153,32 +212,31 @@ def stream_kline_data():
 
     def bulk_insert(batch):
         if batch:
-            Kline.objects.bulk_create([Kline(**data)
-                                       for data in batch], ignore_conflicts=True)
-            print(
-                f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
-            batch.clear()
+            with lock:
+                Kline.objects.bulk_create(
+                    [Kline(**data) for data in batch], ignore_conflicts=True)
+                print(
+                    f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
+                batch.clear()
 
     def periodic_flush():
         while True:
             time.sleep(FLUSH_INTERVAL)
-            with lock:
-                bulk_insert(kline_batch)
+            bulk_insert(kline_batch)
 
     twm = ThreadedWebsocketManager(api_key=PUBLIC, api_secret=SECRET)
     twm.start()
 
     symbols = Symbol.objects.filter(
         active=True, enabled=True).values_list('pair', flat=True)
-    streams = [f"{symbol.lower()}@kline_5m" for symbol in symbols]
+    streams = [f"{symbol.lower()}@kline_{interval}" for symbol in symbols]
 
     twm.start_multiplex_socket(callback=handle_socket_message, streams=streams)
 
-    # Start a background thread for periodic flushing
     flush_thread = threading.Thread(target=periodic_flush, daemon=True)
     flush_thread.start()
 
-    twm.join()  # Keeps the task running
+    twm.join()
 
 
 @shared_task

@@ -104,14 +104,16 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
     def check_klines_freshness(self, n_klines=28):
         current_time = timezone.now()
-        KLINE_FRESHNESS_LOOKBACK = settings.KLINE_FRESHNESS_LOOKBACK  # timedelta(minutes=5)
+        # timedelta(minutes=5)
+        KLINE_FRESHNESS_LOOKBACK = settings.KLINE_FRESHNESS_LOOKBACK
         freshness_threshold = current_time - KLINE_FRESHNESS_LOOKBACK
         all_fresh = True
 
         for symbol in self.sorted_symbols:
             try:
                 # Get the latest Kline based on end_time
-                latest_kline = Kline.objects.filter(symbol=symbol).order_by('-end_time').first()
+                latest_kline = Kline.objects.filter(
+                    symbol=symbol).order_by('-end_time').first()
                 if not latest_kline:
                     print(f"WARNING: No Kline data for {symbol}")
                     all_fresh = False
@@ -119,33 +121,49 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
 
                 # Check if the latest Kline is outdated (more than 5 minutes old)
                 if latest_kline.end_time < freshness_threshold:
-                    print(f"WARNING: Kline data for {symbol} is outdated. Latest end_time: {latest_kline.end_time}, Expected: >{freshness_threshold}")
+                    print(
+                        f"WARNING: Kline data for {symbol} is outdated. Latest end_time: {latest_kline.end_time}, Expected: >{freshness_threshold}")
                     all_fresh = False
                     continue
 
                 # Fetch the last n_klines, ordered by end_time descending
-                klines = Kline.objects.filter(symbol=symbol).order_by('-end_time')[:n_klines]
+                klines = Kline.objects.filter(
+                    symbol=symbol).order_by('-end_time')[:n_klines]
 
                 if len(klines) < n_klines:
-                    print(f"WARNING: Insufficient Klines for {symbol} ({len(klines)} found, expected {n_klines})")
+                    print(
+                        f"WARNING: Insufficient Klines for {symbol} ({len(klines)} found, expected {n_klines})")
                     all_fresh = False
                     continue
 
                 # Check total time span using end_time
-                earliest_end_time = klines[n_klines - 1].end_time.astimezone(dt_timezone.utc)
-                latest_end_time = klines[0].end_time.astimezone(dt_timezone.utc)
-                expected_span = (n_klines - 1) * 5 * 60  # Total seconds expected (5 min intervals)
-                actual_span = (latest_end_time - earliest_end_time).total_seconds()
+                earliest_end_time = klines[n_klines -
+                                           1].end_time.astimezone(dt_timezone.utc)
+                latest_end_time = klines[0].end_time.astimezone(
+                    dt_timezone.utc)
+                # Total seconds expected (5 min intervals)
+                expected_span = (n_klines - 1) * 5 * 60
+                actual_span = (latest_end_time -
+                               earliest_end_time).total_seconds()
+
+                print(
+                    f'earliest_end_time: {earliest_end_time} - latest_end_time: {latest_end_time}')
+                print(
+                    f'expected_span: {expected_span} - actual_span: {actual_span}')
+
                 if abs(actual_span - expected_span) > 2:  # 2-second tolerance
-                    print(f"WARNING: Incorrect time span for {symbol}. Expected: {expected_span}s, Actual: {actual_span}s")
+                    print(
+                        f"WARNING: Incorrect time span for {symbol}. Expected: {expected_span}s, Actual: {actual_span}s")
                     all_fresh = False
                     continue
 
                 # Check for gaps between consecutive Klines using end_time
                 for i in range(1, len(klines)):
-                    time_diff = (klines[i - 1].end_time - klines[i].end_time).total_seconds()
+                    time_diff = (klines[i - 1].end_time -
+                                 klines[i].end_time).total_seconds()
                     if abs(time_diff - 300) > 2:  # 300 seconds = 5 minutes, 2-second tolerance
-                        print(f"WARNING: Gap detected in {symbol} Klines between {klines[i - 1].end_time} and {klines[i].end_time}")
+                        print(
+                            f"WARNING: Gap detected in {symbol} Klines between {klines[i - 1].end_time} and {klines[i].end_time}")
                         all_fresh = False
                         break
 
