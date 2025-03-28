@@ -126,7 +126,8 @@ class SymbolAdmin(admin.ModelAdmin):
 
 
 class KlineAdmin(admin.ModelAdmin):
-    list_display = ['id', 'symbol', 'volume', 'localized_time', 'localized_end_time']
+    list_display = ['id', 'symbol', 'volume',
+                    'localized_time', 'localized_open_time', 'localized_end_time']
     list_filter = [
         'symbol',
         ('time', DateTimeRangeFilterBuilder()),
@@ -149,6 +150,16 @@ class KlineAdmin(admin.ModelAdmin):
         # Convert the stored datetime to UTC first.
         from datetime import timezone
         utc_time = obj.end_time.astimezone(timezone.utc)
+        # Then convert from UTC to your system's local timezone.
+        tz_name = str(get_localzone())
+        user_tz = zoneinfo.ZoneInfo(tz_name)
+        local_time = utc_time.astimezone(timezone.utc)
+        return local_time.strftime("%b %d, %Y, %I:%M:%S %p (%Z)")
+
+    def localized_open_time(self, obj):
+        # Convert the stored datetime to UTC first.
+        from datetime import timezone
+        utc_time = obj.start_time.astimezone(timezone.utc)
         # Then convert from UTC to your system's local timezone.
         tz_name = str(get_localzone())
         user_tz = zoneinfo.ZoneInfo(tz_name)
