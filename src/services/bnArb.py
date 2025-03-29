@@ -146,10 +146,10 @@ class BnArber(TechnicalAnalysisMixin, OrderHandler):
                 actual_span = (latest_end_time -
                                earliest_end_time).total_seconds()
 
-                print(
-                    f'earliest_end_time: {earliest_end_time} - latest_end_time: {latest_end_time}')
-                print(
-                    f'expected_span: {expected_span} - actual_span: {actual_span}')
+                # print(
+                #     f'earliest_end_time: {earliest_end_time} - latest_end_time: {latest_end_time}')
+                # print(
+                #     f'expected_span: {expected_span} - actual_span: {actual_span}')
 
                 if abs(actual_span - expected_span) > 2:  # 2-second tolerance
                     print(

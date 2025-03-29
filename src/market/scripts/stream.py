@@ -7,5 +7,5 @@ from django.utils import timezone
 def run():
     # get_samples()
     # delete_last_klines(amount=10000)
-    # fill_kline_gaps(period_type='minutes', period=15)
-    stream_kline_data()
+    fill_kline_gaps(period_type='days', period=1)
+    # stream_kline_data()
