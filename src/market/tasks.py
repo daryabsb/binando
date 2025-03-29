@@ -31,7 +31,7 @@ FLUSH_INTERVAL = 60  # Seconds between periodic flushes
 client = get_client()
 
 
-def normalize_to_5m(dt):
+def normalize_to_5m2(dt):
     """Round a datetime to the nearest 5-minute boundary."""
     epoch = dt.timestamp()
     rounded_epoch = (epoch // 300) * 300  # 300 seconds = 5 minutes
@@ -140,7 +140,69 @@ def fill_kline_gaps(symbols=None, interval='5m', period_type='days', period=8, b
     print(f'Fetching {period} {period_type} of Kline data finished')
     return True
 
-def stream_kline_data(interval='5m'):
+def stream_kline_data():
+    print(f'streaming started for 5m klines @{timezone.now().time()}')
+    kline_batch = []
+    lock = threading.Lock()
+
+    def handle_socket_message(msg):
+        try:
+            data = msg['data']
+            kline = data['k']
+            if kline['x']:  # Only process finalized Klines
+                with lock:
+                    kline_batch.append({
+                        'symbol': kline['s'],
+                        'interval': kline['i'],
+                        'start_time': timezone.datetime.fromtimestamp(kline['t'] / 1000, tz=dt_timezone.utc),
+                        'end_time': timezone.datetime.fromtimestamp(kline['T'] / 1000, tz=dt_timezone.utc),
+                        'open': Decimal(kline['o']),
+                        'close': Decimal(kline['c']),
+                        'high': Decimal(kline['h']),
+                        'low': Decimal(kline['l']),
+                        'volume': Decimal(kline['v']),
+                        'quote_volume': Decimal(kline['q']),
+                        'taker_buy_base_volume': Decimal(kline['V']),
+                        'taker_buy_quote_volume': Decimal(kline['Q']),
+                        'trade_count': kline['n'],
+                        'is_closed': True,
+                        'time': timezone.datetime.fromtimestamp(data['E'] / 1000, tz=dt_timezone.utc),
+                    })
+                    # Flush immediately if batch size is reached
+                    if len(kline_batch) >= BATCH_SIZE:
+                        bulk_insert(kline_batch)
+        except Exception as e:
+            print(f"Error processing message: {e}")
+
+    def bulk_insert(batch):
+        if batch:
+            Kline.objects.bulk_create([Kline(**data)
+                                        for data in batch], ignore_conflicts=True)
+            print(f"Bulk inserted {len(batch)} Klines @{timezone.now().time()}")
+            batch.clear()
+
+    def periodic_flush():
+        while True:
+            time.sleep(FLUSH_INTERVAL)
+            with lock:
+                bulk_insert(kline_batch)
+
+    twm = ThreadedWebsocketManager(api_key=PUBLIC, api_secret=SECRET)
+    twm.start()
+
+    symbols = Symbol.objects.filter(
+        active=True, enabled=True).values_list('pair', flat=True)
+    streams = [f"{symbol.lower()}@kline_5m" for symbol in symbols]
+
+    twm.start_multiplex_socket(callback=handle_socket_message, streams=streams)
+
+    # Start a background thread for periodic flushing
+    flush_thread = threading.Thread(target=periodic_flush, daemon=True)
+    flush_thread.start()
+
+    twm.join()  # Keeps the task running
+
+def stream_kline_data_with_round(interval='5m'):
     print(f'streaming started for {interval} klines @{timezone.now().time()}')
     kline_batch = []
     lock = threading.Lock()
