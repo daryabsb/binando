@@ -1,29 +1,28 @@
 {% load static %}
 
-<table id="orders-table-1" class="hover row-border" style="width:100%"
-    hx-on:htmx:load="console.log('Order table: ', orderTable);"
->
+<table id="cryptos-table-1" class="hover row-border" style="width:100%">
     <thead>
         <tr>
-            <th>Date</th>
-            <th>Pair</th>
-            <th>Side</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Executed</th>
-            <th>Content Type</th>
+            <th>Ticker</th>
+            <th>Balance</th>
+            <th>Pnl</th>
         </tr>
     </thead>
 </table>
-<script>
-document.addEventListener("DOMContentLoaded", (event) => {
-    var orderTable;
-    orderTable = renderDataTable('#orders-table-1', '/orders-data/');
-});
 
-    var renderDataTable = function(elementId, url) {
+{% comment %} <div id="{{ crypto.ticker }}"></div> {% endcomment %}
+ <script>
+    document.addEventListener("DOMContentLoaded", (event) => {
+        var cryptosTable;
+        cryptosTable = renderCryptosTable('#cryptos-table-1', '/balances-data/');
+            
+            //getKlineChart('{{crypto.ticker}}', {{ crypto.klines|safe}});
+            //renderCryptosTable('{{crypto.ticker}}', {{ crypto.klines|safe}});
+
+    });
+        var renderCryptosTable = function(elementId, url) {
         let toolbar = document.createElement('div');
-            toolbar.innerHTML = '<h5 class="mb-0 fw-bold">Recent Transactions</h5>';
+            toolbar.innerHTML = '<h5 class="mb-0 fw-bold">Holding Cryptos</h5>';
         var table = new DataTable(elementId, {
             ajax: {
                 url: url,  // URL to fetch data (update with your Django URL)
@@ -36,13 +35,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
             //order: [[0, 'desc']]
             columnDefs: [{ width: '25%', targets: 0 }],
             columns: [
-                { data: 'timestamp' },
+                //{ data: 'timestamp' },
                 { data: 'ticker',
                     render: function(data, type) {
                         return `<img src="/static/assets/images/coin/${data}.png" alt="" class="img-fluid avatar mx-1"> ${data}/USDT`
                     }
 
                 },
+                /*
                 {
                     data: 'order_type',
                     
@@ -59,18 +59,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
                     }
                     
                 },
-                { data: 'quantity' },
-                { data: 'price' },
-                { data: 'value' },
+                */
+                { data: 'balance' },
+                { data: 'pnl' },
+                // data: 'value' },
                 // { data: 'content' },
-                { data: 'content_type' },
+                //{ data: 'content_type' },
                 //{ data: 'object_id' },
                 //{ data: 'event' },
                 //{ data: 'exception_id' },
             ]
 
             })
-        orderTable = table;
+        cryptosTable = table;
         return table;
         }
 </script>

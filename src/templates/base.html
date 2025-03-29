@@ -231,7 +231,7 @@
         
         <!-- Jquery Page Js -->
         <script src="{% static 'assets/js/template.js' %}"></script>
-        <script src="{% static 'assets/js/page/index.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/js/page/index.js' %}"></script> {% endcomment %}
 
         {% comment %} <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script> {% endcomment %}
 
@@ -333,72 +333,75 @@
                 spark.render();
         }
 
-        document.addEventListener("DOMContentLoaded", (event) => {
-            console.log("DOM fully loaded and parsed");
-            var orderTable;
-                orderTable = renderDataTable('#orders-table-1', '/orders-data/');
+document.addEventListener("DOMContentLoaded", (event) => {
+    console.log("DOM fully loaded and parsed");
+    //var orderTable;
+    //orderTable = renderDataTable('#orders-table-1', '/orders-data/');
 
-            var sparklineData = [
-                {x:'09:00', y:0.00000756}, 
-                {x:'09:05', y:0.00000856}, 
-                {x:'09:10', y:0.00000910}, 
-                {x:'09:15', y:0.00000620}, 
-                {x:'09:20', y:0.00000500}, 
-                {x:'09:25', y:0.000012}, 
-                {x:'09:30', y:0.00000780}, 
-                {x:'09:35', y:0.00000430}, 
-                {x:'09:40', y:0.000015}, 
-                {x:'09:45', y:0.00000645}, 
-                {x:'09:50', y:0.00000890}, 
-                {x:'10:00', y:0.00000975}, 
-                {x:'10:05', y:0.00000398}, 
-                {x:'10:10', y:0.00000612}, 
-                {x:'10:15', y:0.00000570}
-                ];
+    //var cryptosTable;
+    //cryptosTable = renderCryptosTable('#cryptos-table-1', '/balances-data/');
+
+    var sparklineData = [
+        {x:'09:00', y:0.00000756}, 
+        {x:'09:05', y:0.00000856}, 
+        {x:'09:10', y:0.00000910}, 
+        {x:'09:15', y:0.00000620}, 
+        {x:'09:20', y:0.00000500}, 
+        {x:'09:25', y:0.000012}, 
+        {x:'09:30', y:0.00000780}, 
+        {x:'09:35', y:0.00000430}, 
+        {x:'09:40', y:0.000015}, 
+        {x:'09:45', y:0.00000645}, 
+        {x:'09:50', y:0.00000890}, 
+        {x:'10:00', y:0.00000975}, 
+        {x:'10:05', y:0.00000398}, 
+        {x:'10:10', y:0.00000612}, 
+        {x:'10:15', y:0.00000570}
+        ];
             
-            // topb big chart    
-            {% block additional_js %}
-            {% endblock additional_js %}
+    // topb big chart    
+    {% block additional_js %}
+    {% endblock additional_js %}
 
 
-                        /*  
-           new DataTable('#orders-datatable', {
-                    ajax: {
-                        url: '/balances-data/',  
-                        dataSrc: 'data'  
-                    },
-                    columns: [
-                        { data: 'ticker' },
-                        { data: 'balance' },
-                        { data: 'usd_value' },
-                        { data: 'last_price' },
-                        { data: 'change_24h' },
-                        { data: 'high_24h' },
-                        { data: 'low_24h' },
-                        { data: 'volume_24h' },
-                        { data: 'timestamp' },
-                    ]
-                })
-                */
-                    // topb big chart    
-        var spark1 = {
-            chart: {
-                type: 'area',
-                height: 30,
-                sparkline: {
-                enabled: true
-                },
+    /*  
+    new DataTable('#orders-datatable', {
+        ajax: {
+            url: '/balances-data/',  
+            dataSrc: 'data'  
+        },
+        columns: [
+            { data: 'ticker' },
+            { data: 'balance' },
+            { data: 'usd_value' },
+            { data: 'last_price' },
+            { data: 'change_24h' },
+            { data: 'high_24h' },
+            { data: 'low_24h' },
+            { data: 'volume_24h' },
+            { data: 'timestamp' },
+        ]
+        })
+    // topb big chart    
+    var spark1 = {
+        chart: {
+            type: 'area',
+            height: 30,
+            sparkline: {
+            enabled: true
             },
-            stroke: {
-                width: 1
-            },
-            series: [{
-                data: randomizeArray(sparklineData)
-            }],
-            colors: ['#f8921a'],
-        }
-        var spark1 = new ApexCharts(document.querySelector("#apexspark0"), spark1); spark1.render();
-        });
+        },
+        stroke: {
+            width: 1
+        },
+        series: [{
+            data: randomizeArray(sparklineData)
+        }],
+        colors: ['#f8921a'],
+    }
+    var spark1 = new ApexCharts(document.querySelector("#apexspark0"), spark1); spark1.render();
+    */
+    });
 
     var klineData = [{
         x: new Date(1538839800000),
@@ -488,61 +491,12 @@
 
 
 
-var renderDataTable = function(elementId, url) {
-        let toolbar = document.createElement('div');
-            toolbar.innerHTML = '<h5 class="mb-0 fw-bold">Recent Transactions</h5>';
-        var table = new DataTable(elementId, {
-            ajax: {
-                url: url,  // URL to fetch data (update with your Django URL)
-                dataSrc: 'data'  // Key in the JSON response containing the data
-            },
-            layout: {
-                top2Start: toolbar
-            },
-            ordering: false,
-            //order: [[0, 'desc']]
-            columnDefs: [{ width: '25%', targets: 0 }],
-            columns: [
-                { data: 'timestamp' },
-                { data: 'ticker',
-                    render: function(data, type) {
-                        return `<img src="/static/assets/images/coin/${data}.png" alt="" class="img-fluid avatar mx-1"> ${data}/USDT`
-                    }
-
-                },
-                {
-                    data: 'order_type',
-                    
-                    render: function (data, type) {
-                        if (type === 'display') {
-                            let color = 'green';
-                            if (data === 'SELL') {
-                                color = 'green';
-                            }        
-                            return `<span style="color:${color}">${data}</span>`;
-                        }
-        
-                    return data; 
-                    }
-                    
-                },
-                { data: 'quantity' },
-                { data: 'price' },
-                { data: 'value' },
-                // { data: 'content' },
-                { data: 'content_type' },
-                //{ data: 'object_id' },
-                //{ data: 'event' },
-                //{ data: 'exception_id' },
-            ]
-
-        })
-    orderTable = table;
-    return table;
-    }
 
 
-</script>
-        
-</body>
+
+
+
+    </script>
+ 
+    </body>
 </html>
